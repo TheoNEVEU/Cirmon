@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Inventory from './pages/Inventory';
 import Friends from './pages/Friends';
 import Shop from './pages/Shop';
+import StatusSquare from './components/statusSquare';
 
 function App() {
   const [indicatorTop, setIndicatorTop] = useState(0);
@@ -41,8 +42,7 @@ function App() {
 
   return (
     <div id="app-container">
-      {/* <h1>Statut de connexion MongoDB</h1>
-      <StatusSquare /> */}
+      <StatusSquare />
       <div id="grid-container-sidebar">
         <div id="sidebar">
           <div className="active-indicator" style={{ top: indicatorTop }} />
