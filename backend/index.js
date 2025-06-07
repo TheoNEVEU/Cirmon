@@ -1,23 +1,3 @@
-// const express = require('express');
-// const mongoose = require('mongoose');
-// const cors = require('cors');
-// require('dotenv').config();
-
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
-
-// mongoose.connect(process.env.MONGODB_URI)
-//   .then(() => console.log('MongoDB connecté'))
-//   .catch(err => console.error(err));
-
-// app.get('/api/hello', (req, res) => {
-//   res.json({ message: 'Hello depuis le backend !' });
-// });
-
-// const PORT = process.env.PORT || 3001;
-// app.listen(PORT, () => console.log(`Serveur sur le port ${PORT}`));
-
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -53,6 +33,16 @@ app.get('/test', async (req, res) => {
       doc = await Test.create({ message: 'Hello depuis MongoDB !' });
     }
     res.json({ success: true, message: doc.message });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/cards', async (req, res) => {
+  console.log('GET /cards appelé');  // <== ajoute cette ligne pour debug
+  try {
+    const cards = await Card.find();
+    res.json(cards);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
