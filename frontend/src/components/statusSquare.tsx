@@ -4,7 +4,7 @@ export default function StatusSquare() {
   const [connected, setConnected] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
+    fetch('https://cirmon.onrender.com/test') // remplace par ton URL backend
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setConnected(true);
