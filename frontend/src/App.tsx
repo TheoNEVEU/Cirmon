@@ -48,16 +48,16 @@ function App() {
           <div className="active-indicator" style={{ top: indicatorTop }} />
 
           <button onClick={() => handleClick('home')} ref={buttonRefs.home}>
-            <img src="public/img/icones/home.png" className="nav-icon" />
+            <img src={`${import.meta.env.BASE_URL}img/icones/home.png`} className="nav-icon" />
           </button>
           <button onClick={() => handleClick('inventory')} ref={buttonRefs.inventory}>
-            <img src="public/img/icones/inventory.png" className="nav-icon" />
+            <img src={`${import.meta.env.BASE_URL}img/icones/inventory.png`} className="nav-icon" />
           </button>
           <button onClick={() => handleClick('friends')} ref={buttonRefs.friends}>
-            <img src="public/img/icones/users.png" className="nav-icon" />
+            <img src={`${import.meta.env.BASE_URL}img/icones/users.png`} className="nav-icon" />
           </button>
           <button onClick={() => handleClick('shop')} ref={buttonRefs.shop}>
-            <img src="public/img/icones/shop.png" className="nav-icon" />
+            <img src={`${import.meta.env.BASE_URL}img/icones/shop.png`} className="nav-icon" />
           </button>
         </div>
       </div>
