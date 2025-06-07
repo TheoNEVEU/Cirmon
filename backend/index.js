@@ -18,6 +18,7 @@
 // const PORT = process.env.PORT || 3001;
 // app.listen(PORT, () => console.log(`Serveur sur le port ${PORT}`));
 
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); // <-- 1. importe cors
