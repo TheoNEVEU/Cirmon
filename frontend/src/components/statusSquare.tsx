@@ -15,11 +15,14 @@ export default function StatusSquare() {
   return (
     <div
       style={{
-        width: '100px',
-        height: '100px',
+        position: 'absolute',
+        top: '2%',
+        left: '1%',
+        width: '10px',
+        height: '10px',
+        borderRadius: '100px',
         backgroundColor: connected ? 'green' : 'red',
         transition: 'background-color 0.5s ease',
-        margin: '20px auto',
       }}
       aria-label={connected ? "Connecté à la base" : "Non connecté à la base"}
     />
