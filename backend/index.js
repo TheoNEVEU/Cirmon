@@ -48,6 +48,10 @@ app.get('/cards', async (req, res) => {
   }
 });
 
+app.use((req, res) => {
+  res.status(404).json({ error: "Route non trouvée" });
+});
+
 // Démarrage serveur
 app.listen(port, () => {
   console.log(`Serveur démarré sur le port ${port}`);
