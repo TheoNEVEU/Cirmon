@@ -6,9 +6,6 @@ const cors = require('cors'); // <-- 1. importe cors
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Import des models mongoose
-const Card = require('./models/Card');
-
 app.use(cors()); // <-- 2. active cors ici, juste après la création de l'app
 
 // Connexion MongoDB (assure-toi que MONGODB_URI est bien dans ton .env)
