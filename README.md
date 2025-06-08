@@ -32,7 +32,7 @@ Cirmon/
 ### 1. Cloner le projet
 
 ```bash
-git clone https://github.com/<ton-username>/<nom-du-repo>.git
+git clone https://github.com/TheoNEVEU/Cirmon.git
 cd Cirmon
 ```
 
@@ -93,4 +93,4 @@ npm run deploy
 ```
 
 Le site sera en ligne sur :
-https://theoneveu.github.io/Cirmon/, quelques minutes plus tard.
+https://TheoNEVEU.github.io/Cirmon/, quelques minutes plus tard.
