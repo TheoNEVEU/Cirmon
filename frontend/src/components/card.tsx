@@ -1,48 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// interface CardProps {
-//   id: number;
-//   name: string;
-//   type: string;
-//   imageUrl: string; // URL de l'illustration du Pokémon
-//   hp: number;
-//   attacks: string[];
-//   retreatCost: number; // La valeur de retreatCost que tu veux afficher
-//   quantity: number;
-//   isShiny: boolean;
-//   isRainbow: boolean;
-// }
-
-// const Card: React.FC<CardProps> = ({ id, type, name, hp, attacks, retreatCost, imageUrl, quantity, isShiny, isRainbow }) => {
-//   return (
-//     <div className="card" id={"card-"+id} data-shiny={isShiny ? true : undefined} data-rainbow={isRainbow ? true : undefined}>
-//       <img src={"img/fondsCartes/"+type+".png"} alt="" />
-//       <div className="illustration">
-//         <img src={"img/illustrations/"+imageUrl+".png"} alt={name} />
-//       </div>
-//       <div className="name"><span>{name}</span></div>
-//       <div className="hp"><span>{hp}</span></div>
-//       <div className="attacks">
-//         {attacks.map((attack, index) => (
-//           <div className="attack" key={index}>
-//             <span>{attack}</span>
-//           </div>
-//         ))}
-//       </div>
-//       <div className="retreat">
-//         {/* Afficher l'image energy.png autant de fois que retreatCost */}
-//         {[...Array(retreatCost)].map((_, index) => (
-//           <img key={index} src="img/energy.png" alt="Energy" />
-//         ))}
-//       </div>
-//       <div className="quantity"><span>x{quantity}</span></div>
-//     </div>
-//   );
-// };
-//
-// export default Card;
-
-// Typage de la carte pour TypeScript
 interface Card {
   _id: string;
   idPokedex: number;
@@ -50,7 +7,12 @@ interface Card {
   quantity: number;
   description?: string;
   image?: string;
-  [key: string]: any; // autorise d'autres propriétés éventuelles
+  illustration?: string;
+  hp: number;
+  type: string;
+  attacks: string[];
+  retreatCost: number;
+  [key: string]: any;
 }
 
 interface CardDetailsProps {
@@ -61,6 +23,7 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
   const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCard = async () => {
@@ -68,10 +31,9 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
         const response = await fetch(`https://testcirmon.onrender.com/cards/${idPokedex}`);
         const data = await response.json();
         if (data.success) {
-          console.log("oui");
           setCard(data.card);
+          setImgSrc(`img/illustrations/${data.card.illustration}.png`);
         } else {
-          console.log("non");
           setError('Carte non trouvée');
         }
       } catch (err) {
@@ -89,13 +51,38 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
   if (!card) return <div>Aucune carte trouvée</div>;
 
   return (
-    <div style={{ border: '1px solid gray', padding: '1rem', borderRadius: '8px', maxWidth: '300px' }}>
-      <h2>{card.name}</h2>
-      <p><strong>ID Pokédex :</strong> {card.idPokedex}</p>
-      <p><strong>Quantité :</strong> {card.quantity}</p>
-      {card.description && <p><strong>Description :</strong> {card.description}</p>}
-      {card.image && <img src={card.image} alt={card.name} style={{ width: '100%' }} />}
-      {/* Ajoute d'autres attributs si besoin */}
+    <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"}>
+      <img
+        src={`${import.meta.env.BASE_URL}img/fondsCartes/${card.type}.png`}
+        alt={`${card.type} background`}
+      />
+
+      <div className="illustration">
+        <img
+          src={imgSrc ?? "img/illustrations/car.jpg"}
+          alt={card.name}
+          onError={() => setImgSrc("img/illustrations/car.jpg")}
+        />
+      </div>
+
+      <div className="name"><span>{card.name}</span></div>
+      <div className="hp"><span>{card.hp}</span></div>
+
+      <div className="attacks">
+        {card.attacks.map((attack: string, index: number) => (
+          <div className="attack" key={index}>
+            <span>{attack}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="retreat">
+        {[...Array(card.retreatCost)].map((_, index) => (
+          <img key={index} src="img/energy.png" alt="Energy" />
+        ))}
+      </div>
+
+      <div className="quantity"><span>x{card.quantity ?? 1}</span></div>
     </div>
   );
 }
