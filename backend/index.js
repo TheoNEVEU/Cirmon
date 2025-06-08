@@ -26,6 +26,8 @@ const cors = require('cors'); // <-- 1. importe cors
 const app = express();
 const port = process.env.PORT || 3000;
 
+const Card = require('./models/Card');
+
 app.use(cors()); // <-- 2. active cors ici, juste après la création de l'app
 
 // Connexion MongoDB (assure-toi que MONGODB_URI est bien dans ton .env)
@@ -51,6 +53,15 @@ app.get('/test', async (req, res) => {
       doc = await Test.create({ message: 'Hello depuis MongoDB !' });
     }
     res.json({ success: true, message: doc.message });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/cards', async (req, res) => {
+  try {
+    const cards = await Card.find();
+    res.json(cards);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

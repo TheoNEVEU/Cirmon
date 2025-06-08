@@ -9,7 +9,10 @@ export default function StatusSquare() {
       .then((data) => {
         if (data.success) setConnected(true);
       })
-      .catch(() => setConnected(false));
+      .catch(() => {
+        setConnected(false)
+        console.log("BDD Connectée");
+        });
   }, []);
 
   return (
