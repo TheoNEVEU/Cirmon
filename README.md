@@ -11,18 +11,18 @@ Il est composé de deux parties :
 
 ## 🔧 Architecture du projet
 
-Cirmon/
-├── backend/ # Serveur Node.js + Express
-│ ├── index.js # Point d’entrée du serveur
-│ ├── models/ # Schémas Mongoose (ex: Cards.js)
-│ └── .env # Clés secrètes (non suivi par Git)
-│
-├── frontend/ # Application React
-│ ├── public/ # Dossier public (images, icônes...)
-│ ├── src/ # Code source React
-│ └── vite.config.ts # Configuration Vite
-│
-└── README.md # Ce fichier mdr
+Cirmon/  
+├── backend/ # Serveur Node.js + Express  
+│ ├── index.js # Point d’entrée du serveur  
+│ ├── models/ # Schémas Mongoose (ex: Cards.js)  
+│ └── .env # Clés secrètes (non suivi par Git)  
+│  
+├── frontend/ # Application React  
+│ ├── public/ # Dossier public (images, icônes...)  
+│ ├── src/ # Code source React  
+│ └── vite.config.ts # Configuration Vite  
+│  
+└── README.md # Ce fichier mdr  
 
 
 ---
