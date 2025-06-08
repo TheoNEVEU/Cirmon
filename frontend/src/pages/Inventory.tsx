@@ -1,4 +1,4 @@
-import Card from "../components/card";
+import CardDetails from "../components/card";
 import '../style/Inventory.css';
 
 export default function Inventory() {
@@ -48,7 +48,8 @@ export default function Inventory() {
       </div>
     </div>
     <div id="cards-container">
-      <Card
+      <CardDetails idPokedex={1} />
+      {/* <Card
         id={1}
         name="Salamèche"
         hp={100}
@@ -143,7 +144,7 @@ export default function Inventory() {
         quantity={3}
         isShiny={false}
         isRainbow={false}
-      />  
+      />   */}
       
     </div>
   </div>
