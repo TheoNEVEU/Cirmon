@@ -10,6 +10,5 @@ const CardSchema = new mongoose.Schema({
   hp: Number,
   attacks: [String],
   retreatCost: Number,
-});
 
 module.exports = mongoose.model('Card', CardSchema);
