@@ -6,6 +6,9 @@ const cors = require('cors'); // <-- 1. importe cors
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Import des models mongoose
+const Card = require('./models/Card');
+
 app.use(cors()); // <-- 2. active cors ici, juste après la création de l'app
 
 // Connexion MongoDB (assure-toi que MONGODB_URI est bien dans ton .env)
@@ -38,6 +41,20 @@ app.get('/test', async (req, res) => {
   }
 });
 
+// Route pour récupérer les infos d'une carte selon l'idPokedex
+app.get('/cards/:idPokedex', async (req, res) => {
+  const idPokedex = parseInt(req.params.idPokedex, 10);
+  try {
+    const card = await Card.findOne({ idPokedex: idPokedex });
+    if (card) {
+      res.json({ success: true, card }); // On renvoie tout le document
+    } else {
+      res.status(404).json({ success: false, message: 'Carte non trouvée' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 app.get('/cards', async (req, res) => {
   console.log('GET /cards appelé');  // <== ajoute cette ligne pour debug
   try {
@@ -47,7 +64,6 @@ app.get('/cards', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 app.use((req, res) => {
   res.status(404).json({ error: "Route non trouvée" });
 });

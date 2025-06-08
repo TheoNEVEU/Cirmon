@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function StatusSquare() {
   const [connected, setConnected] = useState<boolean>(false);
@@ -9,7 +9,10 @@ export default function StatusSquare() {
       .then((data) => {
         if (data.success) setConnected(true);
       })
-      .catch(() => setConnected(false));
+      .catch(() => {
+        setConnected(false)
+        console.log("BDD Connectée");
+        });
   }, []);
 
   return (
