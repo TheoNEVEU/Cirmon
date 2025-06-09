@@ -129,6 +129,10 @@
   overflow-y: scroll;
 }
 
+.card[data-dark=true] {
+  color: white;
+}
+
 .card {
   position: relative;
   display: block;

@@ -72,9 +72,9 @@ npm run dev
 Lorsque le backend est complet et sans bug, pour le publier, il faut le push sur la branche gh-pages_backend avec :
 
 ```bash
-git add dist -f
-git commit -m "déploiement"
-git subtree push --prefix dist origin gh-pages_backend
+git add .
+git commit -m "backend ready"
+git push origin gh-pages_backend
 ```
 La misa à jour peut prendre quelques minutes car Render doit déployer le projet.
 

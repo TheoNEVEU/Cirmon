@@ -49,103 +49,18 @@ export default function Inventory() {
     </div>
     <div id="cards-container">
       <CardDetails idPokedex={1} />
-      {/* <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="Salameche"
-        type="Fire"
-        quantity={3}
-        isShiny={false}
-        isRainbow={true}
-      />
-      <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="Pikachu"
-        type="Normal"
-        quantity={3}
-        isShiny={false}
-        isRainbow={true}
-      />  
-      <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="DracaufeuA"
-        type="Psy"
-        quantity={3}
-        isShiny={true}
-        isRainbow={false}
-      />    
-      <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="DracaufeuB"
-        type="Water"
-        quantity={3}
-        isShiny={false}
-        isRainbow={false}
-      />    
-      <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="Genesect"
-        type="Electric"
-        quantity={3}
-        isShiny={false}
-        isRainbow={false}
-      />    
-      <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="Tyrranocif"
-        type="Dark"
-        quantity={3}
-        isShiny={false}
-        isRainbow={false}
-      />
-      <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="Salameche"
-        type="Fight"
-        quantity={3}
-        isShiny={false}
-        isRainbow={false}
-      />    
-      <Card
-        id={1}
-        name="Salamèche"
-        hp={100}
-        attacks={["Attaque 1", "Attaque 2"]}
-        retreatCost={2} // Par exemple, une carte avec un coût de retraite de 3
-        imageUrl="Salameche"
-        type="Grass"
-        quantity={3}
-        isShiny={false}
-        isRainbow={false}
-      />   */}
-      
+      <CardDetails idPokedex={2} />
+      <CardDetails idPokedex={3} />
+      <CardDetails idPokedex={4} />
+      <CardDetails idPokedex={5} />
+      <CardDetails idPokedex={6} />
+      <CardDetails idPokedex={7} />
+      <CardDetails idPokedex={8} />
+      <CardDetails idPokedex={9} />
+      <CardDetails idPokedex={10} />
+      <CardDetails idPokedex={11} />
+      <CardDetails idPokedex={12} />
+      <CardDetails idPokedex={13} />
     </div>
   </div>
   );

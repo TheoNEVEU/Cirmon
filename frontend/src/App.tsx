@@ -5,12 +5,13 @@ import Home from './pages/Home';
 import Inventory from './pages/Inventory';
 import Friends from './pages/Friends';
 import Shop from './pages/Shop';
+import Account from './pages/Account';
 import StatusSquare from './components/statusSquare';
 
 function App() {
   const [indicatorTop, setIndicatorTop] = useState(0);
 
-  type Page = 'home' | 'inventory' | 'friends' | 'shop';
+  type Page = 'home' | 'inventory' | 'friends' | 'shop' | 'account';
   const [activePage, setActivePage] = useState<Page>('home');
 
   const buttonRefs: Record<Page, React.RefObject<HTMLButtonElement | null>> = {
@@ -18,6 +19,7 @@ function App() {
     inventory: useRef<HTMLButtonElement | null>(null),
     friends: useRef<HTMLButtonElement | null>(null),
     shop: useRef<HTMLButtonElement | null>(null),
+    account: useRef<HTMLButtonElement | null>(null),
   }; 
 
   // Lorsqu'on clique, on change la page ET on lance une animation
@@ -59,6 +61,9 @@ function App() {
           <button onClick={() => handleClick('shop')} ref={buttonRefs.shop}>
             <img src={`${import.meta.env.BASE_URL}img/icones/shop.png`} className="nav-icon" />
           </button>
+          <button onClick={() => handleClick('account')} ref={buttonRefs.account}>
+            <img src={`${import.meta.env.BASE_URL}img/icones/account.png`} className="nav-icon" />
+          </button>
         </div>
       </div>
 
@@ -67,6 +72,7 @@ function App() {
           <div className={`page ${activePage === 'inventory' ? 'active' : ''}`}><Inventory /></div>
           <div className={`page ${activePage === 'friends' ? 'active' : ''}`}><Friends /></div>
           <div className={`page ${activePage === 'shop' ? 'active' : ''}`}><Shop /></div>
+          <div className={`page ${activePage === 'account' ? 'active' : ''}`}><Account /></div>
       </div>
     </div>
   );
