@@ -1,36 +1,19 @@
-// const express = require('express');
-// const mongoose = require('mongoose');
-// const cors = require('cors');
-// require('dotenv').config();
-
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
-
-// mongoose.connect(process.env.MONGODB_URI)
-//   .then(() => console.log('MongoDB connecté'))
-//   .catch(err => console.error(err));
-
-// app.get('/api/hello', (req, res) => {
-//   res.json({ message: 'Hello depuis le backend !' });
-// });
-
-// const PORT = process.env.PORT || 3001;
-// app.listen(PORT, () => console.log(`Serveur sur le port ${PORT}`));
-
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors'); // <-- 1. importe cors
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 const Card = require('./models/Card');
+const Profile = require('./models/Profile');
 
-app.use(cors()); // <-- 2. active cors ici, juste après la création de l'app
+app.use(cors());
 
-// Connexion MongoDB (assure-toi que MONGODB_URI est bien dans ton .env)
+// Connexion MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -38,7 +21,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB connecté'))
 .catch(err => console.error('Erreur MongoDB :', err));
 
-// Schéma simple pour tester
+// Schéma simple pour tester la connexion
 const TestSchema = new mongoose.Schema({
   message: String,
 });
@@ -64,6 +47,49 @@ app.get('/cards', async (req, res) => {
     res.json(cards);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Partie inscription
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await Profile.create({ username, password: hashedPassword });
+    res.json({ success: true, message: 'Utilisateur créé', user: { username: user.username } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Partie connexion (bcp de chat GPT, pour la partie des tokens)
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await Profile.findOne({ username });
+    if (!user) return res.status(400).json({ success: false, message: 'Utilisateur non trouvé' });
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) return res.status(400).json({ success: false, message: 'Mot de passe incorrect' });
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.json({ success: true, token, username: user.username });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Route protégée (lecture des tokens)
+app.get('/profile', async (req, res) => {
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ success: false, message: 'Token manquant' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await Profile.findById(decoded.userId).select('-password');
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
   }
 });
 
