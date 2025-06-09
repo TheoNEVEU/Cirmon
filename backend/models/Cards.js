@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const CardSchema = new mongoose.Schema({
   idPokedex: Number,
-  collection: Number,
+  generation: Number,
   name: String,
   illustration: String,
   rarity: Number,
