@@ -11,6 +11,7 @@ const port = process.env.PORT || 3000;
 const Card = require('./models/Cards');
 const Profile = require('./models/Profile');
 
+app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
 
 
