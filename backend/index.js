@@ -13,6 +13,7 @@ const Profile = require('./models/Profile');
 
 app.use(cors());
 
+
 // Connexion MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
@@ -27,6 +28,8 @@ const TestSchema = new mongoose.Schema({
 });
 
 const Test = mongoose.model('Test', TestSchema);
+const Card = require('./models/Cards');
+
 
 // Route test : récupère ou crée un document test
 app.get('/test', async (req, res) => {
@@ -41,13 +44,31 @@ app.get('/test', async (req, res) => {
   }
 });
 
+// Route pour récupérer les infos d'une carte selon l'idPokedex
+app.get('/cards/:idPokedex', async (req, res) => {
+  const idPokedex = parseInt(req.params.idPokedex, 10);
+  try {
+    const card = await Card.findOne({ idPokedex: idPokedex });
+    if (card) {
+      res.json({ success: true, card }); // On renvoie tout le document
+    } else {
+      res.status(404).json({ success: false, message: 'Carte non trouvée' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 app.get('/cards', async (req, res) => {
+  console.log('GET /cards appelé');  // <== ajoute cette ligne pour debug
   try {
     const cards = await Card.find();
     res.json(cards);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+app.use((req, res) => {
+  res.status(404).json({ error: "Route non trouvée" });
 });
 
 // Partie inscription

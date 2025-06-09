@@ -2,15 +2,14 @@ const mongoose = require('mongoose');
 
 const CardSchema = new mongoose.Schema({
   idPokedex: Number,
-  type: String,
+  collection: Number,
   name: String,
+  illustration: String,
+  rarity: Number,
+  type: String,
   hp: Number,
   attacks: [String],
   retreatCost: Number,
-  imageUrl: String,
-  quantity: Number,
-  isShiny: Boolean,
-  isRainbow: Boolean,
 });
 
 module.exports = mongoose.model('Card', CardSchema);
