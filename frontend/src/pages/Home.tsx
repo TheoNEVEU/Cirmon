@@ -26,7 +26,8 @@ const [connected, setConnected] = useState<boolean>(false);
   else {
     return (
       <div id="page-container-loading">
-        <img className="loadingImg"  src="img/illustrations/car.jpg" alt="car"/>
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Connexion de la base de donnée...</h2>
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import CardDetails from "../components/card";
 import { useEffect, useState } from 'react';
 import '../style/Inventory.css';
+import '../style/App.css'
 
 export default function Inventory() {
   function inventorySort(sortType: string) {
@@ -82,8 +83,12 @@ export default function Inventory() {
     );
   }
   else {
-    return (<h1>oe oe</h1>);
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Connexion de la base de donnée...</h2>
+      </div>
+    );
   }
-  return (<h1>problemos</h1>);
 }
 

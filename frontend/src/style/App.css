@@ -178,6 +178,7 @@ html::-webkit-scrollbar {
 /* Image de chargement en attendant la connexion à la db */
 #page-container-loading {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 
@@ -196,7 +197,8 @@ html::-webkit-scrollbar {
   }
 }
 .loadingImg {
-  animation: rotating 2s linear infinite;
-  height: 20%;
-  width: 20%;
+  animation: rotating 4s linear infinite;
+  margin-bottom: 2vh;
+  height: 15vw;
+  width: 15vw;
 }
