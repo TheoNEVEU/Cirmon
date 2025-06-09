@@ -13,17 +13,23 @@ function Account() {
   const [isRegistering, setIsRegistering] = useState<boolean>(false); // 👈 switch login/register
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetch('https://testcirmon.onrender.com/profile', {
-        headers: { 'Authorization': token }
+  const token = localStorage.getItem('token');
+  if (token) {
+    fetch('https://testcirmon.onrender.com/profile', {
+      headers: { 'Authorization': token }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setUser(data.user);
+        } else {
+          console.error('Erreur côté API :', data.message);
+        }
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) setUser(data.user);
-        });
-    }
-  }, []);
+      .catch(err => console.error('Erreur réseau :', err));
+  }
+}, []);
+
 
   const handleLogin = () => {
     fetch('https://testcirmon.onrender.com/login', {
