@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const Card = require('./models/Card');
+const Card = require('./models/Cards');
 const Profile = require('./models/Profile');
 
 app.use(cors());
@@ -28,8 +28,6 @@ const TestSchema = new mongoose.Schema({
 });
 
 const Test = mongoose.model('Test', TestSchema);
-const Card = require('./models/Cards');
-
 
 // Route test : récupère ou crée un document test
 app.get('/test', async (req, res) => {
