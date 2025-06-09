@@ -102,6 +102,7 @@ app.post('/login', async (req, res) => {
 app.get('/profile', async (req, res) => {
   console.log('GET /profile appelé');
   const authHeader = req.headers['authorization'];
+  console.log('Token reçu :', token); // Ajoute cette ligne
   if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
 
   const token = authHeader.split(' ')[1];
