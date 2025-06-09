@@ -67,9 +67,7 @@ app.get('/cards', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.use((req, res) => {
-  res.status(404).json({ error: "Route non trouvée" });
-});
+
 
 // Partie inscription
 app.post('/register', async (req, res) => {
@@ -119,6 +117,10 @@ app.get('/profile', async (req, res) => {
   }
 });
 
+// A garder à la fin du fichier !
+app.use((req, res) => {
+  res.status(404).json({ error: "Route non trouvée" });
+});
 // Démarrage serveur
 app.listen(port, () => {
   console.log(`Serveur démarré sur le port ${port}`);
