@@ -15,7 +15,7 @@ function Account() {
     const token = localStorage.getItem('token');
     if (token) {
       fetch('https://testcirmon.onrender.com/profile', {
-        headers: { 'Authorization': token }
+        headers: { 'Authorization': `Bearer ${token}` }
       })
         .then(res => res.json())
         .then(data => {

@@ -53,6 +53,7 @@ app.get('/cards/:idPokedex', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 app.get('/cards', async (req, res) => {
   console.log('GET /cards appelé');  // <== ajoute cette ligne pour debug
   try {
@@ -68,6 +69,7 @@ app.use((req, res) => {
 
 // Partie inscription
 app.post('/register', async (req, res) => {
+  console.log('POST /register appelé');
   const { username, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -80,6 +82,7 @@ app.post('/register', async (req, res) => {
 
 // Partie connexion (bcp de chat GPT, pour la partie des tokens)
 app.post('/login', async (req, res) => {
+  console.log('POST /login appelé');
   const { username, password } = req.body;
   try {
     const user = await Profile.findOne({ username });
@@ -97,8 +100,11 @@ app.post('/login', async (req, res) => {
 
 // Route protégée (lecture des tokens)
 app.get('/profile', async (req, res) => {
-  const token = req.headers['authorization'];
-  if (!token) return res.status(401).json({ success: false, message: 'Token manquant' });
+  console.log('GET /profile appelé');
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
+
+  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
