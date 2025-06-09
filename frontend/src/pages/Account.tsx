@@ -10,12 +10,13 @@ function Account() {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [user, setUser] = useState<User | null>(null);
+  const [isRegistering, setIsRegistering] = useState<boolean>(false); // 👈 switch login/register
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       fetch('https://testcirmon.onrender.com/profile', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': token }
       })
         .then(res => res.json())
         .then(data => {
@@ -41,6 +42,23 @@ function Account() {
       });
   };
 
+  const handleRegister = () => {
+    fetch('https://testcirmon.onrender.com/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+          setIsRegistering(false); // Retour au mode connexion
+        } else {
+          alert(data.error);
+        }
+      });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -57,7 +75,7 @@ function Account() {
         </>
       ) : (
         <>
-          <h1 className="text-xl font-bold mb-2">Connexion</h1>
+          <h1 className="text-xl font-bold mb-2">{isRegistering ? 'Inscription' : 'Connexion'}</h1>
           <input
             type="text"
             placeholder="Nom d'utilisateur"
@@ -72,8 +90,20 @@ function Account() {
             onChange={(e) => setPassword(e.target.value)}
             className="border p-2 mb-2 block"
           />
-          <button onClick={handleLogin} className="bg-blue-500 text-white px-4 py-2 rounded">
-            Se connecter
+          {isRegistering ? (
+            <button onClick={handleRegister} className="bg-green-500 text-white px-4 py-2 rounded">
+              S'inscrire
+            </button>
+          ) : (
+            <button onClick={handleLogin} className="bg-blue-500 text-white px-4 py-2 rounded">
+              Se connecter
+            </button>
+          )}
+          <button
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="mt-2 text-blue-700 underline"
+          >
+            {isRegistering ? 'Vous avez déjà un compte ? Se connecter' : "Pas encore de compte ? S'inscrire"}
           </button>
         </>
       )}
