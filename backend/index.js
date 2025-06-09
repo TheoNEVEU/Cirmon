@@ -69,6 +69,7 @@ app.get('/cards', async (req, res) => {
 // Partie inscription
 app.post('/register', async (req, res) => {
   console.log('POST /register appelé');
+  console.log('Données reçues pour inscription :', req.body);
   const { username, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
