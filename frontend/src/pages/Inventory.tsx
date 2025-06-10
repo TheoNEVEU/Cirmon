@@ -21,7 +21,7 @@ export default function Inventory() {
   }
 
   return (
-  <div id="page-container">
+  <div className="page-container">
     <div id="inventory-menu">
       <div id="sortlist">
         <span>Trier par :</span>

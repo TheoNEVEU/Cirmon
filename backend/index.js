@@ -101,7 +101,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Route protégée (lecture des tokens)
+// Route protégée (lecture des tokens), pour son compte perso
 app.get('/profile', async (req, res) => {
   console.log('GET /profile appelé');
   const authHeader = req.headers['authorization'];
@@ -115,6 +115,32 @@ app.get('/profile', async (req, res) => {
     res.json({ success: true, user });
   } catch (err) {
     res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Route publique, pour voir n'importe quel profil (sauf les infos sensibles)
+app.get('/profile/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // Cherche l'utilisateur par son username dans la base
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+    }
+
+    // Ne renvoyer que les infos publiques
+    res.json({
+      success: true,
+      user: {
+        username: user.username,
+        // Tu peux ajouter ici des infos publiques : image, bio, stats, etc.
+      }
+    });
+  } catch (err) {
+    console.error('Erreur lors de la récupération du profil :', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
   }
 });
 

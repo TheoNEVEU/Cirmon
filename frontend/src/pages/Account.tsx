@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import Profile from '../components/profil';
 import '../style/Account.css';
 
 interface User {
@@ -10,26 +10,26 @@ function Account() {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [user, setUser] = useState<User | null>(null);
-  const [isRegistering, setIsRegistering] = useState<boolean>(false); // 👈 switch login/register
+  const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState<boolean>(false);
 
   useEffect(() => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    fetch('https://testcirmon.onrender.com/profile', {
-      headers: { 'Authorization': token }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setUser(data.user);
-        } else {
-          console.error('Erreur côté API :', data.message);
-        }
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('https://testcirmon.onrender.com/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
       })
-      .catch(err => console.error('Erreur réseau :', err));
-  }
-}, []);
-
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setUser(data.user);
+          } else {
+            console.error('Erreur API :', data.message);
+          }
+        })
+        .catch(err => console.error('Erreur réseau :', err));
+    }
+  }, []);
 
   const handleLogin = () => {
     fetch('https://testcirmon.onrender.com/login', {
@@ -58,28 +58,28 @@ function Account() {
       .then(data => {
         if (data.success) {
           alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
-          setIsRegistering(false); // Retour au mode connexion
+          setIsRegistering(false);
         } else {
           alert(data.error);
         }
       });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
   return (
-    <div className="p-4">
-      {user ? (
+    <div id="account-display" className="page-container">
+      {selectedUsername ? (
+        // Affiche le profil sélectionné
+        <div>
+          <Profile username={selectedUsername} isOwnProfile={user?.username === selectedUsername} />
+          <button onClick={() => setSelectedUsername(null)} className="mt-4 text-blue-700 underline">Retour</button>
+        </div>
+      ) : user ? (
+        // Affiche les options pour ton propre compte
         <>
-          <h1 className="text-xl font-bold mb-2">Bienvenue {user.username} !</h1>
-          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded">
-            Déconnexion
-          </button>
+          <Profile username={user.username} isOwnProfile={true} />
         </>
       ) : (
+        // Formulaire de connexion/inscription
         <>
           <h1 className="text-xl font-bold mb-2">{isRegistering ? 'Inscription' : 'Connexion'}</h1>
           <input
