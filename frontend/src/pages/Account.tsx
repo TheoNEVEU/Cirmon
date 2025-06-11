@@ -4,14 +4,18 @@ import '../style/Account.css';
 
 interface User {
   username: string;
+  title: string;
+  ppURL: string;
+  badgeURL: string[]; 
+  stats: number[];
+  cards: number[];
 }
 
 function Account() {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [user, setUser] = useState<User | null>(null);
-  const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
-  const [isRegistering, setIsRegistering] = useState<boolean>(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -41,7 +45,7 @@ function Account() {
       .then(data => {
         if (data.success) {
           localStorage.setItem('token', data.token);
-          setUser({ username: data.username });
+          setUser(data.user);
         } else {
           alert(data.message);
         }
@@ -49,10 +53,19 @@ function Account() {
   };
 
   const handleRegister = () => {
+    const newUser: User = {
+      username,
+      title: 'Nouveau Joueur',
+      ppURL: 'defaultPP',
+      badgeURL: ['defaultBadge1', 'defaultBadge2'],
+      stats: [0, 0, 0, 0, 0, 0],
+      cards: []
+    };
+
     fetch('https://testcirmon.onrender.com/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ ...newUser, password })
     })
       .then(res => res.json())
       .then(data => {
@@ -67,19 +80,9 @@ function Account() {
 
   return (
     <div id="account-display" className="page-container">
-      {selectedUsername ? (
-        // Affiche le profil sélectionné
-        <div>
-          <Profile username={selectedUsername} isOwnProfile={user?.username === selectedUsername} />
-          <button onClick={() => setSelectedUsername(null)} className="mt-4 text-blue-700 underline">Retour</button>
-        </div>
-      ) : user ? (
-        // Affiche les options pour ton propre compte
-        <>
-          <Profile username={user.username} isOwnProfile={true} />
-        </>
+      {user ? (
+        <Profile username={user.username} isOwnProfile={true} />
       ) : (
-        // Formulaire de connexion/inscription
         <>
           <h1 className="text-xl font-bold mb-2">{isRegistering ? 'Inscription' : 'Connexion'}</h1>
           <input

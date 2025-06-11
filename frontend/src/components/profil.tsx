@@ -3,17 +3,20 @@ import SmartImage from './smartImage';
 
 interface User {
   username: string;
+  title: string;
   ppURL: string;
+  badgeURL: string[];
+  stats: number[];
+  cards: number[];
 }
 
 interface ProfileProps {
   username: string;
-  isOwnProfile?: boolean; // facultatif, si non précisé, on considère que c'est un profil public
+  isOwnProfile?: boolean;
 }
 
 function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
 
   useEffect(() => {
     const url = isOwnProfile
@@ -21,18 +24,15 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
       : `https://testcirmon.onrender.com/profile/${username}`;
 
     const headers: HeadersInit = {};
-
     if (isOwnProfile) {
-        const token = localStorage.getItem('token');
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
     }
 
     fetch(url, { headers })
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.user && typeof data.user.username === 'string') {
+        if (data.success && data.user) {
           setUser(data.user);
         } else {
           console.error('Erreur :', data.message);
@@ -41,59 +41,58 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
       .catch(err => console.error('Erreur réseau :', err));
   }, [username, isOwnProfile]);
 
-  if (!user) {
-    return <p>Chargement du profil...</p>;
-  }
-
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setUser(null);
-    setSelectedUsername(null);
-    
+    window.location.reload();
   };
+
+  if (!user) return <p>Chargement du profil...</p>;
 
   return (
     <div id="account-grid" className="page-container">
       <div id="profil-infos">
         <div id="profilpartA">
-          <div id="pp-container"><SmartImage src={`${import.meta.env.BASE_URL}img/icones/plus.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}/></div>
-          <div id="username"><h1>{user.username}</h1><h2>Creator</h2></div>
+          <div id="pp-container">
+            <SmartImage src={`${import.meta.env.BASE_URL}img/profiles/${user.ppURL}.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`} />
+          </div>
+          <div id="username">
+            <h1>{user.username}</h1>
+            <h2>{user.title}</h2>
+          </div>
           <div id="badges-display">
-            <div className="badge"><SmartImage src={`${import.meta.env.BASE_URL}img/profiles/${user.ppURL}.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}/></div>
-            <div className="badge"><SmartImage src={`${import.meta.env.BASE_URL}img/profiles/${user.ppURL}.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}/></div>
+            {user.badgeURL.map((badge, index) => (
+              <div key={index} className="badge">
+                <SmartImage src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`} />
+              </div>
+            ))}
           </div>
         </div>
-          <div id="profilpartB">
-            <div className='single-stat'>Nombre de cartes : 644</div>
-            <div className='single-stat'>Nombre de cartes : 3637</div>
-            <div className='single-stat'>Nombre de cartes : 3</div>
-            <div className='single-stat'>Nombre de cartes : 596863</div>
-            <div className='single-stat'>Nombre de cartes : 33</div>
-            <div className='single-stat'>Nombre de cartes : 2357</div>
-          </div>
+
+        <div id="profilpartB">
+          {user.stats.map((stat, index) => (
+            <div key={index} className='single-stat'>Stat {index + 1} : {stat}</div>
+          ))}
+        </div>
+
         <div id="profilpartC">
           {isOwnProfile && (
             <>
               <button id="delete" className="account-button">
-                <img src={`${import.meta.env.BASE_URL}img/icones/delete.png`} alt='' />Supprimer
+                <img src={`${import.meta.env.BASE_URL}img/icones/delete.png`} alt='' /> Supprimer
               </button>
-              <button className="account-button" onClick={() => handleLogout()}>
-                <img src={`${import.meta.env.BASE_URL}img/icones/logout.png`} alt='' />Déconnexion
+              <button className="account-button" onClick={handleLogout}>
+                <img src={`${import.meta.env.BASE_URL}img/icones/logout.png`} alt='' /> Déconnexion
               </button>
               <button className="account-button">
-                <img src={`${import.meta.env.BASE_URL}img/icones/edit.png`} alt='' />Modifier
+                <img src={`${import.meta.env.BASE_URL}img/icones/edit.png`} alt='' /> Modifier
               </button>
             </>
           )}
-          {!isOwnProfile && (
-              <>
-              </>
-          )}
         </div>
+      </div>
 
-      </div> 
-      <div id="profil-cards"> 
-
+      <div id="profil-cards">
+        {/* Ici tu pourras afficher les cartes de l'utilisateur si besoin */}
       </div>
     </div>
   );
