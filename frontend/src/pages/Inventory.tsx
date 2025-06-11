@@ -21,7 +21,7 @@ export default function Inventory() {
     });
   // Construire ici la fonction de filtre des cartes quand on aura fait les inventaires
   }
-
+  
   const [connected, setConnected] = useState<boolean>(false);
 
   useEffect(() => {

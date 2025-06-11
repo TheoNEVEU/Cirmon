@@ -167,9 +167,12 @@ html::-webkit-scrollbar {
   opacity: 1;
 }
 
-#page-container {
+.page-container {
+  display: flex;
   position: relative;
   background-color: transparent;
+
+  overflow: hidden;
 
   height: 100%;
   width: 100%;
