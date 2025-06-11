@@ -218,3 +218,69 @@
 
   border-radius: 30px;
 }
+
+/* PAGE DE CONNEXION */
+
+#connection-display {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-column-gap: 2%;
+  transition: all 0.5s ease-in-out;
+  width: 100%;
+}
+
+#connection-display[data-register="true"] { 
+  grid-template-columns: 1fr 0fr;
+}
+
+#connection-display[data-register="false"] {
+  grid-template-columns: 0fr 1fr;
+}
+
+#connection-partA, #connection-partB {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#connection-partA h1, #connection-partB h1 {
+  font-size: 200%;
+}
+
+#connection-partA input, #connection-partB input {
+  display: flex;
+  width: max(30%,10vw);
+  height: 6%;
+  margin: 2% 0% 0% 0%;
+  padding-left: 1%;
+  justify-self: center;
+  border: 1px solid lightgrey;
+  border-radius: 500px;
+  filter: drop-shadow(0px 0px 5px grey);
+}
+
+#connection-partA button, #connection-partB button {
+  display: flex;
+  width: max(22%,6vw);
+  height: 6%;
+  margin: 2% 0% 0% 0%;
+  justify-self: center;
+  border: 1px solid transparent;
+  border-radius: 500px;
+  filter: drop-shadow(0px 0px 5px grey);
+  justify-content: center;
+  align-items: center;
+}
+
+#connection-partA button:hover, #connection-partB button:hover {
+  background-color: rgb(184, 183, 183);
+}
+
+#connection-partA button:active, #connection-partB button:active {
+  background-color: grey;
+}

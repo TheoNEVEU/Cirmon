@@ -92,44 +92,60 @@ function Account() {
   };
 
   return (
-    <div id="account-display" className="page-container">
+    <>
       {user ? (
-        <Profile username={user.username} isOwnProfile={true} />
+        <div id="account-display" className="page-container">
+          <Profile username={user.username} isOwnProfile={true} />
+        </div>
       ) : (
-        <>
-          <h1 className="text-xl font-bold mb-2">{isRegistering ? 'Inscription' : 'Connexion'}</h1>
-          <input
-            type="text"
-            placeholder="Nom d'utilisateur"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="border p-2 mb-2 block"
-          />
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border p-2 mb-2 block"
-          />
-          {isRegistering ? (
-            <button onClick={handleRegister} className="bg-green-500 text-white px-4 py-2 rounded">
-              S'inscrire
+        <div id="connection-display" className="page-container" data-register={isRegistering}>
+          <div id="connection-partA">
+            <h1>Connexion</h1>
+            <input
+              type="text"
+              placeholder="Nom d'utilisateur"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="border p-2 mb-2 block"
+            />
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleLogin}>
+                Se connecter
             </button>
-          ) : (
-            <button onClick={handleLogin} className="bg-blue-500 text-white px-4 py-2 rounded">
-              Se connecter
+            <button onClick={() => {setIsRegistering(false)}}>
+              Pas encore de compte ? S'inscrire
             </button>
-          )}
-          <button
-            onClick={() => setIsRegistering(!isRegistering)}
-            className="mt-2 text-blue-700 underline"
-          >
-            {isRegistering ? 'Vous avez déjà un compte ? Se connecter' : "Pas encore de compte ? S'inscrire"}
-          </button>
-        </>
+          </div>
+
+          <div id="connection-partB">
+            <h1>Inscription</h1>
+            <input
+              type="text"
+              placeholder="Nom d'utilisateur"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleRegister}>
+                Se connecter
+            </button>
+            <button onClick={() => {setIsRegistering(true)}}>
+              Déjà un compte ? Se connecter
+            </button>
+          </div> 
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
