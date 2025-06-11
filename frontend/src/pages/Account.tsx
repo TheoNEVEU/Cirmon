@@ -20,7 +20,7 @@ function Account() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      fetch('https://testcirmon.onrender.com/profile', {
+      fetch('https://testcirmon.onrender.com/users', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
         .then(res => res.json())

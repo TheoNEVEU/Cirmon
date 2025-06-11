@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const Card = require('./models/Cards');
-const Profile = require('./models/Profile');
+const Profile = require('./models/User');
 
 app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
@@ -99,7 +99,7 @@ app.post('/login', async (req, res) => {
 });
 
 
-app.get('/profile', async (req, res) => {
+app.get('/users', async (req, res) => {
   console.log('GET /profile appelé');
   const authHeader = req.headers['authorization'];
 
@@ -122,7 +122,7 @@ app.get('/profile', async (req, res) => {
   }
 });
 
-app.get('/profile/:username', async (req, res) => {
+app.get('/users/:username', async (req, res) => {
   const { username } = req.params;
 
   try {
