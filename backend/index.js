@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const Card = require('./models/Cards');
-const Profile = require('./models/Profile');
+const Profile = require('./models/profil');
 
 app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
@@ -100,6 +100,7 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 app.get('/profile', async (req, res) => {
   console.log('GET /profile appelé');
