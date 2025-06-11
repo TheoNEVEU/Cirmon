@@ -1,35 +1,39 @@
 import { useState, useEffect } from 'react';
-
+import Profile from '../components/profil';
 import '../style/Account.css';
 
 interface User {
   username: string;
+  title: string;
+  ppURL: string;
+  badgeURL: string[]; 
+  stats: number[];
+  cards: number[];
 }
 
 function Account() {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [user, setUser] = useState<User | null>(null);
-  const [isRegistering, setIsRegistering] = useState<boolean>(false); // 👈 switch login/register
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    fetch('https://testcirmon.onrender.com/profile', {
-      headers: { 'Authorization': token }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setUser(data.user);
-        } else {
-          console.error('Erreur côté API :', data.message);
-        }
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('https://testcirmon.onrender.com/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
       })
-      .catch(err => console.error('Erreur réseau :', err));
-  }
-}, []);
-
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setUser(data.user);
+          } else {
+            console.error('Erreur API :', data.message);
+          }
+        })
+        .catch(err => console.error('Erreur réseau :', err));
+    }
+  }, []);
 
   const handleLogin = () => {
     fetch('https://testcirmon.onrender.com/login', {
@@ -41,7 +45,7 @@ function Account() {
       .then(data => {
         if (data.success) {
           localStorage.setItem('token', data.token);
-          setUser({ username: data.username });
+          setUser(data.user);
         } else {
           alert(data.message);
         }
@@ -49,36 +53,35 @@ function Account() {
   };
 
   const handleRegister = () => {
+    const newUser: User = {
+      username,
+      title: 'Nouveau Joueur',
+      ppURL: 'defaultPP',
+      badgeURL: ['defaultBadge1', 'defaultBadge2'],
+      stats: [0, 0, 0, 0, 0, 0],
+      cards: []
+    };
+
     fetch('https://testcirmon.onrender.com/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ ...newUser, password })
     })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
-          setIsRegistering(false); // Retour au mode connexion
+          setIsRegistering(false);
         } else {
           alert(data.error);
         }
       });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
   return (
-    <div className="p-4">
+    <div id="account-display" className="page-container">
       {user ? (
-        <>
-          <h1 className="text-xl font-bold mb-2">Bienvenue {user.username} !</h1>
-          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded">
-            Déconnexion
-          </button>
-        </>
+        <Profile username={user.username} isOwnProfile={true} />
       ) : (
         <>
           <h1 className="text-xl font-bold mb-2">{isRegistering ? 'Inscription' : 'Connexion'}</h1>

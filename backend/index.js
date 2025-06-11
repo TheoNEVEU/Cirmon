@@ -101,22 +101,58 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Route protégée (lecture des tokens)
 app.get('/profile', async (req, res) => {
   console.log('GET /profile appelé');
   const authHeader = req.headers['authorization'];
-  
+
   if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
+
   const token = authHeader.split(' ')[1];
-  console.log('Token reçu :', token);
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await Profile.findById(decoded.userId).select('-password');
+
+    // On récupère toutes les infos du profil sauf le mot de passe
+    const user = await User.findById(decoded.userId).select('-password');
+
+    if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+
     res.json({ success: true, user });
   } catch (err) {
+    console.error('Erreur de token :', err);
     res.status(401).json({ success: false, message: 'Token invalide' });
   }
 });
+
+app.get('/profile/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // On récupère l'utilisateur par son username
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+    }
+
+    // On retourne uniquement les informations publiques
+    res.json({
+      success: true,
+      user: {
+        username: user.username,
+        title: user.title,
+        ppURL: user.ppURL,
+        badgeURL: user.badgeURL,
+        stats: user.stats,
+        cards: user.cards,
+      }
+    });
+  } catch (err) {
+    console.error('Erreur lors de la récupération du profil :', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+});
+
 
 // A garder à la fin du fichier !
 app.use((req, res) => {
