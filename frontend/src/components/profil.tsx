@@ -20,8 +20,8 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
 
   useEffect(() => {
     const url = isOwnProfile
-      ? 'https://testcirmon.onrender.com/profile'
-      : `https://testcirmon.onrender.com/profile/${username}`;
+      ? 'https://testcirmon.onrender.com/users'
+      : `https://testcirmon.onrender.com/users/${username}`;
 
     const headers: HeadersInit = {};
     if (isOwnProfile) {
