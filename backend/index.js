@@ -114,7 +114,7 @@ app.get('/profile', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // On récupère toutes les infos du profil sauf le mot de passe
-    const user = await User.findById(decoded.userId).select('-password');
+    const user = await Profile.findById(decoded.userId).select('-password');
 
     if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
 
@@ -130,7 +130,7 @@ app.get('/profile/:username', async (req, res) => {
 
   try {
     // On récupère l'utilisateur par son username
-    const user = await User.findOne({ username });
+    const user = await Profile.findOne({ username });
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
