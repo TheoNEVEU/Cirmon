@@ -177,3 +177,31 @@ html::-webkit-scrollbar {
   height: 100%;
   width: 100%;
 }
+
+/* Image de chargement en attendant la connexion à la db */
+#page-container-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+  background-color: transparent;
+
+  height: 100%;
+  width: 100%;
+}
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.loadingImg {
+  animation: rotating 4s linear infinite;
+  margin-bottom: 2vh;
+  height: 15vw;
+  width: 15vw;
+}
