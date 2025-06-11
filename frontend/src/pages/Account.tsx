@@ -36,21 +36,34 @@ function Account() {
   }, []);
 
   const handleLogin = () => {
-    fetch('https://testcirmon.onrender.com/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          localStorage.setItem('token', data.token);
-          setUser(data.user);
-        } else {
-          alert(data.message);
-        }
-      });
-  };
+  fetch('https://testcirmon.onrender.com/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.setItem('token', data.token);
+        
+        // Aller chercher l'utilisateur après login :
+        fetch('https://testcirmon.onrender.com/users', {
+          headers: { 'Authorization': `Bearer ${data.token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              setUser(data.user);
+            } else {
+              console.error('Erreur API :', data.message);
+            }
+          });
+      } else {
+        alert(data.message);
+      }
+    });
+};
+
 
   const handleRegister = () => {
     const newUser: User = {
@@ -70,8 +83,8 @@ function Account() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
           setIsRegistering(false);
+          handleLogin();
         } else {
           alert(data.error);
         }
