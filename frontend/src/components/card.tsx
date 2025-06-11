@@ -66,7 +66,7 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
       </div>
 
       <div className="name"><span>{card.name}</span></div>
-      <div className="hp"><span>{card.hp}</span></div>
+      <div className="hp"><p>PV</p><span>{card.hp}</span></div>
 
       <div className="attacks">
         {card.attacks.map((attack: string, index: number) => (
