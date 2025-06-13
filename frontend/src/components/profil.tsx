@@ -17,6 +17,7 @@ interface ProfileProps {
 
 function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const [user, setUser] = useState<User | null>(null);
+  const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
 
   useEffect(() => {
     const url = isOwnProfile
@@ -46,6 +47,34 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
     window.location.reload();
   };
 
+  const handleDelete = async () => {
+  try {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+    const response = await fetch('https://ton-backend.com/api/users/delete', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      localStorage.removeItem('token');
+      window.location.reload();
+    } else {
+      console.error('Failed to delete account');
+    }
+  } catch (error) {
+    console.error('Error deleting account:', error);
+  }
+};
+
+
   if (!user) return <p>Chargement du profil...</p>;
 
   return (
@@ -70,14 +99,14 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
 
         <div id="profilpartB">
           {user.stats.map((stat, index) => (
-            <div key={index} className='single-stat'>Stat {index + 1} : {stat}</div>
+            <div key={index} className='single-stat'> {statlist[index]} : {stat}</div>
           ))}
         </div>
 
         <div id="profilpartC">
           {isOwnProfile && (
             <>
-              <button id="delete" className="account-button">
+              <button id="delete" className="account-button" onClick={handleDelete}>
                 <img src={`${import.meta.env.BASE_URL}img/icones/delete.png`} alt='' /> Supprimer
               </button>
               <button className="account-button" onClick={handleLogout}>
