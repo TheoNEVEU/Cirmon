@@ -3,7 +3,12 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  title: { type: String, default: 'default' },
+  title: {
+    text: { type: String, default: 'default' },
+    gradientDirection: { type: String, default: 'none' },
+    colors: { type: [String], default: ['black'] },
+    isGradientActive: { type: Boolean, default: false }
+  },
   ppURL: { type: String, default: 'default' },
   badgeURL: { type: [String], default: ['default', 'default'] },
   stats: { type: [Number], default: [0, 0, 0, 0, 0, 0] },

@@ -3,11 +3,18 @@ import SmartImage from './smartImage';
 
 interface User {
   username: string;
-  title: string;
+  title: TitleWithEffect;
   ppURL: string;
   badgeURL: string[];
   stats: number[];
   cards: number[];
+}
+
+interface TitleWithEffect {
+  text: string;
+  gradientDirection: string; // Exemple : "to right" ou "90deg"
+  colors: string[];          // Exemple : ["#3b82f6", "#a855f7", "#ec4899"]
+  isGradientActive: string;
 }
 
 interface ProfileProps {
@@ -17,6 +24,7 @@ interface ProfileProps {
 
 function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
 
   useEffect(() => {
@@ -54,7 +62,7 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
       console.error('No token found');
       return;
     }
-    const response = await fetch('https://ton-backend.com/users', {
+    const response = await fetch('https://testcirmon.onrender.com/users', {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -70,9 +78,18 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
   } catch (error) {
     console.error('Erreur lors de la suppression :', error);
   }
+  
 };
 
   if (!user) return <p>Chargement du profil...</p>;
+  else { 
+    const gradientStyle = {
+      backgroundImage: `linear-gradient(${user.title.gradientDirection}, ${user.title.colors.join(', ')})`,
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      color: 'transparent'
+    };
 
   return (
     <div id="account-grid" className="page-container">
@@ -83,7 +100,8 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
           </div>
           <div id="username">
             <h1>{user.username}</h1>
-            <h2>{user.title}</h2>
+            <div id="title-display" style={user.title.isGradientActive ? gradientStyle : {}}>
+              <h2>{user.title.text}</h2></div>
           </div>
           <div id="badges-display">
             {user.badgeURL.map((badge, index) => (
@@ -103,15 +121,31 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
         <div id="profilpartC">
           {isOwnProfile && (
             <>
-              <button id="delete" className="account-button" onClick={handleDelete}>
-                <img src={`${import.meta.env.BASE_URL}img/icones/delete.png`} alt='' /> Supprimer
-              </button>
-              <button className="account-button" onClick={handleLogout}>
-                <img src={`${import.meta.env.BASE_URL}img/icones/logout.png`} alt='' /> Déconnexion
-              </button>
-              <button className="account-button">
-                <img src={`${import.meta.env.BASE_URL}img/icones/edit.png`} alt='' /> Modifier
-              </button>
+              {isDeleting ? (
+                // Affichage de confirmation
+                <>
+                  <button className="account-button" onClick={() => setIsDeleting(false)}>
+                    <img src={`${import.meta.env.BASE_URL}img/icones/retour.png`} alt='' /> Annuler
+                  </button>
+                  <button className="account-button" id="delete" onClick={handleDelete}>
+                    <img src={`${import.meta.env.BASE_URL}img/icones/delete.png`} alt='' /> Supprimer
+                  </button>
+                  <p>Supprimer le compte ?</p>
+                </>
+              ) : (
+                // Affichage des boutons standards
+                <>
+                  <button id="delete" className="account-button" onClick={() => setIsDeleting(true)}>
+                    <img src={`${import.meta.env.BASE_URL}img/icones/delete.png`} alt='' /> Supprimer
+                  </button>
+                  <button className="account-button" onClick={handleLogout}>
+                    <img src={`${import.meta.env.BASE_URL}img/icones/logout.png`} alt='' /> Déconnexion
+                  </button>
+                  <button className="account-button">
+                    <img src={`${import.meta.env.BASE_URL}img/icones/edit.png`} alt='' /> Modifier
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
@@ -122,6 +156,7 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
       </div>
     </div>
   );
+}
 }
 
 export default Profile;
