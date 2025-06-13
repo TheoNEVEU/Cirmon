@@ -57,10 +57,15 @@
   font-size: 200%;
 }
 
+#title-display {
+}
+
 #username h2 {
   font-size: 100%;
-  margin-left: 3%;
-
+  padding-left: 3%;
+  background: linear-gradient(90deg, #3b82f6, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 #pp-container {
@@ -206,6 +211,10 @@
 
 .account-button:active {
   filter: brightness(0.5);
+}
+
+#profilpartC p {
+  font-size: 70%;
 }
 
 #profil-cards {
