@@ -50,30 +50,27 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const handleDelete = async () => {
   try {
     const token = localStorage.getItem('token');
-
     if (!token) {
       console.error('No token found');
       return;
     }
-    const response = await fetch('https://ton-backend.com/api/users/delete', {
+    const response = await fetch('https://ton-backend.com/users', {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
-
     if (response.ok) {
       localStorage.removeItem('token');
       window.location.reload();
     } else {
-      console.error('Failed to delete account');
+      console.error('Erreur lors de la suppression du compte');
     }
   } catch (error) {
-    console.error('Error deleting account:', error);
+    console.error('Erreur lors de la suppression :', error);
   }
 };
-
 
   if (!user) return <p>Chargement du profil...</p>;
 
