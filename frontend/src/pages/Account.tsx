@@ -59,7 +59,6 @@ function Account() {
             }
           });
       } else {
-        alert(data.message);
       }
     });
 };
@@ -86,7 +85,6 @@ function Account() {
           setIsRegistering(false);
           handleLogin();
         } else {
-          alert(data.error);
         }
       });
   };
@@ -137,7 +135,7 @@ function Account() {
               onChange={(e) => setPassword(e.target.value)}
             />
             <button onClick={handleRegister}>
-                Se connecter
+                S'inscrire
             </button>
             <button onClick={() => {setIsRegistering(true)}}>
               Déjà un compte ? Se connecter

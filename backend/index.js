@@ -102,6 +102,7 @@ app.post('/login', async (req, res) => {
 });
 
 
+// Récupération de toutes les infos du compte
 app.get('/users', async (req, res) => {
   console.log('GET /profile appelé');
   const authHeader = req.headers['authorization'];
@@ -125,18 +126,17 @@ app.get('/users', async (req, res) => {
   }
 });
 
+// Récupération des infos publiques du compte
 app.get('/users/:username', async (req, res) => {
   const { username } = req.params;
 
   try {
-    // On récupère l'utilisateur par son username
     const user = await Profile.findOne({ username });
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
     }
 
-    // On retourne uniquement les informations publiques
     res.json({
       success: true,
       user: {
@@ -153,6 +153,18 @@ app.get('/users/:username', async (req, res) => {
     res.status(500).json({ success: false, message: 'Erreur serveur.' });
   }
 });
+
+// Suppression d'un compte
+app.delete('/api/users/delete', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await User.findByIdAndDelete(userId);
+    res.status(200).json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 
 // A garder à la fin du fichier !
