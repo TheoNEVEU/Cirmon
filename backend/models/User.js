@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   title: {
     text: { type: String, default: 'default' },
-    gradientDirection: { type: String, default: 'none' },
+    gradientDirection: { type: String, default: 'to right' },
     colors: { type: [String], default: ['black'] },
     isGradientActive: { type: Boolean, default: false }
   },
