@@ -1,7 +1,6 @@
 import CardDetails from "../components/card";
 import { useEffect, useState } from 'react';
 import '../style/Inventory.css';
-import '../style/App.css'
 
 export default function Inventory() {
   function inventorySort(sortType: string) {

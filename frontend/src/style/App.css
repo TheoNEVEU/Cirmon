@@ -191,6 +191,7 @@ html::-webkit-scrollbar {
   height: 100%;
   width: 100%;
 }
+
 @keyframes rotating {
   from {
     transform: rotate(0deg);
@@ -199,6 +200,7 @@ html::-webkit-scrollbar {
     transform: rotate(360deg);
   }
 }
+
 .loadingImg {
   animation: rotating 4s linear infinite;
   margin-bottom: 2vh;
