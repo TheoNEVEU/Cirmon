@@ -155,7 +155,7 @@ app.get('/users/:username', async (req, res) => {
 });
 
 // Suppression d'un compte
-app.delete('/api/users/delete', authenticateToken, async (req, res) => {
+app.delete('/users/delete', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     await User.findByIdAndDelete(userId);
