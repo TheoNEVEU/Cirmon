@@ -86,7 +86,6 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
   else { 
     var colors = user?.title?.colors ?? ['green'];
     var direction = user?.title?.gradientDirection ?? 'to left';
-    console.log(`linear-gradient(${direction}, ${colors.join(', ')})`);
 
     const gradientStyle = {
       background: `linear-gradient(${direction}, ${colors.join(', ')})`,
@@ -101,7 +100,7 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
 
   return (
     <div id="account-grid" className="page-container">
-      <div id="profil-infos" data-isEditing={isEditing}>
+      <div id="profil-infos" data-isediting={isEditing}>
         <div id="profilpartA">
           <div id="pp-container">
             <SmartImage src={`${import.meta.env.BASE_URL}img/profiles/${user.ppURL}.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`} />
@@ -121,13 +120,13 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
           </div>
         </div>
 
-        <div id="profilpartB" data-isEditing={isEditing}>
+        <div id="profilpartB" data-isediting={isEditing} style={isEditing ? {display: "none"} : {display: "flex"}}>
           {user.stats.map((stat, index) => (
             <div key={index} className='single-stat'> {statlist[index]} : {stat}</div>
           ))}
         </div>
 
-        <div id="profilpartC" data-isEditing={isEditing}>
+        <div id="profilpartC" data-isediting={isEditing}>
           {isOwnProfile && (
             <>
               {isDeleting ? (
@@ -157,6 +156,10 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
               )}
             </>
           )}
+        </div>
+
+        <div id="profilpartB" data-isediting={isEditing} style={isEditing ? {display: "flex"} : {display: "none"}}>
+          liste des badges, images de profil, cartes, titres
         </div>
       </div>
 

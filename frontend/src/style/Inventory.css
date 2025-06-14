@@ -145,6 +145,10 @@
   color: white;
 }
 
+.card[data-error=true] {
+  filter: grayscale(0.8) brightness(0.5);
+}
+
 .card {
   position: relative;
   display: block;
