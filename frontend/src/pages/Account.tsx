@@ -4,11 +4,18 @@ import '../style/Account.css';
 
 interface User {
   username: string;
-  title: string;
+  title: TitleWithEffect;
   ppURL: string;
-  badgeURL: string[]; 
+  badgeURL: string[];
   stats: number[];
   cards: number[];
+}
+
+interface TitleWithEffect {
+  text: string;
+  gradientDirection: string;
+  colors: string[];
+  isGradientActive: boolean;
 }
 
 function Account() {
@@ -67,7 +74,12 @@ function Account() {
   const handleRegister = () => {
     const newUser: User = {
       username,
-      title: 'Nouveau Joueur',
+      title: {
+        text: "",
+        gradientDirection: "to right",
+        colors: ["black"], 
+        isGradientActive: false,
+      },
       ppURL: 'defaultPP',
       badgeURL: ['defaultBadge1', 'defaultBadge2'],
       stats: [0, 0, 0, 0, 0, 0],

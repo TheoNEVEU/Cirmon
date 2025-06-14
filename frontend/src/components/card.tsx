@@ -12,14 +12,17 @@ interface Card {
   type: string;
   attacks: string[];
   retreatCost: number;
+  rarity: number;
   [key: string]: any;
 }
 
 interface CardDetailsProps {
   idPokedex: number;
+  typeFilter: string;
+  rarityFilter: string;
 }
 
-export default function CardDetails({ idPokedex }: CardDetailsProps) {
+export default function CardDetails({ idPokedex, typeFilter, rarityFilter }: CardDetailsProps) {
   const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +53,8 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
   if (error) return <div>{error}</div>;
   if (!card) return <div>Aucune carte trouvée</div>;
 
+  if(typeFilter!="none" && card.type.toLowerCase() != typeFilter) return "";
+  if(rarityFilter!="none" && card.rarity.toString() != rarityFilter) return "";
   return (
     <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"}>
       <img

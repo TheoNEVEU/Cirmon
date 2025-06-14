@@ -87,28 +87,40 @@
   filter: drop-shadow(0px 0px 5px lightgrey);
 }
 
-.filterbuttons {
-  width: 10%;
-  aspect-ratio: 1;
-
-  border: none;
-  border-radius: 40px;
-
-  background-color: white;
-  filter: drop-shadow(0px 0px 5px lightgrey);
-}
-
-.sortbuttons[data-selectedsort], .filterbuttons[data-selectedfilter] {
+.sortbuttons[data-selectedsort] {
   background-color: rgb(184, 184, 184);
   filter: drop-shadow(0px 0px 5px rgb(170, 170, 170));
 }
 
-.sortbuttons:not([data-selectedsort]):hover, .filterbuttons:not([data-selectedfilter]):hover {
+.sortbuttons:not([data-selectedsort]):hover {
   background-color: rgb(221, 221, 221);
 }
 
-.sortbuttons[data-selectedsort].hover, .filterbuttons[data-selectedfilter].hover {
+.sortbuttons[data-selectedsort].hover {
   background-color: lightgray;
+}
+
+.filtertypebuttons, .filterraritybuttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 10%;
+  aspect-ratio: 1/1;
+
+  border: none;
+  border-radius: 40px;
+
+  filter: drop-shadow(0px 0px 5px lightgrey);
+}
+
+.filtertypebuttons img, .filterraritybuttons img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  transition: all 0.2s linear;
+}
+
+.filtertypebuttons:not([data-selectedfilter]) img, .filterraritybuttons:not([data-selectedfilter]) img {
+  filter: grayscale(1);
 }
 
 

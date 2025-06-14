@@ -12,9 +12,9 @@ interface User {
 
 interface TitleWithEffect {
   text: string;
-  gradientDirection: string; // Exemple : "to right" ou "90deg"
-  colors: string[];          // Exemple : ["#3b82f6", "#a855f7", "#ec4899"]
-  isGradientActive: string;
+  gradientDirection: string;
+  colors: string[];
+  isGradientActive: boolean;
 }
 
 interface ProfileProps {
@@ -25,6 +25,7 @@ interface ProfileProps {
 function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
 
   useEffect(() => {
@@ -83,25 +84,33 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
 
   if (!user) return <p>Chargement du profil...</p>;
   else { 
+    var colors = user?.title?.colors ?? ['green'];
+    var direction = user?.title?.gradientDirection ?? 'to left';
+    console.log(`linear-gradient(${direction}, ${colors.join(', ')})`);
+
     const gradientStyle = {
-      backgroundImage: `linear-gradient(${user.title.gradientDirection}, ${user.title.colors.join(', ')})`,
+      background: `linear-gradient(${direction}, ${colors.join(', ')})`,
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text',
-      color: 'transparent'
+      color: 'transparent',
+      width: 'fit-content',
+      paddingLeft: '3%',
+      fontSize: '100%'
     };
 
   return (
     <div id="account-grid" className="page-container">
-      <div id="profil-infos">
+      <div id="profil-infos" data-isEditing={isEditing}>
         <div id="profilpartA">
           <div id="pp-container">
             <SmartImage src={`${import.meta.env.BASE_URL}img/profiles/${user.ppURL}.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`} />
           </div>
           <div id="username">
             <h1>{user.username}</h1>
-            <div id="title-display" style={user.title.isGradientActive ? gradientStyle : {}}>
-              <h2>{user.title.text}</h2></div>
+            <h2 style={user.title.isGradientActive ? gradientStyle : {}}>
+              {user.title.text ?? "test"}
+            </h2>
           </div>
           <div id="badges-display">
             {user.badgeURL.map((badge, index) => (
@@ -112,13 +121,13 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
           </div>
         </div>
 
-        <div id="profilpartB">
+        <div id="profilpartB" data-isEditing={isEditing}>
           {user.stats.map((stat, index) => (
             <div key={index} className='single-stat'> {statlist[index]} : {stat}</div>
           ))}
         </div>
 
-        <div id="profilpartC">
+        <div id="profilpartC" data-isEditing={isEditing}>
           {isOwnProfile && (
             <>
               {isDeleting ? (
@@ -141,7 +150,7 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
                   <button className="account-button" onClick={handleLogout}>
                     <img src={`${import.meta.env.BASE_URL}img/icones/logout.png`} alt='' /> Déconnexion
                   </button>
-                  <button className="account-button">
+                  <button className="account-button" onClick={() => setIsEditing(!isEditing)}>
                     <img src={`${import.meta.env.BASE_URL}img/icones/edit.png`} alt='' /> Modifier
                   </button>
                 </>
