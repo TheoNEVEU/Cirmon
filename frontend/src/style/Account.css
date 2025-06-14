@@ -76,6 +76,7 @@
   font-size: 100%;
   padding-left: 3%;
   width: fit-content;
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
