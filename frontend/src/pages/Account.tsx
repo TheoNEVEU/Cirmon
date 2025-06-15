@@ -4,11 +4,18 @@ import '../style/Account.css';
 
 interface User {
   username: string;
-  title: string;
+  title: TitleWithEffect;
   ppURL: string;
-  badgeURL: string[]; 
+  badgeURL: string[];
   stats: number[];
   cards: number[];
+}
+
+interface TitleWithEffect {
+  text: string;
+  gradientDirection: string;
+  colors: string[];
+  isGradientActive: boolean;
 }
 
 function Account() {
@@ -50,24 +57,29 @@ function Account() {
         fetch('https://testcirmon.onrender.com/users', {
           headers: { 'Authorization': `Bearer ${data.token}` }
         })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setUser(data.user);
-            } else {
-              console.error('Erreur API :', data.message);
-            }
-          });
-      } else {
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setUser(data.user);
+          } else {
+            console.error('Erreur API :', data.message);
+          }
+        });
+      } 
+      else {
       }
     });
-};
-
+  };
 
   const handleRegister = () => {
     const newUser: User = {
       username,
-      title: 'Nouveau Joueur',
+      title: {
+        text: "",
+        gradientDirection: "to right",
+        colors: ["black"], 
+        isGradientActive: false,
+      },
       ppURL: 'defaultPP',
       badgeURL: ['defaultBadge1', 'defaultBadge2'],
       stats: [0, 0, 0, 0, 0, 0],

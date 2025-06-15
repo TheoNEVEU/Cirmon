@@ -12,7 +12,10 @@ const userSchema = new mongoose.Schema({
   ppURL: { type: String, default: 'default' },
   badgeURL: { type: [String], default: ['default', 'default'] },
   stats: { type: [Number], default: [0, 0, 0, 0, 0, 0] },
-  cards: { type: [Number], default: [] },
+  cards: [{
+  numPokedex: { type: Number, required: true },
+  quantity: { type: Number, required: true }
+  }]
 });
 
 module.exports = mongoose.model('User', userSchema);
