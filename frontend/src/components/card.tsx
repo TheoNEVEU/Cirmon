@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SmartImage from './smartImage';
 
 interface Card {
   _id: string;
@@ -12,14 +13,18 @@ interface Card {
   type: string;
   attacks: string[];
   retreatCost: number;
+  rarity: number;
   [key: string]: any;
 }
 
 interface CardDetailsProps {
   idPokedex: number;
+  typeFilter: string;
+  rarityFilter: string;
+  quantity: number;
 }
 
-export default function CardDetails({ idPokedex }: CardDetailsProps) {
+export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quantity }: CardDetailsProps) {
   const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +39,7 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
           setCard(data.card);
           setImgSrc(`img/illustrations/${data.card.illustration}.png`);
         } else {
-          setError('Carte non trouvée');
+          setError('Carte n°'+idPokedex+' non trouvée');
         }
       } catch (err) {
         setError('Erreur lors du chargement des données');
@@ -47,9 +52,21 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
   }, [idPokedex]);
 
   if (loading) return <div>Chargement...</div>;
-  if (error) return <div>{error}</div>;
-  if (!card) return <div>Aucune carte trouvée</div>;
+  if (error) {
+    console.error(error);
+    return (
+    <><div className="card" id={"none"} data-error="true">
+      <img src={`${import.meta.env.BASE_URL}img/cardback.png`}/>
+    </div></>);
+  }
+  if (!card) return (
+    <><div className="card" id={"none"} data-error="true">
+      <img src={`${import.meta.env.BASE_URL}img/cardback.png`}/>
+    </div></>);
 
+  if(typeFilter!="none" && card.type.toLowerCase() != typeFilter) return "";
+  if(rarityFilter!="none" && card.rarity.toString() != rarityFilter) return "";
+  if(quantity == 0 && card.rarity.toString() != rarityFilter) return "";
   return (
     <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"}>
       <img
@@ -82,7 +99,7 @@ export default function CardDetails({ idPokedex }: CardDetailsProps) {
         ))}
       </div>
 
-      <div className="quantity"><span>x{card.quantity ?? 1}</span></div>
+      <div className="quantity"><span>x{quantity}</span></div>
     </div>
   );
 }
