@@ -57,19 +57,19 @@ function Account() {
         fetch('https://testcirmon.onrender.com/users', {
           headers: { 'Authorization': `Bearer ${data.token}` }
         })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setUser(data.user);
-            } else {
-              console.error('Erreur API :', data.message);
-            }
-          });
-      } else {
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setUser(data.user);
+          } else {
+            console.error('Erreur API :', data.message);
+          }
+        });
+      } 
+      else {
       }
     });
-};
-
+  };
 
   const handleRegister = () => {
     const newUser: User = {

@@ -5,6 +5,8 @@ import '../style/Inventory.css';
 export default function Inventory() {
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
+  const [connected, setConnected] = useState<boolean>(false);
+  const [cards, setCards] = useState<{ numPokedex: number; quantity: number }[]>([]);
 
   function inventorySort(sortType: string) {
     const sortButtons = document.querySelectorAll(".sortbuttons");
@@ -25,19 +27,27 @@ export default function Inventory() {
       else setactiveRarityFilter(filter);
     }
   }
-  
-  const [connected, setConnected] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setConnected(true);
-      })
-      .catch(() => {
-        setConnected(false)
-        console.log("BDD Connectée");
-      });
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('https://testcirmon.onrender.com/users', {headers: { 'Authorization': `Bearer ${token}`}})
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) { 
+            setConnected(true);
+            setCards(data.user.cards);
+            console.log(data.user.cards);
+          } 
+          else {
+            console.error('Erreur API :', data.message);
+          }
+        })
+        .catch(err => console.error('Erreur réseau :', err));
+    }
+    else {
+      console.log("utilisateur non connecté")
+    }
   }, []);
 
   if (connected) {
@@ -101,19 +111,23 @@ export default function Inventory() {
         </div>
       </div>
       <div id="cards-container">
-        <CardDetails idPokedex={1} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={2} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={3} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={4} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={5} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={6} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={7} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={8} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={9} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={10} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={11} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={12} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
-        <CardDetails idPokedex={13} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter}/>
+        {cards && cards.length > 0 && cards.map((card) => (
+          <CardDetails
+            idPokedex={card.numPokedex}
+            typeFilter={activeTypeFilter}
+            rarityFilter={activeRarityFilter}
+            quantity={card.quantity}
+          />
+        ))}
+        {/* <CardDetails idPokedex={1} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
+        <CardDetails idPokedex={2} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
+        <CardDetails idPokedex={3} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={999}/>
+        <CardDetails idPokedex={4} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={5}/>
+        <CardDetails idPokedex={5} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
+        <CardDetails idPokedex={6} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
+        <CardDetails idPokedex={7} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
+        <CardDetails idPokedex={8} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
+        <CardDetails idPokedex={9} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/> */}
       </div>
     </div>
     );

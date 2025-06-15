@@ -21,9 +21,10 @@ interface CardDetailsProps {
   idPokedex: number;
   typeFilter: string;
   rarityFilter: string;
+  quantity: number;
 }
 
-export default function CardDetails({ idPokedex, typeFilter, rarityFilter }: CardDetailsProps) {
+export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quantity }: CardDetailsProps) {
   const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +66,7 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter }: Car
 
   if(typeFilter!="none" && card.type.toLowerCase() != typeFilter) return "";
   if(rarityFilter!="none" && card.rarity.toString() != rarityFilter) return "";
+  if(quantity == 0 && card.rarity.toString() != rarityFilter) return "";
   return (
     <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"}>
       <img
@@ -97,7 +99,7 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter }: Car
         ))}
       </div>
 
-      <div className="quantity"><span>x{card.quantity ?? 1}</span></div>
+      <div className="quantity"><span>x{quantity}</span></div>
     </div>
   );
 }
