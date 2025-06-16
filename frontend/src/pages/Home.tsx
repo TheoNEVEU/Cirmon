@@ -1,34 +1,31 @@
+//import { useEffect, useState } from 'react';
+//import { useUser } from '../contexts/userContext';
+import { useConnection } from '../contexts/connectedContext'
+import ProfileDisplay from '../components/profileDisplay'
+
 import '../style/Home.css'
 import '../style/App.css'
-import { useEffect, useState } from 'react';
 
 export default function Home() {
-const [connected, setConnected] = useState<boolean>(false);
+  //const [connected, setConnected] = useState<boolean>(false);
+  //const { user } = useUser();
+  const { isConnected } = useConnection();
 
-  useEffect(() => {
-    fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setConnected(true);
-      })
-      .catch(() => {
-        setConnected(false)
-        console.log("BDD Connectée");
-      });
-  }, []);
-
-  if (connected) {
-    return (
-    <div id="page-container">Bienvenue sur la page d'accueil
-      <div>blablabla</div>
-    </div>);
-  }
-  else {
+  if (!isConnected) {
     return (
       <div id="page-container-loading">
         <img className="loadingImg"  src="img/loading.png" alt="car"/>
         <h2>Connexion de la base de donnée...</h2>
       </div>
     );
+  }
+  else {
+    return (
+      <>
+        <ProfileDisplay/>
+        <div id="page-container">Bienvenue sur la page d'accueil
+          <div>blablabla</div>
+        </div>
+      </>);
   }
 }

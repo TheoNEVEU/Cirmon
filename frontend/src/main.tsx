@@ -1,10 +1,18 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './style/index.css'
-import App from './App.tsx'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+
+import { ConnectionProvider } from './contexts/connectedContext';
+import { UserProvider } from './contexts/userContext';
+import App from './App';
+
+import './style/index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ConnectionProvider>
+      <UserProvider>
+        <App />
+      </UserProvider>
+    </ConnectionProvider>
   </StrictMode>,
 )
