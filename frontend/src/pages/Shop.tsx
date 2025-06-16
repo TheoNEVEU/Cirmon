@@ -1,8 +1,10 @@
-import '../style/App.css'
 import { useEffect, useState } from 'react';
+//import { useUser } from '../contexts/userContext';
+import '../style/App.css';
 
 export default function Shop() {
   const [connected, setConnected] = useState<boolean>(false);
+  //const { user, setUser } = useUser();
 
   useEffect(() => {
     fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
