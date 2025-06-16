@@ -9,8 +9,9 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const Card = require('./models/Cards');
-const Profile = require('./models/Profile');
+const Profile = require('./models/User');
 
+app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
 
 
@@ -56,6 +57,7 @@ app.get('/cards/:idPokedex', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 app.get('/cards', async (req, res) => {
   console.log('GET /cards appelé');  // <== ajoute cette ligne pour debug
   try {
@@ -65,12 +67,12 @@ app.get('/cards', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.use((req, res) => {
-  res.status(404).json({ error: "Route non trouvée" });
-});
+
 
 // Partie inscription
 app.post('/register', async (req, res) => {
+  console.log('POST /register appelé');
+  console.log('Données reçues pour inscription :', req.body);
   const { username, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -83,6 +85,7 @@ app.post('/register', async (req, res) => {
 
 // Partie connexion (bcp de chat GPT, pour la partie des tokens)
 app.post('/login', async (req, res) => {
+  console.log('POST /login appelé');
   const { username, password } = req.body;
   try {
     const user = await Profile.findOne({ username });
@@ -98,22 +101,88 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Route protégée (lecture des tokens)
-app.get('/profile', async (req, res) => {
+
+// Récupération de toutes les infos du compte
+app.get('/users', async (req, res) => {
+  console.log('GET /profile appelé');
   const authHeader = req.headers['authorization'];
+
   if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
 
-  const token = authHeader.split(' ')[1]; // ✅ Correction ici (enlève "Bearer ")
+  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // On récupère toutes les infos du profil sauf le mot de passe
     const user = await Profile.findById(decoded.userId).select('-password');
+
+    if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+
     res.json({ success: true, user });
   } catch (err) {
+    console.error('Erreur de token :', err);
     res.status(401).json({ success: false, message: 'Token invalide' });
   }
 });
 
+// Récupération des infos publiques du compte
+app.get('/users/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await Profile.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        username: user.username,
+        title: user.title,
+        ppURL: user.ppURL,
+        badgeURL: user.badgeURL,
+        stats: user.stats,
+        cards: user.cards,
+      }
+    });
+  } catch (err) {
+    console.error('Erreur lors de la récupération du profil :', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+});
+
+// Suppression du compte utilisateur
+app.delete('/users', async (req, res) => {
+  console.log('DELETE /users appelé');
+  const authHeader = req.headers['authorization'];
+
+  if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await Profile.findById(decoded.userId);
+
+    if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+
+    await Profile.findByIdAndDelete(decoded.userId);
+
+    res.json({ success: true, message: 'Compte supprimé avec succès.' });
+  } catch (err) {
+    console.error('Erreur de token ou suppression :', err);
+    res.status(401).json({ success: false, message: 'Token invalide ou suppression impossible.' });
+  }
+});
+
+// A garder à la fin du fichier !
+app.use((req, res) => {
+  res.status(404).json({ error: "Route non trouvée" });
+});
 // Démarrage serveur
 app.listen(port, () => {
   console.log(`Serveur démarré sur le port ${port}`);

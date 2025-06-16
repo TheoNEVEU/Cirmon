@@ -33,6 +33,16 @@ html::-webkit-scrollbar {
   text-align: center;
 }
 
+#statusSquare {
+  position: absolute;
+  top: 2%;
+  left: 1%;
+  width: 10px;
+  height: 10px;
+  border-radius: 100px;
+  transition: background-color 0.5s ease;
+}
+
 #app-container {
   display: grid;
   grid-template-columns: 1fr 8fr;
@@ -127,8 +137,6 @@ html::-webkit-scrollbar {
 
 .active-indicator {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
 
   height: auto;
   width: 70%;
@@ -167,9 +175,12 @@ html::-webkit-scrollbar {
   opacity: 1;
 }
 
-#page-container {
+.page-container {
+  display: flex;
   position: relative;
   background-color: transparent;
+
+  overflow: hidden;
 
   height: 100%;
   width: 100%;
@@ -188,6 +199,7 @@ html::-webkit-scrollbar {
   height: 100%;
   width: 100%;
 }
+
 @keyframes rotating {
   from {
     transform: rotate(0deg);
@@ -196,6 +208,7 @@ html::-webkit-scrollbar {
     transform: rotate(360deg);
   }
 }
+
 .loadingImg {
   animation: rotating 4s linear infinite;
   margin-bottom: 2vh;

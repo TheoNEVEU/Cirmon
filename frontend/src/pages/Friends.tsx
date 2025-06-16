@@ -1,8 +1,10 @@
 import '../style/App.css'
 import { useEffect, useState } from 'react';
+//import { useUser } from '../contexts/userContext';
 
 export default function Friends() {
   const [connected, setConnected] = useState<boolean>(false);
+  //const { user, setUser } = useUser();
 
   useEffect(() => {
     fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend

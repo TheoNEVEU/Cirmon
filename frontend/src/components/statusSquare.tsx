@@ -1,33 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useConnection } from '../contexts/connectedContext'
+import '../style/App.css'
 
 export default function StatusSquare() {
-  const [connected, setConnected] = useState<boolean>(false);
+  const { isConnected, setIsConnected } = useConnection();
 
   useEffect(() => {
-    fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
+    fetch('https://testcirmon.onrender.com/test')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setConnected(true);
+        if (data.success) 
+        setIsConnected(true);
       })
       .catch(() => {
-        setConnected(false)
-        console.log("BDD Connectée");
+        setIsConnected(false)
       });
   }, []);
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '2%',
-        left: '1%',
-        width: '10px',
-        height: '10px',
-        borderRadius: '100px',
-        backgroundColor: connected ? 'green' : 'red',
-        transition: 'background-color 0.5s ease',
-      }}
-      aria-label={connected ? "Connecté à la base" : "Non connecté à la base"}
+    <div id="statusSquare"
+      style={{backgroundColor: isConnected ? 'green' : 'red'}}
+      aria-label={isConnected ? "Connecté à la base" : "Non connecté à la base"}
     />
   );
 }

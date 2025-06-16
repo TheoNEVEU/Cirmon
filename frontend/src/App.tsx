@@ -7,9 +7,12 @@ import Friends from './pages/Friends';
 import Shop from './pages/Shop';
 import Account from './pages/Account';
 import StatusSquare from './components/statusSquare';
+import { useUser } from './contexts/userContext';
 
 function App() {
   const [indicatorTop, setIndicatorTop] = useState(0);
+  const [indicatorLeft, setIndicatorLeft] = useState(0);
+  const { setUser } = useUser();
 
   type Page = 'home' | 'inventory' | 'friends' | 'shop' | 'account';
   const [activePage, setActivePage] = useState<Page>('home');
@@ -22,10 +25,8 @@ function App() {
     account: useRef<HTMLButtonElement | null>(null),
   }; 
 
-  // Lorsqu'on clique, on change la page ET on lance une animation
   const handleClick = (page: Page) => {
     setActivePage(page);
-
     const button = buttonRefs[page].current;
     if (button) {
       button.classList.add('clicked');
@@ -39,15 +40,34 @@ function App() {
     const ref = buttonRefs[activePage];
     if (ref.current) {
       setIndicatorTop(ref.current.offsetTop);
+      setIndicatorLeft(ref.current.offsetLeft);
     }
   }, [activePage]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('https://testcirmon.onrender.com/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setUser(data.user);
+          } else {
+            console.error('Erreur API :', data.message);
+          }
+        })
+        .catch(err => console.error('Erreur réseau :', err));
+    }
+  }, [setUser]);
 
   return (
     <div id="app-container">
       <StatusSquare />
       <div id="grid-container-sidebar">
         <div id="sidebar">
-          <div className="active-indicator" style={{ top: indicatorTop }} />
+          <div className="active-indicator" style={{ top: indicatorTop, left: indicatorLeft }} />
 
           <button onClick={() => handleClick('home')} ref={buttonRefs.home}>
             <img src={`${import.meta.env.BASE_URL}img/icones/home.png`} className="nav-icon" />
