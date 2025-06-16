@@ -1,28 +1,65 @@
 import '../style/App.css'
+import '../style/Friend.css';
+import { useConnection } from '../contexts/connectedContext'
 import { useEffect, useState } from 'react';
+import { useUser } from '../contexts/userContext';
 
 export default function Friends() {
-  const [connected, setConnected] = useState<boolean>(false);
+  const isConnected = useConnection();
+  const {user} = useUser();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [friends, setFriends] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setConnected(true);
-      })
-      .catch(() => {
-        setConnected(false)
-        console.log("BDD Connectée");
-      });
-  }, []);
+    user?.friends.sort((a, b) => a.localeCompare(b));
+    const fetchCard = async () => {
+      try {
+        const response = await fetch(`https://testcirmon.onrender.com/users/friends/${user?.username}`);
+        const data = await response.json();
+        if (data.success) {
+          setFriends(data.friends);
+        }
+        else {
+          setError(`Liste d'amis de ${user?.username} introuvable`);
+        }
+      } catch (err) {
+        setError('Erreur lors du chargement des données');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (connected) {
-    return <div id="page-container">Voici la liste de tes amis</div>;
+    fetchCard();
+  });
+
+  if (isConnected) {
+    console.log(friends);
+    if (friends.length > 0) {
+      return (
+        <div id="page-container">
+          <h1>Amis</h1>
+          <p>{friends.length}</p>
+        </div>
+      );
+    }
+    else {
+      return (
+        <div id="page-container" className="page-container-no-friends">
+          <h1>vous n'avez aucun ami :(</h1>
+          <p>{friends.length}</p>
+          <img className="noFriends" src="img/yoshi.gif" alt="no friends"/>
+        </div>
+      );
+    }
   }
   else {
-    <div id="page-container-loading">
-      <img className="loadingImg"  src="img/loading.png" alt="car"/>
-      <h2>Connexion de la base de donnée...</h2>
-    </div>
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Connexion de la base de donnée...</h2>
+      </div>
+    );
   }
 }

@@ -151,6 +151,31 @@ app.get('/users/:username', async (req, res) => {
   }
 });
 
+// récupère les amis d'un utilisateur
+app.get('/users/friends/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await Profile.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+    }
+
+    res.json({
+      success: true,
+      friends: user.friends.map(friend => ({
+        username: friend.username,
+        ppURL: friend.ppURL,
+        badgeURL: friend.badgeURL,
+        stats: friend.stats,
+      }))
+    })
+  } catch (err) {
+    console.error('Erreur lors de la récupération du profil :', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+});
+
 // Suppression du compte utilisateur
 app.delete('/users', async (req, res) => {
   console.log('DELETE /users appelé');

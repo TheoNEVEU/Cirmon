@@ -1,12 +1,18 @@
+import { /*useEffect,*/ useState } from 'react';
+
+import { useUser } from '../contexts/userContext';
+import { useConnection } from '../contexts/connectedContext';
 import CardDetails from "../components/card";
-import { useEffect, useState } from 'react';
+
 import '../style/Inventory.css';
 
 export default function Inventory() {
+  const { user } = useUser();
+  const { isConnected } = useConnection();
+
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
-  const [connected, setConnected] = useState<boolean>(false);
-  const [cards, setCards] = useState<{ numPokedex: number; quantity: number }[]>([]);
+  //const [cards, setCards] = useState<{ numPokedex: number; quantity: number }[]>([]);
 
   function inventorySort(sortType: string) {
     const sortButtons = document.querySelectorAll(".sortbuttons");
@@ -28,29 +34,42 @@ export default function Inventory() {
     }
   }
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetch('https://testcirmon.onrender.com/users', {headers: { 'Authorization': `Bearer ${token}`}})
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) { 
-            setConnected(true);
-            setCards(data.user.cards);
-            console.log(data.user.cards);
-          } 
-          else {
-            console.error('Erreur API :', data.message);
-          }
-        })
-        .catch(err => console.error('Erreur réseau :', err));
-    }
-    else {
-      console.log("utilisateur non connecté")
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem('token');
+  //   if(user) {
+  //     setConnected(true);
+  //     setCards(user.cards);
+  //     console.log(user.cards+" depuis context");
+  //   }
+  //   else if (token) {
+  //     fetch('https://testcirmon.onrender.com/users', {headers: { 'Authorization': `Bearer ${token}`}})
+  //       .then(res => res.json())
+  //       .then(data => {
+  //         if (data.success) { 
+  //           setConnected(true);
+  //           setCards(data.user.cards);
+  //           console.log(data.user.cards);
+  //         } 
+  //         else {
+  //           console.error('Erreur API :', data.message);
+  //         }
+  //       })
+  //       .catch(err => console.error('Erreur réseau :', err));
+  //   }
+  //   else {
+  //     console.log("utilisateur non connecté")
+  //   }
+  // }, []);
 
-  if (connected) {
+  if (!isConnected) {
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Chargement du profil...</h2>
+      </div>
+    );
+  }    
+  else {
     return (
     <div id="page-container">
       <div id="inventory-menu">
@@ -111,33 +130,18 @@ export default function Inventory() {
         </div>
       </div>
       <div id="cards-container">
-        {cards && cards.length > 0 && cards.map((card) => (
+        {user && user.cards.length > 0 && user.cards.map((card, index) => (
           <CardDetails
+            key={index}
             idPokedex={card.numPokedex}
             typeFilter={activeTypeFilter}
             rarityFilter={activeRarityFilter}
             quantity={card.quantity}
           />
         ))}
-        {/* <CardDetails idPokedex={1} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
-        <CardDetails idPokedex={2} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
-        <CardDetails idPokedex={3} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={999}/>
-        <CardDetails idPokedex={4} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={5}/>
-        <CardDetails idPokedex={5} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
-        <CardDetails idPokedex={6} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
-        <CardDetails idPokedex={7} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
-        <CardDetails idPokedex={8} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/>
-        <CardDetails idPokedex={9} typeFilter={activeTypeFilter} rarityFilter={activeRarityFilter} quantity={1}/> */}
+        {!user && <p>Vous n'êtes pas connecté</p>}
       </div>
     </div>
-    );
-  }
-  else {
-    return (
-      <div id="page-container-loading">
-        <img className="loadingImg"  src="img/loading.png" alt="car"/>
-        <h2>Connexion de la base de donnée...</h2>
-      </div>
     );
   }
 }
