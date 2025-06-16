@@ -161,15 +161,21 @@ app.get('/users/friends/:username', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
     }
 
-    res.json({
-      success: true,
-      friends: user.friends.map(friend => ({
-        username: friend.username,
-        ppURL: friend.ppURL,
-        badgeURL: friend.badgeURL,
-        stats: friend.stats,
-      }))
-    })
+    // Récupère les profils complets des amis
+    const friendsProfiles = await Profile.find({
+      username: { $in: user.friends }
+    });
+
+    // On simplifie les données envoyées
+    const friends = friendsProfiles.map(friend => ({
+      username: friend.username,
+      ppURL: friend.ppURL,
+      badgeURL: friend.badgeURL,
+      stats: friend.stats,
+    }));
+
+    res.json({ success: true, friends });
+
   } catch (err) {
     console.error('Erreur lors de la récupération du profil :', err);
     res.status(500).json({ success: false, message: 'Erreur serveur.' });
