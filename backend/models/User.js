@@ -15,7 +15,9 @@ const userSchema = new mongoose.Schema({
   cards: [{
     numPokedex: { type: Number, required: true },
     quantity: { type: Number, required: true }
-  }]
+  }],
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 module.exports = mongoose.model('User', userSchema);

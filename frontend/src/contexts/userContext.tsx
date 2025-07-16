@@ -18,6 +18,8 @@ export interface User {
   badgeURL: string[];
   stats: number[];
   cards: Card[];
+  friends: string[];
+  requests: string[];
 }
 
 type UserContextType = {

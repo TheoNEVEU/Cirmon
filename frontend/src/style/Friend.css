@@ -1,0 +1,21 @@
+.page-container-no-friends {
+    margin: 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-container-no-friends > :first-child {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.page-container-no-friends > img {
+    width: 65%;
+    margin: auto;
+    display: block;
+}
+
+.page-container-no-friends > h1{
+    font-size: 3vw;
+}
