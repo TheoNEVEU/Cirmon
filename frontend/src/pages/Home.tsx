@@ -23,8 +23,8 @@ export default function Home() {
     return (
       <>
         <ProfileDisplay/>
-        <div id="page-container">Bienvenue sur la page d'accueil
-          <div>blablabla</div>
+        <div id="page-container">
+          
         </div>
       </>);
   }

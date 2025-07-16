@@ -12,7 +12,6 @@ export default function Inventory() {
 
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
-  //const [cards, setCards] = useState<{ numPokedex: number; quantity: number }[]>([]);
 
   function inventorySort(sortType: string) {
     const sortButtons = document.querySelectorAll(".sortbuttons");
@@ -33,33 +32,6 @@ export default function Inventory() {
       else setactiveRarityFilter(filter);
     }
   }
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   if(user) {
-  //     setConnected(true);
-  //     setCards(user.cards);
-  //     console.log(user.cards+" depuis context");
-  //   }
-  //   else if (token) {
-  //     fetch('https://testcirmon.onrender.com/users', {headers: { 'Authorization': `Bearer ${token}`}})
-  //       .then(res => res.json())
-  //       .then(data => {
-  //         if (data.success) { 
-  //           setConnected(true);
-  //           setCards(data.user.cards);
-  //           console.log(data.user.cards);
-  //         } 
-  //         else {
-  //           console.error('Erreur API :', data.message);
-  //         }
-  //       })
-  //       .catch(err => console.error('Erreur réseau :', err));
-  //   }
-  //   else {
-  //     console.log("utilisateur non connecté")
-  //   }
-  // }, []);
 
   if (!isConnected) {
     return (
