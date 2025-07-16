@@ -43,6 +43,45 @@ html::-webkit-scrollbar {
   transition: background-color 0.5s ease;
 }
 
+#profile_display {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  position: absolute;
+
+  top: 0%;
+  left: 0%;
+  height: 15%;
+  width: 40%;
+  margin: 1%;
+  
+  overflow: hidden;
+}
+
+#profile_display img, #profile_display div {
+  position: relative;
+  height: 80%;
+  aspect-ratio: 1/1;
+  margin: 0% 3% 0% 2%;
+  overflow: hidden;
+  border-radius: 500px;
+}
+
+#profile_display div {
+  background-color: whitesmoke;
+  border: 3px dashed lightgray;
+}
+
+#profile_display h1 {
+  color: rgb(79, 79, 79);
+  font-weight: bold;
+  font-size: 200%;
+}
+
+#sidebar, #grid-container-content {
+  transition: transform 2s ease;
+}
+
 #app-container {
   display: grid;
   grid-template-columns: 1fr 8fr;
@@ -82,7 +121,7 @@ html::-webkit-scrollbar {
 
 
 /* PARTIE SIDEBAR */
-#sidebar {
+#sidebar:not([data-card-opening]) {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -116,17 +155,21 @@ html::-webkit-scrollbar {
   background-color: whitesmoke;
 }
 
+#sidebar button[data-locked="true"] {
+  filter: brightness(0.75);
+}
+
 #sidebar button img {
   width: 50%;
   aspect-ratio: 1;
 }
 
-#sidebar button:hover {
+#sidebar button:not([data-locked="true"]):hover {
   background-color: lightgray;
 }
 
-.sidebar button.clicked {
-  animation: pulse 0.3s ease;
+#sidebar button:not([data-locked="true"]):active {
+  animation: pulse 0.1s ease-in-out;
 }
 
 @keyframes pulse {
@@ -135,7 +178,8 @@ html::-webkit-scrollbar {
   100% { transform: scale(1); }
 }
 
-.active-indicator {
+#active-indicator {
+  display: flex;
   position: absolute;
 
   height: auto;
@@ -147,7 +191,7 @@ html::-webkit-scrollbar {
   border-radius: 20%;
 
   box-sizing: border-box;
-  transition: top 0.3s ease;
+  transition: top 0.3s ease, left 0.3s ease;
   pointer-events: none;
   z-index: 1000;
 }
@@ -214,4 +258,14 @@ html::-webkit-scrollbar {
   margin-bottom: 2vh;
   height: 15vw;
   width: 15vw;
+}
+
+/* Annimation ouverture de cartes */
+
+#app-container[data-card-opening] #sidebar {
+  transform: translateX(-200%);
+}
+
+#app-container[data-card-opening] #grid-container-content {
+  transform: translateX(120%);
 }

@@ -4,6 +4,8 @@ import { useConnection } from '../contexts/connectedContext'
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/userContext';
 
+import '../style/App.css'
+
 export default function Friends() {
   const isConnected = useConnection();
   const {user} = useUser();

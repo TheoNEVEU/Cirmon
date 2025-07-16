@@ -1,0 +1,13 @@
+#container {
+    position: absolute;
+    background-color: red;
+    top: 10vh;
+    left: 5vw;
+
+    height: 80vh;
+    width: 90vw;
+}
+
+#container[data-card-opening="true"] {
+    display: none;
+}

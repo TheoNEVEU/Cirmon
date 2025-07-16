@@ -188,16 +188,13 @@ app.delete('/users', async (req, res) => {
   const authHeader = req.headers['authorization'];
 
   if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
-
   const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     const user = await Profile.findById(decoded.userId);
 
     if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
-
     await Profile.findByIdAndDelete(decoded.userId);
 
     res.json({ success: true, message: 'Compte supprimé avec succès.' });
@@ -206,6 +203,48 @@ app.delete('/users', async (req, res) => {
     res.status(401).json({ success: false, message: 'Token invalide ou suppression impossible.' });
   }
 });
+
+// Exemple dans Express
+app.get('/booster', async (req, res) => {
+  const boosterSize = 5;
+
+  // Probabilités de rareté
+  const rarityChances = [
+    { rarity: 1, chance: 0.01 },
+    { rarity: 2, chance: 0.09 },
+    { rarity: 3, chance: 0.20 },
+    { rarity: 4, chance: 0.30 },
+    { rarity: 5, chance: 0.40 },
+  ];
+
+  const pickRarity = () => {
+    const rand = Math.random();
+    let sum = 0;
+    for (let i = rarityChances.length - 1; i >= 0; i--) {
+      sum += rarityChances[i].chance;
+      if (rand <= sum) return rarityChances[i].rarity;
+    }
+    return 5;
+  };
+
+  const db = await getDb(); // ou mongoose.model(...)
+  const boosterCards = [];
+
+  for (let i = 0; i < boosterSize; i++) {
+    const rarity = pickRarity();
+    const pool = await db.collection('Cards').aggregate([
+      { $match: { rarity } },
+      { $sample: { size: 1 } }
+    ]).toArray();
+
+    if (pool.length > 0) {
+      boosterCards.push(pool[0]);
+    }
+  }
+
+  res.json(boosterCards);
+});
+
 
 // A garder à la fin du fichier !
 app.use((req, res) => {
