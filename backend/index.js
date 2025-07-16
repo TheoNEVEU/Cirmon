@@ -56,7 +56,6 @@ app.get('/cards/:idPokedex', async (req, res) => {
 });
 
 app.get('/cards', async (req, res) => {
-  console.log('GET /cards appelé');  // <== ajoute cette ligne pour debug
   try {
     const cards = await Card.find();
     res.json(cards);
@@ -68,8 +67,6 @@ app.get('/cards', async (req, res) => {
 
 // Partie inscription
 app.post('/register', async (req, res) => {
-  console.log('POST /register appelé');
-  console.log('Données reçues pour inscription :', req.body);
   const { username, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -82,7 +79,6 @@ app.post('/register', async (req, res) => {
 
 // Partie connexion (bcp de chat GPT, pour la partie des tokens)
 app.post('/login', async (req, res) => {
-  console.log('POST /login appelé');
   const { username, password } = req.body;
   try {
     const user = await Profile.findOne({ username });
@@ -101,7 +97,6 @@ app.post('/login', async (req, res) => {
 
 // Récupération de toutes les infos du compte
 app.get('/users', async (req, res) => {
-  console.log('GET /profile appelé');
   const authHeader = req.headers['authorization'];
 
   if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
@@ -184,7 +179,6 @@ app.get('/users/friends/:username', async (req, res) => {
 
 // Suppression du compte utilisateur
 app.delete('/users', async (req, res) => {
-  console.log('DELETE /users appelé');
   const authHeader = req.headers['authorization'];
 
   if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
@@ -227,23 +221,38 @@ app.get('/booster', async (req, res) => {
     return 5;
   };
 
-  const db = await getDb(); // ou mongoose.model(...)
   const boosterCards = [];
+  const usedIds = new Set();
 
-  for (let i = 0; i < boosterSize; i++) {
-    const rarity = pickRarity();
-    const pool = await db.collection('Cards').aggregate([
-      { $match: { rarity } },
-      { $sample: { size: 1 } }
-    ]).toArray();
+  try {
+    for (let i = 0; i < boosterSize; i++) {
+      let tries = 0;
+      let card = null;
 
-    if (pool.length > 0) {
-      boosterCards.push(pool[0]);
+      while (tries < 10) {
+        const rarity = pickRarity();
+        const pool = await Card.aggregate([
+          { $match: { rarity } },
+          { $sample: { size: 1 } }
+        ]);
+
+        if (pool.length > 0 && !usedIds.has(pool[0]._id.toString())) {
+          card = pool[0];
+          usedIds.add(card._id.toString());
+          boosterCards.push(card);
+          break;
+        }
+
+        tries++;
+      }
     }
-  }
 
-  res.json(boosterCards);
+    res.json({ success: true, booster: boosterCards });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
+
 
 
 // A garder à la fin du fichier !
