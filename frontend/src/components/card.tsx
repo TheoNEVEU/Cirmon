@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import SmartImage from './smartImage';
 
+import './style/card.css'
+
 interface Card {
   _id: string;
   idPokedex: number;
@@ -66,7 +68,7 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quant
 
   if(typeFilter!="none" && card.type.toLowerCase() != typeFilter) return "";
   if(rarityFilter!="none" && card.rarity.toString() != rarityFilter) return "";
-  if(quantity == 0 && card.rarity.toString() != rarityFilter) return "";
+  if(quantity == 0) return "";
   return (
     <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"}>
       <img
@@ -99,7 +101,11 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quant
         ))}
       </div>
 
-      <div className="quantity"><span>x{quantity}</span></div>
+      {quantity > 0 && (
+        <div className="quantity">
+        <span>x{quantity}</span>
+        </div>
+      )}
     </div>
   );
 }

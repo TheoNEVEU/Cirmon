@@ -1,24 +1,14 @@
-import '../style/App.css'
-import { useEffect, useState } from 'react';
+//import { useEffect, useState } from 'react';
+import { useConnection } from '../contexts/connectedContext'
 //import { useUser } from '../contexts/userContext';
 
+import '../style/App.css'
+
 export default function Friends() {
-  const [connected, setConnected] = useState<boolean>(false);
+  const { isConnected } = useConnection();
   //const { user, setUser } = useUser();
 
-  useEffect(() => {
-    fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setConnected(true);
-      })
-      .catch(() => {
-        setConnected(false)
-        console.log("BDD Connectée");
-      });
-  }, []);
-
-  if (connected) {
+  if (isConnected) {
     return <div id="page-container">Voici la liste de tes amis</div>;
   }
   else {
