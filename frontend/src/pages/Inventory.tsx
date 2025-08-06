@@ -8,7 +8,7 @@ import '../style/Inventory.css';
 
 export default function Inventory() {
   const { user } = useUser();
-  const { isConnected } = useConnection();
+  const { status } = useConnection();
 
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
@@ -33,7 +33,7 @@ export default function Inventory() {
     }
   }
 
-  if (!isConnected) {
+  if (!(status=='connected')) {
     return (
       <div id="page-container-loading">
         <img className="loadingImg"  src="img/loading.png" alt="car"/>

@@ -24,9 +24,10 @@ interface CardDetailsProps {
   typeFilter: string;
   rarityFilter: string;
   quantity: number;
+  style?: React.CSSProperties;
 }
 
-export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quantity }: CardDetailsProps) {
+export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quantity, style }: CardDetailsProps) {
   const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +71,7 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quant
   if(rarityFilter!="none" && card.rarity.toString() != rarityFilter) return "";
   if(quantity == 0) return "";
   return (
-    <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"}>
+    <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"} style={style}>
       <img
         src={`${import.meta.env.BASE_URL}img/fondsCartes/${card.type}.png`}
         alt={`${card.type} background`}
@@ -78,9 +79,9 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quant
 
       <div className="illustration">
         <img
-          src={imgSrc ?? "img/illustrations/car.jpg"}
+          src={imgSrc ?? "img/car.jpg"}
           alt={card.name}
-          onError={() => setImgSrc("img/illustrations/car.jpg")}
+          onError={() => setImgSrc("img/car.jpg")}
         />
       </div>
 

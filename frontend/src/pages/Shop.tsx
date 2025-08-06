@@ -1,24 +1,14 @@
 import { useEffect, useState } from 'react';
+
 //import { useUser } from '../contexts/userContext';
+import { useConnection } from '../contexts/connectedContext';
 import '../style/App.css';
 
 export default function Shop() {
-  const [connected, setConnected] = useState<boolean>(false);
   //const { user, setUser } = useUser();
+  const { isConnected } = useConnection();
 
-  useEffect(() => {
-    fetch('https://testcirmon.onrender.com/test') // remplace par ton URL backend
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setConnected(true);
-      })
-      .catch(() => {
-        setConnected(false)
-        console.log("BDD Connectée");
-      });
-  }, []);
-
-  if (connected) {
+  if (isConnected) {
     return <div id="page-container">Bienvenue à la boutique</div>;
   }
   else {
