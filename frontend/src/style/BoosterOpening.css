@@ -84,7 +84,7 @@
   top: 10%;
 }
 
-#booster-container .card-flip-wrapper {
+#booster-container .card-flip-wrapper, #booster-container .card {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -94,6 +94,7 @@
   border-radius: 8px;
   
   transform: translate(-50%, -50%);
+  transition: left 0.6s ease;
   perspective: 1000px;
 }
 
@@ -104,6 +105,7 @@
   box-shadow: 0 0 10px grey;
   transition: transform 0.8s ease;
   transform-style: preserve-3d;
+  border-radius: 8px;
 }
 
 #booster-container .card-inner.flipped {
@@ -135,3 +137,15 @@
 #booster-container .card-front {
   transform: rotateY(180deg);
 }
+
+#booster-conatiner .card-final {
+  width: 200px;
+  height: 280px;
+  transition: transform 0.5s ease;
+  z-index: 2;
+}
+
+#booster-conatiner .card-final .card {
+  width: 100%;
+}
+

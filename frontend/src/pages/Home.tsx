@@ -16,7 +16,7 @@ export default function Home() {
     return (
       <div id="page-container-loading">
         <img className="loadingImg"  src="img/loading.png" alt="car"/>
-        <h2>Connexion de la base de donnée...</h2>
+        <h2>Connexion à la base de données...</h2>
       </div>
     );
   }
