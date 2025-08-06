@@ -3,21 +3,21 @@ import './style/App.css';
 
 import Home from './pages/Home';
 import Inventory from './pages/Inventory';
-import Friends from './pages/Friends';
+//import Friends from './pages/Friends';
 import Shop from './pages/Shop';
 import Account from './pages/Account';
 import BoosterOpening from './pages/BoosterOpening';
 import StatusSquare from './components/statusSquare';
+
 import { useUser } from './contexts/userContext';
+import { usePage, type Page } from './contexts/pageContext';
 
 function App() {
   const [indicatorTop, setIndicatorTop] = useState(0);
   const [indicatorLeft, setIndicatorLeft] = useState(0);
-  const [isCardOpening, setisCardOpening] = useState(false);
-  const { user, setUser } = useUser();
 
-  type Page = 'home' | 'inventory' | 'friends' | 'shop' | 'account';
-  const [activePage, setActivePage] = useState<Page>('home');
+  const { user, setUser } = useUser();
+  const { activePage, setActivePage } = usePage();
 
   const buttonRefs: Record<Page, React.RefObject<HTMLButtonElement | null>> = {
     home: useRef<HTMLButtonElement | null>(null),
@@ -25,6 +25,7 @@ function App() {
     friends: useRef<HTMLButtonElement | null>(null),
     shop: useRef<HTMLButtonElement | null>(null),
     account: useRef<HTMLButtonElement | null>(null),
+    boosters: useRef<null>(null),
   }; 
 
   const handleClick = (page: Page) => {
@@ -67,13 +68,12 @@ function App() {
   }, [setUser]);
 
   return (
-    <div id="app-container" data-card-opening={isCardOpening? true : undefined }>
+    <div id="app-container" data-booster={activePage === 'boosters' ? true : undefined}>
       <StatusSquare />
-      <div data-card-opening={isCardOpening? true : undefined }><BoosterOpening /></div>
+      <BoosterOpening />
       <div id="grid-container-sidebar">
         <div id="sidebar">
           <div id="active-indicator" style={{ top: indicatorTop, left: indicatorLeft }} />
-
           <button onClick={() => handleClick('home')} ref={buttonRefs.home}>
             <img src={`${import.meta.env.BASE_URL}img/icones/home.png`} className="nav-icon" />
           </button>
@@ -92,11 +92,10 @@ function App() {
         </div>
       </div>
 
-      <button onClick={() => setisCardOpening(!isCardOpening)} ></button>
       <div id="grid-container-content">
-          <div className={`page ${activePage === 'home' ? 'active' : ''}`}><Home /></div>
+          <div className={`page ${activePage === 'home'|| activePage === 'boosters' ? 'active' : ''}`}><Home /></div>
           <div className={`page ${activePage === 'inventory' ? 'active' : ''}`}><Inventory /></div>
-          <div className={`page ${activePage === 'friends' ? 'active' : ''}`}><Friends /></div>
+          {/* <div className={`page ${activePage === 'friends' ? 'active' : ''}`}><Friends /></div> */}
           <div className={`page ${activePage === 'shop' ? 'active' : ''}`}><Shop /></div>
           <div className={`page ${activePage === 'account' ? 'active' : ''}`}><Account /></div>
       </div>

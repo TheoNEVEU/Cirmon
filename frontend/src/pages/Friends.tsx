@@ -49,7 +49,7 @@ export default function Friends() {
     else {
       return (
         <div id="page-container" className="page-container-no-friends">
-          <h1>vous n'avez aucun ami :(</h1>
+          <h1>vous n'avez aucun ami :</h1>
           <p>{friends.length}</p>
           <img className="noFriends" src="img/yoshi.gif" alt="no friends"/>
         </div>

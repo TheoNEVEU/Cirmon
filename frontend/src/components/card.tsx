@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
-import SmartImage from './smartImage';
-
+import { useState } from 'react';
 import './style/card.css'
 
-interface Card {
+export type Card = {
   _id: string;
   idPokedex: number;
   name: string;
@@ -20,57 +18,19 @@ interface Card {
 }
 
 interface CardDetailsProps {
-  idPokedex: number;
-  typeFilter: string;
-  rarityFilter: string;
-  quantity: number;
+  card: Card;
+  style?: React.CSSProperties;
 }
 
-export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quantity }: CardDetailsProps) {
-  const [card, setCard] = useState<Card | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function CardDetails({ card, style }: CardDetailsProps) {
   const [imgSrc, setImgSrc] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCard = async () => {
-      try {
-        const response = await fetch(`https://testcirmon.onrender.com/cards/${idPokedex}`);
-        const data = await response.json();
-        if (data.success) {
-          setCard(data.card);
-          setImgSrc(`img/illustrations/${data.card.illustration}.png`);
-        } else {
-          setError('Carte n°'+idPokedex+' non trouvée');
-        }
-      } catch (err) {
-        setError('Erreur lors du chargement des données');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCard();
-  }, [idPokedex]);
-
-  if (loading) return <div>Chargement...</div>;
-  if (error) {
-    console.error(error);
-    return (
-    <><div className="card" id={"none"} data-error="true">
-      <img src={`${import.meta.env.BASE_URL}img/cardback.png`}/>
-    </div></>);
-  }
   if (!card) return (
     <><div className="card" id={"none"} data-error="true">
       <img src={`${import.meta.env.BASE_URL}img/cardback.png`}/>
     </div></>);
-
-  if(typeFilter!="none" && card.type.toLowerCase() != typeFilter) return "";
-  if(rarityFilter!="none" && card.rarity.toString() != rarityFilter) return "";
-  if(quantity == 0) return "";
   return (
-    <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"}>
+    <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"} style={style}>
       <img
         src={`${import.meta.env.BASE_URL}img/fondsCartes/${card.type}.png`}
         alt={`${card.type} background`}
@@ -78,9 +38,9 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quant
 
       <div className="illustration">
         <img
-          src={imgSrc ?? "img/illustrations/car.jpg"}
+          src={imgSrc ?? "img/car.jpg"}
           alt={card.name}
-          onError={() => setImgSrc("img/illustrations/car.jpg")}
+          onError={() => setImgSrc("img/car.jpg")}
         />
       </div>
 
@@ -101,9 +61,9 @@ export default function CardDetails({ idPokedex, typeFilter, rarityFilter, quant
         ))}
       </div>
 
-      {quantity > 0 && (
+      {card.quantity > 0 && (
         <div className="quantity">
-        <span>x{quantity}</span>
+        <span>x{card.quantity}</span>
         </div>
       )}
     </div>

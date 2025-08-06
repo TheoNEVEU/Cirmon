@@ -3,24 +3,25 @@ import { useConnection } from '../contexts/connectedContext'
 import '../style/App.css'
 
 export default function StatusSquare() {
-  const { isConnected, setIsConnected } = useConnection();
+  const { status, setStatus } = useConnection();
 
   useEffect(() => {
+    setStatus('connecting');
     fetch('https://testcirmon.onrender.com/test')
       .then((res) => res.json())
       .then((data) => {
         if (data.success) 
-        setIsConnected(true);
+          setStatus('connected');
       })
       .catch(() => {
-        setIsConnected(false)
+        setStatus('error')
       });
   }, []);
 
   return (
     <div id="statusSquare"
-      style={{backgroundColor: isConnected ? 'green' : 'red'}}
-      aria-label={isConnected ? "Connecté à la base" : "Non connecté à la base"}
+      style={{backgroundColor: status == "connected" ? 'green' : status == "connecting" ? 'orange' : 'red'}}
+      aria-label={status == "connected" ? "Connecté à la base" : "Non connecté à la base"}
     />
   );
 }

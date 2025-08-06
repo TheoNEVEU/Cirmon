@@ -9,15 +9,9 @@
 .card {
   position: relative;
   display: block;
-  z-index: 4;
-
-  width: 22%;
   aspect-ratio: 0.7128712871;
-
   border-radius: 8px;
-  transition: all 0.5s ease;
   box-shadow: 0 0 10px grey;
-  margin: 0 3% 2% 0;
 }
 
 .card[data-shiny] {
@@ -114,13 +108,25 @@
 
 /* Points de vie (HP) */
 .hp {
+  display: flex;
   position: absolute;
-  height: 5%;
-  font-size: 1.72vh;
   top: 3.8%;
   right: 14%;
+
+  height: 5%;
+
+  font-size: 1.72vh;
   font-weight: bold;
+  text-align: end;
   z-index: 3;
+}
+
+.hp p {
+  position: absolute;
+  font-size: 1vh;
+  height: 50%;
+  bottom: 20%;
+  left: -55%;
 }
 
 /* Illustration du Pokémon */
