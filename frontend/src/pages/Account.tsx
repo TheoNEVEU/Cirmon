@@ -8,7 +8,7 @@ import '../style/Account.css';
 
 export default function Account() {
   const { user, setUser } = useUser();
-  const { isConnected } = useConnection();
+  const { status } = useConnection();
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -77,7 +77,7 @@ export default function Account() {
     });
   };
   
-  if (!isConnected) {
+  if (!(status=="connected")) {
     return (
       <div id="page-container-loading">
         <img className="loadingImg"  src="img/loading.png" alt="car"/>

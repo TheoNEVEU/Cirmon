@@ -7,12 +7,12 @@ html {
     #dadaf8,
     #fce0e0
   );
-  background-size: 400% 400%;
-  animation: subtleShift 30s ease infinite;
+  overflow: hidden;
 }
 
-html::-webkit-scrollbar {
-  display: none;
+html[data-animated=true] {
+  background-size: 400% 400%;
+  animation: subtleShift 30s ease infinite; 
 }
 
 @keyframes subtleShift {
@@ -25,6 +25,10 @@ html::-webkit-scrollbar {
   100% {
     background-position: 0% 50%;
   }
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 #root {
@@ -121,7 +125,7 @@ html::-webkit-scrollbar {
 
 
 /* PARTIE SIDEBAR */
-#sidebar:not([data-card-opening]) {
+#sidebar:not([data-booster]) {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -262,10 +266,10 @@ html::-webkit-scrollbar {
 
 /* Annimation ouverture de cartes */
 
-#app-container[data-card-opening] #sidebar {
+#app-container[data-booster] #sidebar {
   transform: translateX(-200%);
 }
 
-#app-container[data-card-opening] #grid-container-content {
+#app-container[data-booster] #grid-container-content {
   transform: translateX(120%);
 }

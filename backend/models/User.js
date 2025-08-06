@@ -3,6 +3,11 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  diamonds: {
+    type: Number,
+    required: true, 
+    default: 200, //Pour un booster de bienvenue
+  },
   ppURL: { type: String, default: 'default' },
   title: {
     text: { type: String, default: 'default' },

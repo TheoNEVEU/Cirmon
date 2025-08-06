@@ -1,4 +1,4 @@
-import { /*useEffect,*/ useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
@@ -8,10 +8,36 @@ import '../style/Inventory.css';
 
 export default function Inventory() {
   const { user } = useUser();
-  const { isConnected } = useConnection();
+  const { status } = useConnection();
 
+  const [cards, setCards] = useState<any[]>([]);
+  const [loadingCards, setLoadingCards] = useState(true);
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      if (!user || !user.cards) return;
+      const fetchedCards = await Promise.all(
+        user.cards.map(async (c) => {
+          const res = await fetch(`https://testcirmon.onrender.com/cards/${c.numPokedex}`);
+          const data = await res.json();
+          if (data.success) {
+            return {
+              ...data.card,
+              quantity: c.quantity,
+            };
+          } else {
+            return null;
+          }
+        })
+      );
+
+      setCards(fetchedCards.filter(Boolean)); // on filtre les erreurs
+      setLoadingCards(false);
+    };
+    fetchCards();
+  }, [user]);
 
   function inventorySort(sortType: string) {
     const sortButtons = document.querySelectorAll(".sortbuttons");
@@ -33,14 +59,14 @@ export default function Inventory() {
     }
   }
 
-  if (!isConnected) {
+  if (status !== 'connected' || loadingCards) {
     return (
       <div id="page-container-loading">
-        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <img className="loadingImg" src="img/loading.png" alt="car" />
         <h2>Chargement du profil...</h2>
       </div>
     );
-  }    
+  }  
   else {
     return (
     <div id="page-container">
@@ -102,16 +128,13 @@ export default function Inventory() {
         </div>
       </div>
       <div id="cards-container">
-        {user && user.cards.length > 0 && user.cards.map((card, index) => (
-          <CardDetails
-            key={index}
-            idPokedex={card.numPokedex}
-            typeFilter={activeTypeFilter}
-            rarityFilter={activeRarityFilter}
-            quantity={card.quantity}
-          />
-        ))}
-        {!user && <p>Vous n'êtes pas connecté</p>}
+        {cards.map((card, index) => {
+          if (card.quantity === 0) return null;
+          if (activeTypeFilter !== 'none' && card.type.toLowerCase() !== activeTypeFilter) return null;
+          if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;
+
+          return <CardDetails key={index} card={card} />;
+        })}
       </div>
     </div>
     );
