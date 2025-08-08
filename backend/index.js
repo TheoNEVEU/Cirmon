@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const Card = require('./models/Cards');
-const Profile = require('./models/User');
+const User = require('./models/User');
 
 app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
@@ -70,7 +70,7 @@ app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await Profile.create({ username, password: hashedPassword });
+    const user = await User.create({ username, password: hashedPassword });
     res.json({ success: true, message: 'Utilisateur créé', user: { username: user.username } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -81,7 +81,7 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const user = await Profile.findOne({ username });
+    const user = await User.findOne({ username });
     if (!user) return res.status(400).json({ success: false, message: 'Utilisateur non trouvé' });
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -107,7 +107,7 @@ app.get('/users', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // On récupère toutes les infos du profil sauf le mot de passe
-    const user = await Profile.findById(decoded.userId).select('-password');
+    const user = await User.findById(decoded.userId).select('-password');
 
     if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
 
@@ -123,7 +123,7 @@ app.get('/users/:username', async (req, res) => {
   const { username } = req.params;
 
   try {
-    const user = await Profile.findOne({ username });
+    const user = await User.findOne({ username });
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
@@ -151,18 +151,18 @@ app.get('/users/friends/:username', async (req, res) => {
   const { username } = req.params;
 
   try {
-    const user = await Profile.findOne({ username });
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
     }
 
     // Récupère les profils complets des amis
-    const friendsProfiles = await Profile.find({
+    const friendsUsers = await User.find({
       username: { $in: user.friends }
     });
 
     // On simplifie les données envoyées
-    const friends = friendsProfiles.map(friend => ({
+    const friends = friendsUsers.map(friend => ({
       username: friend.username,
       ppURL: friend.ppURL,
       badgeURL: friend.badgeURL,
@@ -186,10 +186,10 @@ app.delete('/users', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await Profile.findById(decoded.userId);
+    const user = await User.findById(decoded.userId);
 
     if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
-    await Profile.findByIdAndDelete(decoded.userId);
+    await User.findByIdAndDelete(decoded.userId);
 
     res.json({ success: true, message: 'Compte supprimé avec succès.' });
   } catch (err) {
