@@ -158,7 +158,8 @@ export default function BoosterOpening() {
       }, 2000);
 
     } catch (err) {
-    console.error("Erreur /booster/open:", err);
+      console.error(err);
+      setError("Erreur lors de l'ouverture du booster");
     }
   };
 
