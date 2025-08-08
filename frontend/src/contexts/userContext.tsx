@@ -8,6 +8,7 @@ interface Card {
 export interface User {
   username: string;
   password: string;
+  diamonds: number;
   ppURL: string;
   title: {
     text: string;
