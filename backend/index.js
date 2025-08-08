@@ -332,7 +332,8 @@ app.post('/booster/open', async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+  console.error("Erreur /booster/open:", err);  // Affiche l'erreur complète dans la console serveur
+  res.status(500).json({ success: false, error: err.message }); // Renvoie le message d'erreur au client
   }
 });
 
