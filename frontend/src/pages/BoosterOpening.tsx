@@ -134,11 +134,12 @@ export default function BoosterOpening() {
       }
 
       // Met à jour le user localement avec les nouvelles données retournées par le serveur
-      setUser((prevUser) => ({
-        ...prevUser,
+      setUser({
+        ...user,
         diamonds: data.diamonds,
-        cards: data.inventory, // Attention, dans ton backend, il faut renvoyer 'inventory' mis à jour
-      }));
+        cards: data.inventory,
+      });
+
 
       setCards(data.booster);
       setAnimation(true);
@@ -157,8 +158,7 @@ export default function BoosterOpening() {
       }, 2000);
 
     } catch (err) {
-      console.error(err);
-      setError("Erreur lors de l'ouverture du booster");
+    console.error("Erreur /booster/open:", err);
     }
   };
 
