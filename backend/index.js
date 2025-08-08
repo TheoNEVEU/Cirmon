@@ -256,17 +256,10 @@ app.get('/booster', async (req, res) => {
 app.post('/booster/open', async (req, res) => {
   const { username } = req.body;
   const boosterCost = 200;
+  const boosterSize = 5;
 
   try {
-    const user = await User.findById(username);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    if (user.diamonds < boosterCost) return res.status(400).json({ error: "Not enough diamonds" });
-
-    // Déduire les diamants
-    user.diamonds -= boosterCost;
-
-    // Générer les cartes (ta logique actuelle ici)
-    const boosterSize = 5;
+    // --- Tirage des cartes ---
     const rarityChances = [
       { rarity: 1, chance: 0.01 },
       { rarity: 2, chance: 0.09 },
@@ -274,10 +267,8 @@ app.post('/booster/open', async (req, res) => {
       { rarity: 4, chance: 0.30 },
       { rarity: 5, chance: 0.40 },
     ];
-
     const pickRarity = () => {
-      const rand = Math.random();
-      let sum = 0;
+      let rand = Math.random(), sum = 0;
       for (let i = rarityChances.length - 1; i >= 0; i--) {
         sum += rarityChances[i].chance;
         if (rand <= sum) return rarityChances[i].rarity;
@@ -287,38 +278,64 @@ app.post('/booster/open', async (req, res) => {
 
     const boosterCards = [];
     const usedIds = new Set();
-
     for (let i = 0; i < boosterSize; i++) {
       let tries = 0;
       while (tries < 10) {
         const rarity = pickRarity();
         const pool = await Card.aggregate([{ $match: { rarity } }, { $sample: { size: 1 } }]);
-
-        if (pool.length > 0 && !usedIds.has(pool[0]._id.toString())) {
-          const card = pool[0];
-          usedIds.add(card._id.toString());
-          boosterCards.push(card);
-
-          // Ajouter à l'inventaire
-          const existing = user.cards.find(c => c.numPokedex == card.idPokedex);
-          if (existing) {
-            existing.quantity = parseInt(existing.quantity) + 1;
-          } else {
-            user.cards.push({ numPokedex: card.idPokedex, quantity: 1 });
-          }
+        if (pool.length && !usedIds.has(pool[0]._id.toString())) {
+          boosterCards.push(pool[0]);
+          usedIds.add(pool[0]._id.toString());
           break;
         }
         tries++;
       }
     }
 
-    await user.save();
-    res.json({ success: true, booster: boosterCards });
+    // --- Transaction Mongo ---
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    // Vérif + déduction diamants
+    const user = await User.findOneAndUpdate(
+      { username, diamonds: { $gte: boosterCost } },
+      { $inc: { diamonds: -boosterCost } },
+      { new: true, session }
+    );
+    if (!user) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Not enough diamonds" });
+    }
+
+    // Ajout / incrément des cartes
+    for (const card of boosterCards) {
+      const existing = user.cards.find(c => c.numPokedex == card.idPokedex);
+      if (existing) {
+        existing.quantity = parseInt(existing.quantity) + 1;
+      } else {
+        user.cards.push({ numPokedex: card.idPokedex, quantity: 1 });
+      }
+    }
+
+    await user.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // --- Réponse complète ---
+    res.json({
+      success: true,
+      booster: boosterCards,
+      diamonds: user.diamonds,
+      inventory: user.cards
+    });
 
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 // A garder à la fin du fichier !
 app.use((req, res) => {

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   diamonds: {
     type: Number,
     required: true, 
-    default: 200, //Pour un booster de bienvenue
+    default: 200, //Pour un booster de bienvenue mdr (sauf si ca commence à frauder)
   },
   ppURL: { type: String, default: 'default' },
   title: {
