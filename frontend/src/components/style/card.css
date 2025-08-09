@@ -177,6 +177,26 @@
   aspect-ratio: 1;
 }
 
+.rarity {
+  display: flex;
+  position: absolute;
+  bottom: 3%;
+  left: 6%;
+  width: 10%;
+  height: 7%;
+  z-index: 3;
+  justify-content: left;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.rarity img {
+  top: 0%;
+  left: 0%;
+  height: 90%;
+  aspect-ratio: 1;
+}
+
 .quantity {
   position: absolute;
   display: flex;

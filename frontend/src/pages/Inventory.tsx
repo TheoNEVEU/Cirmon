@@ -81,7 +81,7 @@ export default function Inventory() {
         <div id="filterlist">
           <span>Filtrer par :</span>
           <fieldset className="filter-parram">
-            <label>Type</label><br></br>
+            {/* <label>Type</label><br></br> */}
             <button className="filtertypebuttons" data-selectedfilter={(activeTypeFilter == "none" || activeTypeFilter == "normal") ? true : undefined}>
               <img onClick={() => inventoryFilter('type','normal')} src={`${import.meta.env.BASE_URL}img/energies/normal.png`}></img>
             </button>
@@ -107,22 +107,23 @@ export default function Inventory() {
               <img onClick={() => inventoryFilter('type','dark')} src={`${import.meta.env.BASE_URL}img/energies/dark.png`}></img>
             </button>
           </fieldset>
+
           <fieldset className="filter-parram">
-            <label>Rareté</label><br></br>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "1") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','1')} src={`${import.meta.env.BASE_URL}img/energies/grass.png`}></img>
-            </button>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "2") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','2')} src={`${import.meta.env.BASE_URL}img/energies/fire.png`}></img>
-            </button>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "3") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','3')} src={`${import.meta.env.BASE_URL}img/energies/water.png`}></img>
+            {/* <label>Rareté</label><br></br> */}
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "5") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','5')} src={`${import.meta.env.BASE_URL}img/rarities/triangle.png`}></img>
             </button>
             <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "4") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','4')} src={`${import.meta.env.BASE_URL}img/energies/electric.png`}></img>
+              <img onClick={() => inventoryFilter('rarity','4')} src={`${import.meta.env.BASE_URL}img/rarities/diamond.png`}></img>
             </button>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "5") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','5')} src={`${import.meta.env.BASE_URL}img/energies/fight.png`}></img>
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "3") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','3')} src={`${import.meta.env.BASE_URL}img/rarities/star.png`}></img>
+            </button>
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "2") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','2')} src={`${import.meta.env.BASE_URL}img/rarities/crown.png`}></img>
+            </button>
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "1") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','1')} src={`${import.meta.env.BASE_URL}img/rarities/rainbow.png`}></img>
             </button>
           </fieldset>
         </div>

@@ -23,14 +23,13 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB connecté'))
 .catch(err => console.error('Erreur MongoDB :', err));
 
+app.get('/', (req, res) => res.send('OK'));
+
 // Schéma simple pour tester la connexion
 const TestSchema = new mongoose.Schema({
   message: String,
 });
-
 const Test = mongoose.model('Test', TestSchema);
-
-// Route test : récupère ou crée un document test
 app.get('/test', async (req, res) => {
   try {
     let doc = await Test.findOne();

@@ -3,14 +3,10 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  diamonds: {
-    type: Number,
-    required: true, 
-    default: 200, //Pour un booster de bienvenue mdr (sauf si ca commence à frauder)
-  },
-  ppURL: { type: String, default: 'default' },
+  diamonds: { type: Number, required: true, default: 0,},
+  ppURL: { type: String, default: 'NoPP' },
   title: {
-    text: { type: String, default: 'default' },
+    text: { type: String, default: '' },
     gradientDirection: { type: String, default: 'to right' },
     colors: { type: [String], default: ['black'] },
     isGradientActive: { type: Boolean, default: false }

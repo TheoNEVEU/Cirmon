@@ -104,18 +104,17 @@ import '../style/BoosterOpening.css';
 export default function BoosterOpening() {
   const { user, setUser } = useUser();  // <-- Récupérer setUser aussi
   const [cards, setCards] = useState<Card[]>([]);
-  const { activePage } = usePage();
+  const { activePage, setActivePage } = usePage();
 
   const [isAnimation, setAnimation] = useState<boolean>(false);
   const [spreadCards, setSpreadCards] = useState(false);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [finalizedCards, setFinalizedCards] = useState<number[]>([]);
-  const [error, setError] = useState<string>("");
 
   const pickRandomCards = async () => {
-    if (!user) return; // Sécurité
-
-    setError("");
+    if (!user) return;
+    setCards([]);
+    setAnimation(false)
     setSpreadCards(false);
     setFlippedCards([]);
     setFinalizedCards([]);
@@ -127,48 +126,35 @@ export default function BoosterOpening() {
         body: JSON.stringify({ username: user.username }),
       });
       const data = await response.json();
-
       if (data.error) {
-        setError(data.error);
         return;
       }
-
-      // Met à jour le user localement avec les nouvelles données retournées par le serveur
       setUser({
         ...user,
         diamonds: data.diamonds,
         cards: data.inventory,
       });
-
-
       setCards(data.booster);
       setAnimation(true);
-
       setTimeout(() => {
         setSpreadCards(true);
-
         data.booster.forEach((_ : { idPokedex: number; quantity: number }, i: number) => {
           setTimeout(() => {
             setFlippedCards(prev => [...prev, i]);
             setTimeout(() => {
               setFinalizedCards(prev => [...prev, i]);
             }, 800);
-          }, 300 * i + 1000);
+          }, 500 * i + 1000);
         });
       }, 2000);
-
     } catch (err) {
       console.error(err);
-      setError("Erreur lors de l'ouverture du booster");
     }
   };
 
   return (
     <div id="booster-container" data-booster={activePage === 'boosters' ? true : undefined} data-clicked={isAnimation ? true : undefined}>
       <div id="booster-opening" onClick={pickRandomCards}></div>
-
-      {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
-
       <div id="boosterCardsDisplay">
         {cards.map((card, index) => {
           const offset = (index - (cards.length - 1) / 2) * 17;
@@ -206,6 +192,16 @@ export default function BoosterOpening() {
             </div>
           );
         })}
+        {finalizedCards.length === 5 && (
+          <button style={{top:"100%"}} className="green-btn" onClick={() => {
+            setActivePage('home');
+            setCards([]);
+            setAnimation(false)
+            setSpreadCards(false);
+            setFlippedCards([]);
+            setFinalizedCards([]);
+          }}>Collecter</button>
+        )}
       </div>
     </div>
   );
