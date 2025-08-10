@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
-import CardDetails from "../components/card";
+import CardDetails, { type Card as CardType } from "../components/card";
 
 import '../style/Inventory.css';
 
@@ -19,32 +19,80 @@ export default function Inventory() {
 
   const [showMissingCards, setShowMissingCards] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchCards = async () => {
-      if (!user || !user.cards) return;
-      const fetchedCards = await Promise.all(
-        user.cards.map(async (c) => {
-          const res = await fetch(`https://testcirmon.onrender.com/cards/${c.idPokedex}`);
-          const data = await res.json();
-          if (data.success) {
-            return {
-              ...data.card,
-              quantity: c.quantity,
-            };
-          } else {
-            return null;
-          }
-        })
+  // useEffect(() => {
+  //   const fetchUserCards = async () => {
+  //     if (!user || !user.cards) return;
+  //     const fetchedCards = await Promise.all(
+  //       user.cards.map(async (c) => {
+  //         const res = await fetch(`https://testcirmon.onrender.com/cards/${c.idPokedex}`);
+  //         const data = await res.json();
+  //         if (data.success) {
+  //           return {
+  //             ...data.card,
+  //             quantity: c.quantity,
+  //           };
+  //         } else {
+  //           return null;
+  //         }
+  //       })
+  //     );
+  //     const sortedCards = fetchedCards
+  //     .filter(Boolean)
+  //     .sort((a, b) => a.idPokedex - b.idPokedex);
+  //     setCards(sortedCards);
+  //     setSortField("idPokedex");
+  //     setLoadingCards(false);
+  //   };
+  //   fetchUserCards();
+  // }, [user]);
+
+
+useEffect(() => {
+  const fetchCards = async () => {
+    if (!user) return;
+
+    try {
+      const allRes = await fetch("https://testcirmon.onrender.com/cards");
+      const allData = await allRes.json();
+
+      // supporte response = [] ou { cards: [...] }
+      const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
+
+      // map user -> quantity (assure Number)
+      const userCardMap = new Map<number, number>(
+        (user.cards || []).map((c: { idPokedex: number; quantity: number }) => [
+          Number(c.idPokedex),
+          Number(c.quantity),
+        ])
       );
-      const sortedCards = fetchedCards
-      .filter(Boolean)
-      .sort((a, b) => a.idPokedex - b.idPokedex);
-      setCards(sortedCards);
-      setSortField("idPokedex");
+
+      // fusion : on prend idPokedex (ou numPokedex si présent) et on met quantity
+      const mergedCards: (CardType & { quantity: number; isPlaceholder: boolean })[] =
+        allCards.map((card: any) => {
+          const id = Number(card.idPokedex ?? card.numPokedex ?? card._id ?? -1);
+          const quantity = userCardMap.get(id) ?? 0;
+          return {
+            ...card,
+            idPokedex: id,
+            quantity,
+            isPlaceholder: quantity === 0,
+          };
+        });
+
+      // tri (typé)
+      mergedCards.sort((a: any, b: any) => Number(a.idPokedex) - Number(b.idPokedex));
+
+      setCards(mergedCards);
+    } catch (err) {
+      console.error("fetchCards error:", err);
+      setCards([]); // safe fallback
+    } finally {
       setLoadingCards(false);
-    };
-    fetchCards();
-  }, [user]);
+    }
+  };
+
+  fetchCards();
+}, [user]);
 
   function inventorySort(sortType: string) {
     const sortButtons = document.querySelectorAll(".sortbuttons");
@@ -158,11 +206,24 @@ export default function Inventory() {
         </div>
       </div>
       <div id="cards-container">
-        {cards.map((card, index) => {
+        {/* {cards.map((card, index) => {
           if (card.quantity == 0) return null;
           if (activeTypeFilter !== 'none' && card.type.toLowerCase() !== activeTypeFilter) return null;
           if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;
           return <CardDetails key={`${card.idPokedex}-${sortField}-${index}`} card={card} />;
+        })} */}
+        {cards.map((card, index) => {
+          if (!showMissingCards && card.quantity === 0) return null;
+          if (activeTypeFilter !== 'none' && card.type.toLowerCase() !== activeTypeFilter) return null;
+          if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;
+          if (card.isPlaceholder) {
+            return (
+              <div key={card.idPokedex} className="empty-card">
+                <span>???<br></br>(N°{card.idPokedex})</span>
+              </div>
+            );
+          }
+          return <CardDetails key={card.idPokedex} card={card} />;
         })}
       </div>
     </div>

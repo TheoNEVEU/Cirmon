@@ -158,16 +158,27 @@
 }
 
 #cards-container .card {
-  position: relative;
-  display: block;
   z-index: 4;
-
   width: 22%;
-  aspect-ratio: 0.7128712871;
-
-  border-radius: 8px;
-  box-shadow: 0 0 10px grey;
   margin: 0 3% 2% 0;
+}
+
+#cards-container .empty-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 4;
+  width: 22%;
+  margin: 0 3% 2% 0;
+  border: 3px solid rgba(128, 128, 128, 0.365);
+  background: transparent;
+}
+
+#cards-container .empty-card span {
+  color: grey;
+  font-weight: bold;
+  margin-bottom: 20%;
 }
 
 /* Masquer la barre de slide */

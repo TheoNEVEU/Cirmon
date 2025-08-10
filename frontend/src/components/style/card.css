@@ -6,11 +6,13 @@
   filter: grayscale(0.8) brightness(0.5);
 }
 
-.card {
+.card, .empty-card {
   position: relative;
   display: block;
   aspect-ratio: 0.7128712871;
   border-radius: 8px;
+}
+.card {
   box-shadow: 0 0 10px grey;
 }
 
@@ -47,7 +49,7 @@
   right: -12px;
   bottom: -12px;
   border-radius: 16px;
-  z-index: 10;
+  z-index: 1;
 
   background: linear-gradient(83deg,red,orange,yellow,rgb(3, 199, 3),cyan,blue,violet,red,orange,yellow,rgb(3, 199, 3),cyan);
   background-size: 400% 400%;
@@ -57,7 +59,7 @@
 }
 
 .card[data-rainbow=true]:hover::after {
-  opacity: 0.15;
+  opacity: 0.25;
   animation: rainbow 6s linear infinite;
 }
 
