@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface Card {
-  numPokedex: number;
+  idPokedex: number;
   quantity: number;
 }
 

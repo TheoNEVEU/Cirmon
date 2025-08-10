@@ -25,7 +25,7 @@ export default function Home() {
       <>
         <div id="page-container"><ProfileDisplay/>
           <div id="booster-cover"></div>
-          <button id="btn-open" onClick={() => setActivePage('boosters')}>Ouvrir 1</button>
+          <button className="green-btn" onClick={() => setActivePage('boosters')}>Ouvrir 1</button>
         </div>
       </>);
   }

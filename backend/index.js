@@ -23,14 +23,13 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB connecté'))
 .catch(err => console.error('Erreur MongoDB :', err));
 
+app.get('/', (req, res) => res.send('OK'));
+
 // Schéma simple pour tester la connexion
 const TestSchema = new mongoose.Schema({
   message: String,
 });
-
 const Test = mongoose.model('Test', TestSchema);
-
-// Route test : récupère ou crée un document test
 app.get('/test', async (req, res) => {
   try {
     let doc = await Test.findOne();
@@ -313,11 +312,11 @@ app.post('/booster/open', async (req, res) => {
 
     // Ajout / incrément des cartes
     for (const card of boosterCards) {
-      const existing = user.cards.find(c => c.numPokedex == card.idPokedex);
+      const existing = user.cards.find(c => c.idPokedex == card.idPokedex);
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
       } else {
-        user.cards.push({ numPokedex: card.idPokedex, quantity: 1 });
+        user.cards.push({ idPokedex: card.idPokedex, quantity: 1 });
       }
     }
 

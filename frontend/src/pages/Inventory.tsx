@@ -12,6 +12,7 @@ export default function Inventory() {
 
   const [cards, setCards] = useState<any[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
+  const [sortField, setSortField] = useState("");
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
 
@@ -20,7 +21,7 @@ export default function Inventory() {
       if (!user || !user.cards) return;
       const fetchedCards = await Promise.all(
         user.cards.map(async (c) => {
-          const res = await fetch(`https://testcirmon.onrender.com/cards/${c.numPokedex}`);
+          const res = await fetch(`https://testcirmon.onrender.com/cards/${c.idPokedex}`);
           const data = await res.json();
           if (data.success) {
             return {
@@ -32,8 +33,11 @@ export default function Inventory() {
           }
         })
       );
-
-      setCards(fetchedCards.filter(Boolean)); // on filtre les erreurs
+      const sortedCards = fetchedCards
+      .filter(Boolean)
+      .sort((a, b) => a.idPokedex - b.idPokedex);
+      setCards(sortedCards);
+      setSortField("idPokedex");
       setLoadingCards(false);
     };
     fetchCards();
@@ -42,11 +46,27 @@ export default function Inventory() {
   function inventorySort(sortType: string) {
     const sortButtons = document.querySelectorAll(".sortbuttons");
     sortButtons.forEach((button) => {
-      if ((button as HTMLButtonElement).value.toLowerCase() === sortType.toLowerCase()) button.setAttribute("data-selectedsort", "true");
-      else button.removeAttribute("data-selectedsort");
+      if ((button as HTMLButtonElement).value.toLowerCase() === sortType.toLowerCase()) {
+        button.setAttribute("data-selectedsort", "true");
+      } else {
+        button.removeAttribute("data-selectedsort");
+      }
     });
-  // Construire ici la fonction de tri des cartes quand on aura fait les inventaires
+
+    let sortedCards = [...cards].sort((a, b) => {
+      switch (sortType) {
+        case "idPokedex": return a.idPokedex - b.idPokedex;
+        case "name": return a.name.localeCompare(b.name);
+        case "rarity": return a.rarity - b.rarity;
+        case "type": return a.type.localeCompare(b.type);
+        case "quantity": return b.quantity - a.quantity;
+        default: return 0;
+      }
+    });
+    setCards(sortedCards);
+    setSortField(sortType);
   }
+
 
   function inventoryFilter(filterName: string, filter: string) {
     if(filterName=="type") {
@@ -73,15 +93,16 @@ export default function Inventory() {
       <div id="inventory-menu">
         <div id="sortlist">
           <span>Trier par :</span>
-          <button value="rarity" className="sortbuttons" onClick={() => inventorySort('rarity')}>Rareté</button>
           <button value="number" className="sortbuttons" onClick={() => inventorySort('number')}>Numéro</button>
+          <button value="rarity" className="sortbuttons" onClick={() => inventorySort('rarity')}>Rareté</button>
+          <button value="name" className="sortbuttons" onClick={() => inventorySort('name')}>Nom</button>
           <button value="type" className="sortbuttons" onClick={() => inventorySort('type')}>Type</button>
           <button value="quantity" className="sortbuttons" onClick={() => inventorySort('quantity')}>Quantité</button>
         </div>
         <div id="filterlist">
           <span>Filtrer par :</span>
           <fieldset className="filter-parram">
-            <label>Type</label><br></br>
+            {/* <label>Type</label><br></br> */}
             <button className="filtertypebuttons" data-selectedfilter={(activeTypeFilter == "none" || activeTypeFilter == "normal") ? true : undefined}>
               <img onClick={() => inventoryFilter('type','normal')} src={`${import.meta.env.BASE_URL}img/energies/normal.png`}></img>
             </button>
@@ -107,33 +128,33 @@ export default function Inventory() {
               <img onClick={() => inventoryFilter('type','dark')} src={`${import.meta.env.BASE_URL}img/energies/dark.png`}></img>
             </button>
           </fieldset>
+
           <fieldset className="filter-parram">
-            <label>Rareté</label><br></br>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "1") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','1')} src={`${import.meta.env.BASE_URL}img/energies/grass.png`}></img>
-            </button>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "2") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','2')} src={`${import.meta.env.BASE_URL}img/energies/fire.png`}></img>
-            </button>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "3") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','3')} src={`${import.meta.env.BASE_URL}img/energies/water.png`}></img>
+            {/* <label>Rareté</label><br></br> */}
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "5") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','5')} src={`${import.meta.env.BASE_URL}img/rarities/triangle.png`}></img>
             </button>
             <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "4") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','4')} src={`${import.meta.env.BASE_URL}img/energies/electric.png`}></img>
+              <img onClick={() => inventoryFilter('rarity','4')} src={`${import.meta.env.BASE_URL}img/rarities/diamond.png`}></img>
             </button>
-            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "5") ? true : undefined}>
-              <img onClick={() => inventoryFilter('rarity','5')} src={`${import.meta.env.BASE_URL}img/energies/fight.png`}></img>
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "3") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','3')} src={`${import.meta.env.BASE_URL}img/rarities/star.png`}></img>
+            </button>
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "2") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','2')} src={`${import.meta.env.BASE_URL}img/rarities/crown.png`}></img>
+            </button>
+            <button className="filterraritybuttons" data-selectedfilter={(activeRarityFilter == "none" || activeRarityFilter == "1") ? true : undefined}>
+              <img onClick={() => inventoryFilter('rarity','1')} src={`${import.meta.env.BASE_URL}img/rarities/rainbow.png`}></img>
             </button>
           </fieldset>
         </div>
       </div>
       <div id="cards-container">
         {cards.map((card, index) => {
-          if (card.quantity === 0) return null;
+          if (card.quantity == 0) return null;
           if (activeTypeFilter !== 'none' && card.type.toLowerCase() !== activeTypeFilter) return null;
           if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;
-
-          return <CardDetails key={index} card={card} />;
+          return <CardDetails key={`${card.idPokedex}-${sortField}-${index}`} card={card} />;
         })}
       </div>
     </div>
