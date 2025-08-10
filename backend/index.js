@@ -206,11 +206,11 @@ app.get('/booster', async (req, res) => {
 
   // Probabilités de rareté
   const rarityChances = [
-    { rarity: 1, chance: 0.01 },
-    { rarity: 2, chance: 0.09 },
-    { rarity: 3, chance: 0.20 },
+    { rarity: 1, chance: 0.002 },
+    { rarity: 2, chance: 0.01 },
+    { rarity: 3, chance: 0.10 },
     { rarity: 4, chance: 0.30 },
-    { rarity: 5, chance: 0.40 },
+    { rarity: 5, chance: 0.60 },
   ];
 
   const pickRarity = () => {
@@ -263,11 +263,11 @@ app.post('/booster/open', async (req, res) => {
   try {
     // --- Tirage des cartes ---
     const rarityChances = [
-      { rarity: 1, chance: 0.01 },
-      { rarity: 2, chance: 0.09 },
-      { rarity: 3, chance: 0.20 },
+      { rarity: 1, chance: 0.002 },
+      { rarity: 2, chance: 0.01 },
+      { rarity: 3, chance: 0.10 },
       { rarity: 4, chance: 0.30 },
-      { rarity: 5, chance: 0.40 },
+      { rarity: 5, chance: 0.60 },
     ];
     const pickRarity = () => {
       let rand = Math.random(), sum = 0;
@@ -311,14 +311,19 @@ app.post('/booster/open', async (req, res) => {
     }
 
     // Ajout / incrément des cartes
+    let newCards = 0;
     for (const card of boosterCards) {
       const existing = user.cards.find(c => c.idPokedex == card.idPokedex);
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
       } else {
         user.cards.push({ idPokedex: card.idPokedex, quantity: 1 });
+        newCards++;
       }
     }
+    user.stats[0] =+ 5;
+    user.stats[1] =+ 1;
+    user.stats[2] =+ newCards;
 
     await user.save({ session });
 

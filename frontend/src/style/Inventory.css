@@ -173,7 +173,7 @@
   z-index: 4;
   width: 22%;
   margin: 0 3% 2% 0;
-  border: 3px solid rgba(128, 128, 128, 0.365);
+  border: 4px dashed rgba(128, 128, 128, 0.365);
   background: transparent;
 }
 

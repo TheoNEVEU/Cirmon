@@ -258,7 +258,7 @@ html::-webkit-scrollbar {
 }
 
 .loadingImg {
-  animation: rotating 4s linear infinite;
+  animation: rotating 1s steps(16) infinite ;
   margin-bottom: 2vh;
   height: 15vw;
   width: 15vw;
@@ -272,4 +272,19 @@ html::-webkit-scrollbar {
 
 #app-container[data-booster] #grid-container-content {
   transform: translateX(120%);
+}
+
+
+.placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: aqua;
+  border: 3px solid magenta;
+}
+
+.placeholder::after {
+  content: 'placeholder';
+  font-weight: bold;
+  color: black;
 }
