@@ -95,12 +95,12 @@ useEffect(() => {
 }, [user]);
 
   function inventorySort(sortType: string) {
-    const sortButtons = document.querySelectorAll(".sortbuttons");
+    const sortButtons = document.querySelectorAll(".invButtons");
     sortButtons.forEach((button) => {
       if ((button as HTMLButtonElement).value.toLowerCase() === sortType.toLowerCase()) {
-        button.setAttribute("data-selectedsort", "true");
+        button.setAttribute("data-selected", "true");
       } else {
-        button.removeAttribute("data-selectedsort");
+        button.removeAttribute("data-selected");
       }
     });
 
@@ -144,11 +144,11 @@ useEffect(() => {
       <div id="inventory-menu">
         <div id="sortlist">
           <span>Trier par :</span>
-          <button value="number" className="sortbuttons" onClick={() => inventorySort('number')}>Numéro</button>
-          <button value="rarity" className="sortbuttons" onClick={() => inventorySort('rarity')}>Rareté</button>
-          <button value="name" className="sortbuttons" onClick={() => inventorySort('name')}>Nom</button>
-          <button value="type" className="sortbuttons" onClick={() => inventorySort('type')}>Type</button>
-          <button value="quantity" className="sortbuttons" onClick={() => inventorySort('quantity')}>Quantité</button>
+          <button value="number" className="invButtons" onClick={() => inventorySort('number')}>Numéro</button>
+          <button value="rarity" className="invButtons" onClick={() => inventorySort('rarity')}>Rareté</button>
+          <button value="name" className="invButtons" onClick={() => inventorySort('name')}>Nom</button>
+          <button value="type" className="invButtons" onClick={() => inventorySort('type')}>Type</button>
+          <button value="quantity" className="invButtons" onClick={() => inventorySort('quantity')}>Quantité</button>
         </div>
         <div id="filterlist">
           <span>Filtrer par :</span>
@@ -198,21 +198,16 @@ useEffect(() => {
               <img onClick={() => inventoryFilter('rarity','1')} src={`${import.meta.env.BASE_URL}img/rarities/rainbow.png`}></img>
             </button>
           </fieldset>
+          <button id='suppfilters' onClick={() => {inventoryFilter('rarity',"none");inventoryFilter('type',"none");}}> Supprimer les filtres </button>
         </div>
         <div id='otherlist'>
           <span>Autres :</span>
-            <button onClick={() => setShowMissingCards(!showMissingCards)} data-checked={showMissingCards ? true : undefined}> Afficher cartes manquantes </button>
+            <button className="invButtons" onClick={() => setShowMissingCards(!showMissingCards)} data-selected={showMissingCards ? true : undefined}> Afficher cartes manquantes </button>
 
         </div>
       </div>
       <div id="cards-container">
-        {/* {cards.map((card, index) => {
-          if (card.quantity == 0) return null;
-          if (activeTypeFilter !== 'none' && card.type.toLowerCase() !== activeTypeFilter) return null;
-          if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;
-          return <CardDetails key={`${card.idPokedex}-${sortField}-${index}`} card={card} />;
-        })} */}
-        {cards.map((card, index) => {
+        {cards.map((card) => {
           if (!showMissingCards && card.quantity === 0) return null;
           if (activeTypeFilter !== 'none' && card.type.toLowerCase() !== activeTypeFilter) return null;
           if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;

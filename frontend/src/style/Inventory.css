@@ -20,6 +20,7 @@
 
   top: 0%;
   left: 0%;
+  padding-top: 0.6%;
 
   background-color: whitesmoke;
   filter: drop-shadow(0px 0px 5px grey);
@@ -44,7 +45,7 @@
   border-bottom: 2px solid lightgray;
 }
 
-.sortbuttons, #otherlist button {
+.invButtons, #suppfilters {
   width: 95%;
   height: 4vh;
   margin: 1% 0 4% 0;
@@ -55,24 +56,26 @@
   border: none;
   border-radius: 40px;
 
-  background-color: white;
-  color: gray;
   filter: drop-shadow(0px 0px 5px lightgrey);
-  transition: all 0.5s ease;
 }
 
-.sortbuttons[data-selectedsort], #otherlist button[data-checked] {
+.invButtons {
+  transition: all 0.3s ease;
+}
+
+.invButtons[data-selected], #suppfilters:active {
   background-color: rgb(184, 184, 184);
   filter: drop-shadow(0px 0px 5px rgb(91, 91, 91));
-  color: black;
+  color: rgb(56, 56, 56);
 }
 
-.sortbuttons:not([data-selectedsort]):hover {
+.invButtons:not([data-selected]), #suppfilters {
+  background-color: white;
+  color: gray;
+}
+
+.invButtons:not([data-selected]):hover, #suppfilters:hover {
   background-color: rgb(221, 221, 221);
-}
-
-.sortbuttons[data-selectedsort].hover {
-  background-color: lightgray;
 }
 
 .filter-parram {
@@ -82,7 +85,9 @@
   flex-direction: row;
   align-content: center;
   justify-content: space-around;
+  align-self: center;
 
+  width: 95%;
   padding: 2% 2% 2% 2%;
   margin-bottom: 4%;
 
@@ -136,9 +141,6 @@
   filter: grayscale(1);
   background-color: rgb(236, 236, 236);
 }
-
-
-
 
 /* Inventaire des cartes */
 #cards-container {
