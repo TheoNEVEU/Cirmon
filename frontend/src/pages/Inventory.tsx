@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
-import CardDetails from "../components/card";
+import CardDetails, { type Card as CardType } from "../components/card";
 
 import '../style/Inventory.css';
 
@@ -12,44 +12,95 @@ export default function Inventory() {
 
   const [cards, setCards] = useState<any[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
+
   const [sortField, setSortField] = useState("");
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
 
-  useEffect(() => {
-    const fetchCards = async () => {
-      if (!user || !user.cards) return;
-      const fetchedCards = await Promise.all(
-        user.cards.map(async (c) => {
-          const res = await fetch(`https://testcirmon.onrender.com/cards/${c.idPokedex}`);
-          const data = await res.json();
-          if (data.success) {
-            return {
-              ...data.card,
-              quantity: c.quantity,
-            };
-          } else {
-            return null;
-          }
-        })
+  const [showMissingCards, setShowMissingCards] = useState<boolean>(false);
+
+  // useEffect(() => {
+  //   const fetchUserCards = async () => {
+  //     if (!user || !user.cards) return;
+  //     const fetchedCards = await Promise.all(
+  //       user.cards.map(async (c) => {
+  //         const res = await fetch(`https://testcirmon.onrender.com/cards/${c.idPokedex}`);
+  //         const data = await res.json();
+  //         if (data.success) {
+  //           return {
+  //             ...data.card,
+  //             quantity: c.quantity,
+  //           };
+  //         } else {
+  //           return null;
+  //         }
+  //       })
+  //     );
+  //     const sortedCards = fetchedCards
+  //     .filter(Boolean)
+  //     .sort((a, b) => a.idPokedex - b.idPokedex);
+  //     setCards(sortedCards);
+  //     setSortField("idPokedex");
+  //     setLoadingCards(false);
+  //   };
+  //   fetchUserCards();
+  // }, [user]);
+
+
+useEffect(() => {
+  const fetchCards = async () => {
+    if (!user) return;
+
+    try {
+      const allRes = await fetch("https://testcirmon.onrender.com/cards");
+      const allData = await allRes.json();
+
+      // supporte response = [] ou { cards: [...] }
+      const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
+
+      // map user -> quantity (assure Number)
+      const userCardMap = new Map<number, number>(
+        (user.cards || []).map((c: { idPokedex: number; quantity: number }) => [
+          Number(c.idPokedex),
+          Number(c.quantity),
+        ])
       );
-      const sortedCards = fetchedCards
-      .filter(Boolean)
-      .sort((a, b) => a.idPokedex - b.idPokedex);
-      setCards(sortedCards);
-      setSortField("idPokedex");
+
+      // fusion : on prend idPokedex (ou numPokedex si présent) et on met quantity
+      const mergedCards: (CardType & { quantity: number; isPlaceholder: boolean })[] =
+        allCards.map((card: any) => {
+          const id = Number(card.idPokedex ?? card.numPokedex ?? card._id ?? -1);
+          const quantity = userCardMap.get(id) ?? 0;
+          return {
+            ...card,
+            idPokedex: id,
+            quantity,
+            isPlaceholder: quantity === 0,
+          };
+        });
+
+      // tri (typé)
+      mergedCards.sort((a: any, b: any) => Number(a.idPokedex) - Number(b.idPokedex));
+
+      setCards(mergedCards);
+    } catch (err) {
+      console.error("fetchCards error:", err);
+      setCards([]); // safe fallback
+    } finally {
       setLoadingCards(false);
-    };
-    fetchCards();
-  }, [user]);
+    }
+  };
+
+  fetchCards();
+}, [user]);
 
   function inventorySort(sortType: string) {
-    const sortButtons = document.querySelectorAll(".sortbuttons");
+    const sortButtons = document.querySelectorAll(".invButtons");
     sortButtons.forEach((button) => {
       if ((button as HTMLButtonElement).value.toLowerCase() === sortType.toLowerCase()) {
-        button.setAttribute("data-selectedsort", "true");
+        button.setAttribute("data-selected", "true");
       } else {
-        button.removeAttribute("data-selectedsort");
+        button.removeAttribute("data-selected");
       }
     });
 
@@ -93,11 +144,11 @@ export default function Inventory() {
       <div id="inventory-menu">
         <div id="sortlist">
           <span>Trier par :</span>
-          <button value="number" className="sortbuttons" onClick={() => inventorySort('number')}>Numéro</button>
-          <button value="rarity" className="sortbuttons" onClick={() => inventorySort('rarity')}>Rareté</button>
-          <button value="name" className="sortbuttons" onClick={() => inventorySort('name')}>Nom</button>
-          <button value="type" className="sortbuttons" onClick={() => inventorySort('type')}>Type</button>
-          <button value="quantity" className="sortbuttons" onClick={() => inventorySort('quantity')}>Quantité</button>
+          <button value="number" className="invButtons" onClick={() => inventorySort('number')}>Numéro</button>
+          <button value="rarity" className="invButtons" onClick={() => inventorySort('rarity')}>Rareté</button>
+          <button value="name" className="invButtons" onClick={() => inventorySort('name')}>Nom</button>
+          <button value="type" className="invButtons" onClick={() => inventorySort('type')}>Type</button>
+          <button value="quantity" className="invButtons" onClick={() => inventorySort('quantity')}>Quantité</button>
         </div>
         <div id="filterlist">
           <span>Filtrer par :</span>
@@ -147,14 +198,27 @@ export default function Inventory() {
               <img onClick={() => inventoryFilter('rarity','1')} src={`${import.meta.env.BASE_URL}img/rarities/rainbow.png`}></img>
             </button>
           </fieldset>
+          <button id='suppfilters' onClick={() => {inventoryFilter('rarity',"none");inventoryFilter('type',"none");}}> Supprimer les filtres </button>
+        </div>
+        <div id='otherlist'>
+          <span>Autres :</span>
+            <button className="invButtons" onClick={() => setShowMissingCards(!showMissingCards)} data-selected={showMissingCards ? true : undefined}> Afficher cartes manquantes </button>
+
         </div>
       </div>
       <div id="cards-container">
-        {cards.map((card, index) => {
-          if (card.quantity == 0) return null;
+        {cards.map((card) => {
+          if (!showMissingCards && card.quantity === 0) return null;
           if (activeTypeFilter !== 'none' && card.type.toLowerCase() !== activeTypeFilter) return null;
           if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;
-          return <CardDetails key={`${card.idPokedex}-${sortField}-${index}`} card={card} />;
+          if (card.isPlaceholder) {
+            return (
+              <div key={card.idPokedex} className="empty-card">
+                <span>???<br></br>(N°{card.idPokedex})</span>
+              </div>
+            );
+          }
+          return <CardDetails key={card.idPokedex} card={card} />;
         })}
       </div>
     </div>

@@ -154,7 +154,7 @@ export default function BoosterOpening() {
 
   return (
     <div id="booster-container" data-booster={activePage === 'boosters' ? true : undefined} data-clicked={isAnimation ? true : undefined}>
-      <div id="booster-opening" onClick={pickRandomCards}></div>
+      <div id="booster-opening" onClick={pickRandomCards} className='placeholder'></div>
       <div id="boosterCardsDisplay">
         {cards.map((card, index) => {
           const offset = (index - (cards.length - 1) / 2) * 17;
