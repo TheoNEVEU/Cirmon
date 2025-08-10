@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   badgeURL: { type: [String], default: ['default', 'default'] },
   stats: { type: [Number], default: [0, 0, 0, 0, 0, 0] },
   cards: [{
-    numPokedex: { type: Number, required: true },
+    idPokedex: { type: Number, required: true },
     quantity: { type: Number, required: true }
   }],
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

@@ -312,11 +312,11 @@ app.post('/booster/open', async (req, res) => {
 
     // Ajout / incrément des cartes
     for (const card of boosterCards) {
-      const existing = user.cards.find(c => c.numPokedex == card.idPokedex);
+      const existing = user.cards.find(c => c.idPokedex == card.idPokedex);
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
       } else {
-        user.cards.push({ numPokedex: card.idPokedex, quantity: 1 });
+        user.cards.push({ idPokedex: card.idPokedex, quantity: 1 });
       }
     }
 

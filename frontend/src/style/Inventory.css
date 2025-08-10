@@ -118,7 +118,7 @@
   width: 100%;
   aspect-ratio: 1/1;
   transition: all 0.2s linear;
-  filter: drop-shadow(0px 0px 6px lightgray);
+  border-radius: 100%;
 }
 
 .filterraritybuttons img {

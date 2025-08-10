@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import SmartImage from './smartImage';
 import './style/card.css'
 
@@ -31,7 +30,7 @@ export default function CardDetails({ card, style }: CardDetailsProps) {
       <img src={`${import.meta.env.BASE_URL}img/cardback.png`}/>
     </div></>);
   return (
-    <div className="card" id={`card-${card.id_}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"} style={style}>
+    <div className="card" id={`card-${card.idPokedex}`} data-shiny={undefined} data-rainbow={undefined} data-dark={card.type === "Dark"} style={style}>
       <img
         src={`${import.meta.env.BASE_URL}img/fondsCartes/${card.type}.png`}
         alt={`${card.type} background`}
