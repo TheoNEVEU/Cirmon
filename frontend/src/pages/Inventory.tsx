@@ -12,9 +12,12 @@ export default function Inventory() {
 
   const [cards, setCards] = useState<any[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
+
   const [sortField, setSortField] = useState("");
   const [activeTypeFilter, setactiveTypeFilter] = useState('none');
   const [activeRarityFilter, setactiveRarityFilter] = useState('none');
+
+  const [showMissingCards, setShowMissingCards] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -147,6 +150,11 @@ export default function Inventory() {
               <img onClick={() => inventoryFilter('rarity','1')} src={`${import.meta.env.BASE_URL}img/rarities/rainbow.png`}></img>
             </button>
           </fieldset>
+        </div>
+        <div id='otherlist'>
+          <span>Autres :</span>
+            <button onClick={() => setShowMissingCards(!showMissingCards)} data-checked={showMissingCards ? true : undefined}> Afficher cartes manquantes </button>
+
         </div>
       </div>
       <div id="cards-container">

@@ -14,11 +14,11 @@
   box-shadow: 0 0 10px grey;
 }
 
-.card[data-shiny] {
+.card[data-shiny=true] {
   overflow: hidden;
 }
 
-.card[data-shiny]::before {
+.card[data-shiny=true]::before {
   content: '';
   position: absolute;
   top: -50%;
@@ -39,15 +39,15 @@
   pointer-events: none;
 }
 
-.card[data-rainbow]::after {
+.card[data-rainbow=true]::after {
   content: "";
   position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
+  top: -12px;
+  left: -12px;
+  right: -12px;
+  bottom: -12px;
   border-radius: 16px;
-  z-index: 1;
+  z-index: 10;
 
   background: linear-gradient(83deg,red,orange,yellow,rgb(3, 199, 3),cyan,blue,violet,red,orange,yellow,rgb(3, 199, 3),cyan);
   background-size: 400% 400%;
@@ -56,8 +56,8 @@
   pointer-events: none;
 }
 
-.card[data-rainbow]:hover::after {
-  opacity: 0.2;
+.card[data-rainbow=true]:hover::after {
+  opacity: 0.15;
   animation: rainbow 6s linear infinite;
 }
 
