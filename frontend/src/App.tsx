@@ -83,7 +83,7 @@ function App() {
           <button onClick={() => handleClick('friends')} ref={buttonRefs.friends} data-locked={user? false : true}>
             <img src={`${import.meta.env.BASE_URL}img/icones/users.png`} className="nav-icon" />
           </button>
-          <button onClick={() => handleClick('shop')} ref={buttonRefs.shop} data-locked={user? false : true}>
+          <button /*onClick={() => handleClick('shop')}*/ ref={buttonRefs.shop} data-locked={user? /*false*/true : true}>
             <img src={`${import.meta.env.BASE_URL}img/icones/shop.png`} className="nav-icon" />
           </button>
           <button onClick={() => handleClick('account')} ref={buttonRefs.account}>

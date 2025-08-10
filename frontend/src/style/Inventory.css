@@ -20,6 +20,7 @@
 
   top: 0%;
   left: 0%;
+  padding-top: 0.6%;
 
   background-color: whitesmoke;
   filter: drop-shadow(0px 0px 5px grey);
@@ -30,11 +31,11 @@
   width: 85%;
   align-self: center;
   text-align: left;
-  color: grey;
+  color: rgb(114, 114, 114);
   font-weight: bold;
 }
 
-#sortlist, #filterlist {
+#sortlist, #filterlist, #otherlist {
   display: flex;
   position: relative;
   flex-direction: column;
@@ -44,6 +45,39 @@
   border-bottom: 2px solid lightgray;
 }
 
+.invButtons, #suppfilters {
+  width: 95%;
+  height: 4vh;
+  margin: 1% 0 4% 0;
+  align-self: center;
+  font-size: 2vh;
+  font-weight: bolder;
+
+  border: none;
+  border-radius: 40px;
+
+  filter: drop-shadow(0px 0px 5px lightgrey);
+}
+
+.invButtons {
+  transition: all 0.3s ease;
+}
+
+.invButtons[data-selected], #suppfilters:active {
+  background-color: rgb(184, 184, 184);
+  filter: drop-shadow(0px 0px 5px rgb(91, 91, 91));
+  color: rgb(56, 56, 56);
+}
+
+.invButtons:not([data-selected]), #suppfilters {
+  background-color: white;
+  color: gray;
+}
+
+.invButtons:not([data-selected]):hover, #suppfilters:hover {
+  background-color: rgb(221, 221, 221);
+}
+
 .filter-parram {
   display: flex;
   position: relative;
@@ -51,7 +85,9 @@
   flex-direction: row;
   align-content: center;
   justify-content: space-around;
+  align-self: center;
 
+  width: 95%;
   padding: 2% 2% 2% 2%;
   margin-bottom: 4%;
 
@@ -73,33 +109,6 @@
   transform: translateY(-20%);
 }
 
-.sortbuttons {
-  width: 95%;
-  height: 4vh;
-  margin: 1% 0 4% 0;
-  align-self: center;
-  font-size: 2vh;
-  font-weight: bolder;
-
-  border: none;
-  border-radius: 40px;
-
-  background-color: white;
-  filter: drop-shadow(0px 0px 5px lightgrey);
-}
-
-.sortbuttons[data-selectedsort] {
-  background-color: rgb(184, 184, 184);
-  filter: drop-shadow(0px 0px 5px rgb(170, 170, 170));
-}
-
-.sortbuttons:not([data-selectedsort]):hover {
-  background-color: rgb(221, 221, 221);
-}
-
-.sortbuttons[data-selectedsort].hover {
-  background-color: lightgray;
-}
 
 .filtertypebuttons, .filterraritybuttons {
   display: flex;
@@ -133,7 +142,6 @@
   background-color: rgb(236, 236, 236);
 }
 
-
 /* Inventaire des cartes */
 #cards-container {
   position: relative;
@@ -152,16 +160,27 @@
 }
 
 #cards-container .card {
-  position: relative;
-  display: block;
   z-index: 4;
-
   width: 22%;
-  aspect-ratio: 0.7128712871;
-
-  border-radius: 8px;
-  box-shadow: 0 0 10px grey;
   margin: 0 3% 2% 0;
+}
+
+#cards-container .empty-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 4;
+  width: 22%;
+  margin: 0 3% 2% 0;
+  border: 4px dashed rgba(128, 128, 128, 0.365);
+  background: transparent;
+}
+
+#cards-container .empty-card span {
+  color: grey;
+  font-weight: bold;
+  margin-bottom: 20%;
 }
 
 /* Masquer la barre de slide */
