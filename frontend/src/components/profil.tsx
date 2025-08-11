@@ -122,7 +122,7 @@ function Profile({ username, isOwnProfile = false }: ProfileProps) {
 
         <div id="profilpartB" data-isediting={isEditing} style={isEditing ? {display: "none"} : {display: "flex"}}>
           {user.stats.map((stat, index) => (
-            <div key={index} className='single-stat'> {statlist[index]} : {stat+"-"+index}</div>
+            <div key={index} className='single-stat'> {statlist[index]} : {stat}</div>
           ))}
         </div>
 
