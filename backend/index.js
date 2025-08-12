@@ -318,9 +318,9 @@ app.post('/booster/open', async (req, res) => {
         newCards++;
       }
     }
-    user.stats[0] =+ 5;
-    user.stats[1] =+ 1;
-    user.stats[2] =+ newCards;
+    user.stats[0] += 5;
+    user.stats[1] += 1;
+    user.stats[2] += newCards;
 
     await user.save({ session });
 
