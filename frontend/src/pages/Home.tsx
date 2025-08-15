@@ -22,13 +22,14 @@ export default function Home() {
   }
   else {
     return (
-      <>
-        <div id="page-container"><ProfileDisplay/>
-          {!user? null :
-          <div id='currency-display'><img src={`${import.meta.env.BASE_URL}img/currency.png`}></img>{user?.diamonds}</div>}
-          <div id="booster-cover" className='placeholder'> </div>
-          <button className="green-btn" style={user && user.diamonds >= 200 ? undefined : {filter: "grayscale(1)"}} onClick={() => {user && user.diamonds >= 200 ? setActivePage('boosters') : null}}>Ouvrir 1</button>
-        </div>
-      </>);
+      <div id="home-page-container"><ProfileDisplay/>
+        {!user? null :
+          <div id='currency-display'><img src={`${import.meta.env.BASE_URL}img/currency.png`}></img>{user?.diamonds}</div>
+        }
+        <div id="message-display"></div>
+        <div id="booster-cover" className='placeholder'> </div>
+        <button className="green-btn" style={user && user.diamonds >= 200 ? undefined : {filter: "grayscale(1)"}} onClick={() => {user && user.diamonds >= 200 ? setActivePage('boosters') : null}}>Ouvrir 1</button>
+      </div>
+    );
   }
 }

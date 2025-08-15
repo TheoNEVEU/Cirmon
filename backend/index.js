@@ -269,6 +269,7 @@ app.post('/booster/open', async (req, res) => {
       { rarity: 4, chance: 0.30 },
       { rarity: 5, chance: 0.60 },
     ];
+
     const pickRarity = () => {
       let rand = Math.random(), sum = 0;
       for (let i = rarityChances.length - 1; i >= 0; i--) {
@@ -285,7 +286,7 @@ app.post('/booster/open', async (req, res) => {
       while (tries < 10) {
         const rarity = pickRarity();
         const pool = await Card.aggregate([{ $match: { rarity } }, { $sample: { size: 1 } }]);
-        if (pool.length && !usedIds.has(pool[0]._id.toString())) {
+        if (pool.length /*&& !usedIds.has(pool[0]._id.toString())*/) {
           boosterCards.push(pool[0]);
           usedIds.add(pool[0]._id.toString());
           break;
@@ -312,8 +313,10 @@ app.post('/booster/open', async (req, res) => {
 
     // Ajout / incrément des cartes
     let newCards = 0;
+    let FACard = 0;
     for (const card of boosterCards) {
       const existing = user.cards.find(c => c.idPokedex == card.idPokedex);
+      if(card.rarity == 1) FACard++;
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
       } else {
@@ -324,6 +327,7 @@ app.post('/booster/open', async (req, res) => {
     user.stats[0] += 5;
     user.stats[1] += 1;
     user.stats[2] += newCards;
+    user.stats[4] += FACard;
 
     await user.save({ session });
 
