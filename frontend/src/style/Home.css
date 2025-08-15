@@ -1,3 +1,9 @@
+#home-page-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
 #currency-display {
   display: flex;
   flex-direction: row-reverse;
@@ -22,6 +28,20 @@
   position: absolute;
   left: -15%;
   height: 180%;
+}
+
+#message-display {
+  display: flex;
+
+
+  position: absolute;
+  bottom: 4%;
+  left: 2%;
+  height: 40%;
+  width: 25%;
+  border-radius: 20px;
+
+  background-color: whitesmoke;
 }
 
 #booster-cover {
