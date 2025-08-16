@@ -9,6 +9,13 @@ const userSchema = new mongoose.Schema({
     quantity: { type: Number, required: true }
   }],
   ppURL: { type: String, default: 'NoPP' },
+  title: {
+    text: { type: String, default: '' },
+    gradientDirection: { type: String, default: 'to right' },
+    colors: { type: [String], default: ['black'] },
+    isGradientActive: { type: Boolean, default: false }
+  },
+  badgeURL: { type: [String], default: ['default', 'default'] },
   collectibles: [{
     type: { type: String, required: true },
     name: { type: String, required: true },

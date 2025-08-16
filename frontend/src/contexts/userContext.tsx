@@ -10,6 +10,13 @@ export interface User {
   password: string;
   diamonds: number;
   ppURL: string;
+  title: {
+    text: String,
+    gradientDirection: String,
+    colors: String[],
+    isGradientActive: Boolean,
+  },
+  badgeURL: String[],
   collectibles: [{
     type: string;
     name: string;

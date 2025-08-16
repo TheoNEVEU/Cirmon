@@ -20,11 +20,24 @@ interface ProfileProps {
   isOwnProfile?: boolean;
 }
 
+type Title = {
+  idTitle: string;
+  text: string;
+  gradientDirection?: string;
+  colors?: string[];
+  isGradientActive?: boolean;
+};
+
+type Badge = {
+  idBadge: string;
+  name: string;
+  imageUrl: string;
+};
+
 export default function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const { user } = useUser();
 
   const [profileUser, setProfileUser] = useState<User | null>(null);
-  const [ownedCards, setOwnedCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [featured, setFeatured] = useState<(number | null)[]>([null, null, null, null]);
   
@@ -35,6 +48,10 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const [pickerType, setPickerType] = useState<"title" | "badges" | "cards" | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  
+  const [ownedCards, setOwnedCards] = useState<Card[]>([]);
+  const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
+  const [ownedTitles, setOwnedTitles] = useState<Title[]>([]);
 
 
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
@@ -52,6 +69,10 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             setProfileUser(user as unknown as User);
             setFeatured((user as any)?.featuredCards ?? [null, null, null, null]);
             setIsEditingAllowed(true);
+
+            setOwnedCards((user as any).cards ?? []);
+            setOwnedBadges((user as any).badges ?? []);
+            setOwnedTitles((user as any).titles ?? []);
           }
         } else {
           // On charge le profil public d’un autre utilisateur
@@ -108,6 +129,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const openPickerForSlot = (slotIndex: number) => {
     if (!isEditingAllowed) return;
     setSelectedSlot(slotIndex);
+    setPickerType('cards');
+    console.log(ownedCards)
     setPickerOpen(true);
   };
 
@@ -135,6 +158,15 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       fontSize: '100%'
   };
 
+  const equippedTitle = profileUser?.collectibles.find(
+    (c) => c.type === "title" && c.equipped
+  );
+
+  const equippedBadges = profileUser?.collectibles.filter(
+    (c) => c.type === "badge" && c.equipped
+  );
+
+
   if (loading || !profileUser) {
     return <p>Chargement du profil...</p>;
   }
@@ -152,13 +184,13 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
           </div>
           <div id="username">
             <h1>{profileUser.username}</h1>
-            <h2 onClick={() => {if(isEditing) setPickerType("title")}} style={profileUser.title.isGradientActive ? gradientStyle : {}} data-isediting={isEditing}> {profileUser.title?.text ?? ''} </h2>
+            <h2 onClick={() => {if(isEditing) setPickerType("title")}} /*style={profileUser.title.isGradientActive ? gradientStyle : {}}*/ data-isediting={isEditing}> {equippedTitle?.name ?? 'default'} </h2>
           </div>
           <div id="badges-display">
-            {profileUser.badgeURL?.map((badge, i) => (
+            {equippedBadges?.map((badge, i) => (
               <div key={i} className="badge" onClick={() => {if(isEditing) setPickerType("badges")}}>
                 <SmartImage
-                  src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`}
+                  src={`${import.meta.env.BASE_URL}img/badges/${badge.name}.png`}
                   alt=""
                   fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
                 />
@@ -249,8 +281,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                   {badge.name}
                 </button>
               )) : pickerType == "title" ? ownedTitles.map((title) => (
-                <button key={title.name} onClick={() => selectCardForSlot(title)}>
-                  {badge.name}
+                <button key={title.text} onClick={() => selectCardForSlot(title)}>
+                  {title.text}
                 </button>
               )) : ""}
 
