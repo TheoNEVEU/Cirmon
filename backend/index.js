@@ -14,6 +14,13 @@ const User = require('./models/User');
 app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
 
+const rarityChances = [
+  { rarity: 1, chance: 0.002 },
+  { rarity: 2, chance: 0.01 },
+  { rarity: 3, chance: 0.10 },
+  { rarity: 4, chance: 0.30 },
+  { rarity: 5, chance: 0.60 },
+];
 
 // Connexion MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -63,7 +70,6 @@ app.get('/cards', async (req, res) => {
   }
 });
 
-
 // Partie inscription
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -92,7 +98,6 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 
 // Récupération de toutes les infos du compte
 app.get('/users', async (req, res) => {
@@ -201,15 +206,6 @@ app.delete('/users', async (req, res) => {
 app.get('/booster', async (req, res) => {
   const boosterSize = 5;
 
-  // Probabilités de rareté
-  const rarityChances = [
-    { rarity: 1, chance: 0.002 },
-    { rarity: 2, chance: 0.01 },
-    { rarity: 3, chance: 0.10 },
-    { rarity: 4, chance: 0.30 },
-    { rarity: 5, chance: 0.60 },
-  ];
-
   const pickRarity = () => {
     const rand = Math.random();
     let sum = 0;
@@ -259,13 +255,6 @@ app.post('/booster/open', async (req, res) => {
 
   try {
     // --- Tirage des cartes ---
-    const rarityChances = [
-      { rarity: 1, chance: 0.002 },
-      { rarity: 2, chance: 0.01 },
-      { rarity: 3, chance: 0.10 },
-      { rarity: 4, chance: 0.30 },
-      { rarity: 5, chance: 0.60 },
-    ];
 
     const pickRarity = () => {
       let rand = Math.random(), sum = 0;
