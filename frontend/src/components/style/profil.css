@@ -1,6 +1,6 @@
 #account-grid {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 4fr 2fr;
   grid-template-rows: 1fr;
   grid-column-gap: 2%;
   
@@ -94,6 +94,7 @@
   border-radius: 500px;
   margin-left: 4%;
   flex-shrink: 0;
+  background-color: whitesmoke;
   filter: drop-shadow(0px 0px 8px lightgrey);
 }
 
@@ -133,6 +134,7 @@
   border-radius: 100px;
   filter: drop-shadow(0px 0px 4px lightgrey);
   position: relative;
+  background-color: whitesmoke;
 }
 
 .badge img {
@@ -259,7 +261,7 @@
 #profil-cards {
   grid-area: 1 / 2 / 2 / 3;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2 , 1fr);
   grid-template-rows: repeat(2, 1fr);
   background-color: whitesmoke;
 
@@ -276,11 +278,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
+  justify-self: center;
 
   border-radius: 12px;
 
-  height: 99%;
-  width: 99%;
+  width: 85%;
+  aspect-ratio: 0.7128712871;
+}
+
+.displayedCard-slot .card {
+  width: 95%;
 }
 
 .emptyDisplayedCard-slot {
@@ -288,21 +296,19 @@
   align-items: center;
   justify-content: center;
 
-  width: 70%;
+  width: 95%;
   aspect-ratio: 0.7128712871;
   border-radius: 8px;
+  font-size: 300%;
 
   color: grey;
-  border: 3px dashed grey;
-}
-
-#profil-cards * {
-  overflow: hidden;
+  border: 3px dashed lightgray;
 }
 
 #account-grid[data-isediting="true"] .emptyDisplayedCard-slot {
   border: 3px dashed var(--editing-color);
   opacity: 0.6;
+  cursor: pointer;
 }
 
 #picker-backdrop {
@@ -322,17 +328,27 @@
   background-color: white;
   border-radius: 12px;
   padding: 16px;
+  overflow: hidden;
 }
 
 #owned-collectibles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
+
+  padding: 2% 0% 2% 0%;
+  width: 100%;
+  height: 100%;
+  gap: 15px;
+  overflow: scroll;
 }
 
 #owned-collectibles-grid button {
-  /* width: 10%; */
+  width: 90%;
+  aspect-ratio: 0.7128712871;
+
   border-radius: 10px;
-  background-color: white;
+  border: none;
+
+  background-color: transparent;
   cursor: pointer;
 }
