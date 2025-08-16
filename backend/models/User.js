@@ -9,11 +9,11 @@ const userSchema = new mongoose.Schema({
     quantity: { type: Number, required: true }
   }],
   ppURL: { type: String, default: 'NoPP' },
-  collectibles: {
+  collectibles: [{
     type: { type: String, required: true },
     name: { type: String, required: true },
     equipped: {type: Boolean, required: true, default: false},
-  },
+  }],
   stats: { type: [Number], default: [0, 0, 0, 0, 0, 0] },
   displayedCards: { type: [Number], default: [null, null, null, null] },
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
