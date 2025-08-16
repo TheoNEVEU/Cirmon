@@ -190,7 +190,7 @@ export default function Inventory() {
               </div>
             );
           }
-          return <CardDetails key={card.idPokedex} card={card} />;
+          return <CardDetails key={card.idPokedex} card={card}/>;
         })}
       </div>
     </div>

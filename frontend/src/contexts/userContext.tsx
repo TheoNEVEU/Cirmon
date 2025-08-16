@@ -10,15 +10,14 @@ export interface User {
   password: string;
   diamonds: number;
   ppURL: string;
-  title: {
-    text: string;
-    gradientDirection: string;
-    colors: string[];
-    isGradientActive: boolean;
-  };
-  badgeURL: string[];
+  collectibles: [{
+    type: string;
+    name: string;
+    equipped: boolean;
+  }];
   stats: number[];
   cards: Card[];
+  displayedCards: Card[];
   friends: string[];
   requests: string[];
 }
