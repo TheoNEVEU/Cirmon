@@ -17,12 +17,16 @@ const userSchema = new mongoose.Schema({
   },
   badgeURL: { type: [String], default: ['default', 'default'] },
   collectibles: [{
-    type: { type: String, required: true },
-    name: { type: String, required: true },
-    equipped: {type: Boolean, required: true, default: false},
+    badges: { type: [String], default: [] },
+    titles: [{
+      text: { type: String, default: '' },
+      gradientDirection: { type: String, default: 'to right' },
+      colors: { type: [String], default: ['black'] },
+      isGradientActive: { type: Boolean, default: false },
+    }]
   }],
   stats: { type: [Number], default: [0, 0, 0, 0, 0, 0] },
-  displayedCards: { type: [Number], default: [null, null, null, null] },
+  displayedCards: { type: [Number], default: [-1, -1, -1, -1] },
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
