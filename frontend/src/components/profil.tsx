@@ -17,7 +17,9 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const { status } = useConnection();
 
   const [profileUser, setProfileUser] = useState<User | null>(null);
-  const [featured, setFeatured] = useState<(number | null)[]>([null, null, null, null]);
+  const [featured, setFeatured] = useState<(Card | null)[]>([null, null, null, null]);
+  const [selectedBadges, setSelectedBadges] = useState<String[]>([]);
+  const [selectedTitle, setSelectedTitle] = useState<TitleWithEffect | null>(null);
   
   const [isEditingAllowed, setIsEditingAllowed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -28,48 +30,99 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   
   const [ownedCards, setOwnedCards] = useState<Card[]>([]);
-  const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
-  const [ownedTitles, setOwnedTitles] = useState<Title[]>([]);
+  const [ownedBadges, setOwnedBadges] = useState<String[]>([]);
+  const [ownedTitles, setOwnedTitles] = useState<TitleWithEffect[]>([]);
 
 
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
 
-  // ---- 1) Charger le user affiché (moi via contexte, sinon GET public) ----
   useEffect(() => {
-    let cancelled = false;
+  let cancelled = false;
 
-    const loadProfileUser = async () => {
-      try {
-        if (isOwnProfile && user) {
-          if (!cancelled) {
-            setProfileUser(user);
-            console.log(profileUser);
-            setFeatured((user)?.displayedCards?.map(c => c.idPokedex) ?? [null, null, null, null]);
-            setIsEditingAllowed(true);
+  const loadProfileUser = async () => {
+    try {
+      // On fetch toutes les cartes du jeu
+      const allRes = await fetch("https://testcirmon.onrender.com/cards");
+      const allData = await allRes.json();
+      const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
 
-            setOwnedCards(user.cards ?? []);
-            setOwnedTitles(user.collectibles?.[0]?.titles ?? []);
-            setOwnedBadges(user.collectibles?.[0]?.badges ?? []);
+      if (isOwnProfile && user) {
+        if (!cancelled) {
+          setProfileUser(user);
+
+          // featured cards (displayedCards -> on prend les cartes correspondantes)
+          // const displayedIds = user.displayedCards ?? [];
+          // const featuredCards = allCards.filter((c: any) =>
+          //   displayedIds.includes(c.idPokedex)
+          // );
+          // setFeatured(featuredCards);
+          const displayedIds = user.displayedCards ?? [];
+          const featuredCards = displayedIds.map((idPokedex: number) => {
+            if (idPokedex == null) return null;
+            return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
+          });
+
+          // toujours 4 emplacements (compléter avec null si besoin)
+          while (featuredCards.length < 4) {
+            featuredCards.push(null);
           }
-        } else {
-          // On charge le profil public d’un autre utilisateur
-          const res = await fetch(`https://testcirmon.onrender.com/users/${username}`);
-          const data = await res.json();
-          if (!cancelled && data?.success && data.user) {
-            setProfileUser(data.user as User);
-            setFeatured(data.user.featuredCards ?? [null, null, null, null]);
-          }
+
+          setFeatured(featuredCards);
+          setSelectedBadges(user.badgeURL);
+          setSelectedTitle(user.title);
+
+          // ownedCards (seulement celles que le user a dans son inventaire)
+          const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
+          console.log(ownedIds);
+          const ownedCardsInit = allCards.filter((c: any) =>
+            ownedIds.includes(c.idPokedex)
+          );
+          setOwnedCards(ownedCardsInit);
+
+          setOwnedBadges(user.collectibles.badges);
+          setOwnedTitles(user.collectibles.titles);
+
+          setIsEditingAllowed(true);
         }
-      } catch (e) {
-        console.error('Erreur chargement profil :', e);
-      }
-    };
+      } else {
+        // Profil d’un autre utilisateur
+        const res = await fetch(`https://testcirmon.onrender.com/users/${username}`);
+        const data = await res.json();
 
-    loadProfileUser();
-    return () => {
-      cancelled = true;
-    };
-  }, [isOwnProfile, username, user]);
+        if (!cancelled && data?.success && data.user) {
+          const profile = data.user;
+          setProfileUser(profile);
+
+          // featured
+          const displayedIds = profile.displayedCards ?? [];
+          const featuredCards = allCards.filter((c: any) =>
+            displayedIds.includes(c.idPokedex)
+          );
+          setFeatured(featuredCards);
+
+          // ownedCards
+          const ownedIds = profile.cards?.map((c: any) => c.idPokedex) ?? [];
+          const ownedCards = allCards.filter((c: any) =>
+            ownedIds.includes(c.idPokedex)
+          );
+          setOwnedCards(ownedCards);
+
+          // collectibles
+          setOwnedBadges(profile.collectibles.filter((c: any) => c.type === "badge"));
+          setOwnedTitles(profile.collectibles.filter((c: any) => c.type === "title"));
+        }
+      }
+    } catch (e) {
+      console.error("Erreur chargement profil :", e);
+    }
+  };
+
+  loadProfileUser();
+  return () => {
+    cancelled = true;
+  };
+}, [isOwnProfile, username, user]);
+
 
 
 
@@ -112,11 +165,13 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     }
   };
 
+  const handleModifications = async () => {}
+
   const openPickerForSlot = (slotIndex: number) => {
     if (!isEditingAllowed) return;
     setSelectedSlot(slotIndex);
     setPickerType('cards');
-    console.log(ownedCards)
+    console.log('cards');
     setPickerOpen(true);
   };
 
@@ -128,10 +183,23 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const selectCardForSlot = (card: Card) => {
     if (selectedSlot == null) return;
     const next = [...featured];
-    next[selectedSlot] = card.idPokedex;
+    next[selectedSlot] = card;
     setFeatured(next);
     closePicker();
   };
+
+  const selectBadgeForSlot = (badge: string) => {
+    if (selectedSlot == null) return;
+    const next = [...selectedBadges];
+    next[selectedSlot] = badge;
+    setSelectedBadges(next);
+    closePicker();
+  }
+
+  const selectTitle = (title: TitleWithEffect) => {
+    setSelectedTitle(title);
+    closePicker();
+  }
 
   const gradientStyle = {
       background: `linear-gradient(${profileUser != null ? profileUser.title.gradientDirection : 'default'}, ${profileUser != null ? profileUser.title.colors.join(', ') : "black"})`,
@@ -160,16 +228,20 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       </div>
     );
   }
+  console.log(profileUser.ppURL)
   return (
     <div id="account-grid" className="page-container" data-isediting={isEditing}>
       <div id="profil-infos" >
         <div id="profilpartA">
           <div id="pp-container">
-            <SmartImage data-isediting={isEditing ? true : false}
+            {(profileUser.ppURL != "NoPP" || isEditing) && 
+              <SmartImage data-isediting={isEditing ? true : false}
               src={`${import.meta.env.BASE_URL}img/profiles/${profileUser.ppURL}.png`}
               alt=""
               fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
-            />
+            />}
+            {!(profileUser.ppURL != "NoPP" || isEditing) && 
+              <SmartImage style={{opacity: 0}} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
           </div>
           <div id="username">
             <h1>{profileUser.username}</h1>
@@ -182,11 +254,14 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
           <div id="badges-display">
             {profileUser.badgeURL?.map((badge, i) => (
               <div key={i} className="badge" onClick={() => {if(isEditing) setPickerType("badges")}}>
+                {(badge != "default" || isEditing) && 
                 <SmartImage
                   src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`}
                   alt=""
                   fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
-                />
+                />}
+                {!(badge != "default" || isEditing) && 
+              <SmartImage style={{opacity: 0}} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
               </div>
             ))}
           </div>
@@ -217,7 +292,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                   <button className="account-button" onClick={() => setIsEditing(false)}>
                     <img src={`${import.meta.env.BASE_URL}img/icones/retour.png`} alt='' /> Annuler
                   </button>
-                  <button className="account-button" id="valid" onClick={handleDelete}>
+                  <button className="account-button" id="valid" onClick={handleModifications}>
                     <img src={`${import.meta.env.BASE_URL}img/icones/check.png`} alt='' /> Valider
                   </button>
                   <p>Enregistrer les modifications ?</p>
@@ -242,13 +317,12 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       </div>
 
       <div id="profil-cards">
-        {featured.map((id, idx) => {
-          const card = id != null ? ownedCards.find((c) => c.idPokedex === id) : null;
+        {featured.map((card, id) => {
           return (
-            <div key={idx} className="displayedCard-slot">
-              {card ? <CardDetails card={card as any}/> : (
-                <div key={id} className="emptyDisplayedCard-slot" onClick={() => {if(isOwnProfile) openPickerForSlot(idx); console.log('ok');}}>
-                  <span>+</span>
+            <div key={id} className="displayedCard-slot" onClick={() => {if(isOwnProfile && isEditing) openPickerForSlot(id);}}>
+              {card ? <CardDetails card={card} /> : (
+                <div className="emptyDisplayedCard-slot">
+                  <span>{isEditing ? "+" : ""}</span>
                 </div>
               )}
             </div>
@@ -264,17 +338,17 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
               <button onClick={closePicker}>Fermer</button>
             </div>
 
-            <div className="owned-collectibles-grid">
+            <div id="owned-collectibles-grid">
               {pickerType == "cards" ? ownedCards.map((card) => (
                 <button key={card.idPokedex} onClick={() => selectCardForSlot(card)}>
                   <CardDetails card={card}/>
                 </button>
-              )) : pickerType == "badges" ? ownedBadges.map((badge) => (
-                <button key={badge.name} onClick={() => selectCardForSlot(badge)}>
-                  {badge.name}
+              )) : pickerType == "badges" ? ownedBadges.map((badge, index) => (
+                <button key={index} onClick={() => selectBadgeForSlot(badge as string)}>
+                  {badge}
                 </button>
               )) : pickerType == "title" ? ownedTitles.map((title) => (
-                <button key={title.text} onClick={() => selectCardForSlot(title)}>
+                <button key={title.text} onClick={() => selectTitle(title)}>
                   {title.text}
                 </button>
               )) : ""}

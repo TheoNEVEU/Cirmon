@@ -19,11 +19,11 @@ export interface User {
   ppURL: string;
   title: TitleWithEffect,
   badgeURL: String[],
-  displayedCards: PreCard[];
-  collectibles: [{
-    titles: string[];
+  displayedCards: number[];
+  collectibles: {
+    titles: TitleWithEffect[];
     badges: string[];
-  }];
+  };
   stats: number[];
   cards: PreCard[];
   friends: string[];
