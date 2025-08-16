@@ -2,43 +2,21 @@ import { useEffect, useState } from 'react';
 import SmartImage from './smartImage';
 import CardDetails, {type Card} from '../components/card';
 
-import { useUser, type User } from '../contexts/userContext';
+import { useConnection } from '../contexts/connectedContext'
+import { useUser, type User, type TitleWithEffect } from '../contexts/userContext';
 
 import './style/profil.css';
-
-type TitleWithEffect = {
-  text: string;
-  gradientDirection: string;
-  colors: string[];
-  isGradientActive: boolean;
-};
-
-type UserCardRef = { idPokedex: number; quantity: number };
 
 interface ProfileProps {
   username: string;
   isOwnProfile?: boolean;
 }
 
-type Title = {
-  idTitle: string;
-  text: string;
-  gradientDirection?: string;
-  colors?: string[];
-  isGradientActive?: boolean;
-};
-
-type Badge = {
-  idBadge: string;
-  name: string;
-  imageUrl: string;
-};
-
 export default function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const { user } = useUser();
+  const { status } = useConnection();
 
   const [profileUser, setProfileUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [featured, setFeatured] = useState<(number | null)[]>([null, null, null, null]);
   
   const [isEditingAllowed, setIsEditingAllowed] = useState(false);
@@ -61,18 +39,17 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     let cancelled = false;
 
     const loadProfileUser = async () => {
-      setLoading(true);
       try {
         if (isOwnProfile && user) {
-          // On utilise le user global pour éviter un fetch inutile
           if (!cancelled) {
-            setProfileUser(user as unknown as User);
-            setFeatured((user as any)?.featuredCards ?? [null, null, null, null]);
+            setProfileUser(user);
+            console.log(profileUser);
+            setFeatured((user)?.displayedCards?.map(c => c.idPokedex) ?? [null, null, null, null]);
             setIsEditingAllowed(true);
 
-            setOwnedCards((user as any).cards ?? []);
-            setOwnedBadges((user as any).badges ?? []);
-            setOwnedTitles((user as any).titles ?? []);
+            setOwnedCards(user.cards ?? []);
+            setOwnedTitles(user.collectibles?.[0]?.titles ?? []);
+            setOwnedBadges(user.collectibles?.[0]?.badges ?? []);
           }
         } else {
           // On charge le profil public d’un autre utilisateur
@@ -85,8 +62,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
         }
       } catch (e) {
         console.error('Erreur chargement profil :', e);
-      } finally {
-        if (!cancelled) setLoading(false);
       }
     };
 
@@ -96,10 +71,21 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     };
   }, [isOwnProfile, username, user]);
 
+
+
+
+
+
+
+
+
+
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.reload();
   };
+
 
   const handleDelete = async () => {
     try {
@@ -148,7 +134,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   };
 
   const gradientStyle = {
-      background: `linear-gradient(${/*direction*/'right'}, ${/*colors.join(', ')*/'red, green'})`,
+      background: `linear-gradient(${profileUser != null ? profileUser.title.gradientDirection : 'default'}, ${profileUser != null ? profileUser.title.colors.join(', ') : "black"})`,
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text',
@@ -158,19 +144,22 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       fontSize: '100%'
   };
 
-  const equippedTitle = profileUser?.collectibles.find(
-    (c) => c.type === "title" && c.equipped
-  );
-
-  const equippedBadges = profileUser?.collectibles.filter(
-    (c) => c.type === "badge" && c.equipped
-  );
-
-
-  if (loading || !profileUser) {
-    return <p>Chargement du profil...</p>;
+  if (!(status=='connected')) {
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Connexion à la base de données...</h2>
+      </div>
+    );
   }
-
+  if (!profileUser) {
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Chargement du profil...</h2>
+      </div>
+    );
+  }
   return (
     <div id="account-grid" className="page-container" data-isediting={isEditing}>
       <div id="profil-infos" >
@@ -184,13 +173,17 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
           </div>
           <div id="username">
             <h1>{profileUser.username}</h1>
-            <h2 onClick={() => {if(isEditing) setPickerType("title")}} /*style={profileUser.title.isGradientActive ? gradientStyle : {}}*/ data-isediting={isEditing}> {equippedTitle?.name ?? 'default'} </h2>
+            <h2 onClick={() => { if (isEditing) setPickerType("title") }} 
+              style={profileUser.title.isGradientActive ? gradientStyle : {}}
+              data-isediting={isEditing}>
+              {profileUser.title.text || 'default'}
+            </h2>
           </div>
           <div id="badges-display">
-            {equippedBadges?.map((badge, i) => (
+            {profileUser.badgeURL?.map((badge, i) => (
               <div key={i} className="badge" onClick={() => {if(isEditing) setPickerType("badges")}}>
                 <SmartImage
-                  src={`${import.meta.env.BASE_URL}img/badges/${badge.name}.png`}
+                  src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`}
                   alt=""
                   fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
                 />

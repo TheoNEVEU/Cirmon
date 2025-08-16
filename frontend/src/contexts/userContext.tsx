@@ -1,30 +1,31 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-interface Card {
+interface PreCard {
   idPokedex: number;
   quantity: number;
 }
+
+export interface TitleWithEffect {
+  text: string;
+  gradientDirection: string;
+  colors: string[];
+  isGradientActive: boolean;
+};
 
 export interface User {
   username: string;
   password: string;
   diamonds: number;
   ppURL: string;
-  title: {
-    text: String,
-    gradientDirection: String,
-    colors: String[],
-    isGradientActive: Boolean,
-  },
+  title: TitleWithEffect,
   badgeURL: String[],
+  displayedCards: PreCard[];
   collectibles: [{
-    type: string;
-    name: string;
-    equipped: boolean;
+    titles: string[];
+    badges: string[];
   }];
   stats: number[];
-  cards: Card[];
-  displayedCards: Card[];
+  cards: PreCard[];
   friends: string[];
   requests: string[];
 }
