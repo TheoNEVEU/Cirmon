@@ -331,6 +331,7 @@
 }
 
 #owned-collectibles-grid button {
+  /* width: 10%; */
   border-radius: 10px;
   background-color: white;
   cursor: pointer;

@@ -2,18 +2,10 @@ import { useEffect, useState } from 'react';
 import SmartImage from './smartImage';
 import CardDetails, {type Card} from '../components/card';
 
-import { useUser, type User } from '../contexts/userContext';
+import { useConnection } from '../contexts/connectedContext'
+import { useUser, type User, type TitleWithEffect } from '../contexts/userContext';
 
 import './style/profil.css';
-
-type TitleWithEffect = {
-  text: string;
-  gradientDirection: string;
-  colors: string[];
-  isGradientActive: boolean;
-};
-
-type UserCardRef = { idPokedex: number; quantity: number };
 
 interface ProfileProps {
   username: string;
@@ -22,10 +14,9 @@ interface ProfileProps {
 
 export default function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const { user } = useUser();
+  const { status } = useConnection();
 
   const [profileUser, setProfileUser] = useState<User | null>(null);
-  const [ownedCards, setOwnedCards] = useState<Card[]>([]);
-  const [loading, setLoading] = useState(true);
   const [featured, setFeatured] = useState<(number | null)[]>([null, null, null, null]);
   
   const [isEditingAllowed, setIsEditingAllowed] = useState(false);
@@ -35,6 +26,10 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const [pickerType, setPickerType] = useState<"title" | "badges" | "cards" | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  
+  const [ownedCards, setOwnedCards] = useState<Card[]>([]);
+  const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
+  const [ownedTitles, setOwnedTitles] = useState<Title[]>([]);
 
 
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
@@ -44,14 +39,17 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     let cancelled = false;
 
     const loadProfileUser = async () => {
-      setLoading(true);
       try {
         if (isOwnProfile && user) {
-          // On utilise le user global pour éviter un fetch inutile
           if (!cancelled) {
-            setProfileUser(user as unknown as User);
-            setFeatured((user as any)?.featuredCards ?? [null, null, null, null]);
+            setProfileUser(user);
+            console.log(profileUser);
+            setFeatured((user)?.displayedCards?.map(c => c.idPokedex) ?? [null, null, null, null]);
             setIsEditingAllowed(true);
+
+            setOwnedCards(user.cards ?? []);
+            setOwnedTitles(user.collectibles?.[0]?.titles ?? []);
+            setOwnedBadges(user.collectibles?.[0]?.badges ?? []);
           }
         } else {
           // On charge le profil public d’un autre utilisateur
@@ -64,8 +62,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
         }
       } catch (e) {
         console.error('Erreur chargement profil :', e);
-      } finally {
-        if (!cancelled) setLoading(false);
       }
     };
 
@@ -75,10 +71,21 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     };
   }, [isOwnProfile, username, user]);
 
+
+
+
+
+
+
+
+
+
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.reload();
   };
+
 
   const handleDelete = async () => {
     try {
@@ -108,6 +115,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const openPickerForSlot = (slotIndex: number) => {
     if (!isEditingAllowed) return;
     setSelectedSlot(slotIndex);
+    setPickerType('cards');
+    console.log(ownedCards)
     setPickerOpen(true);
   };
 
@@ -125,7 +134,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   };
 
   const gradientStyle = {
-      background: `linear-gradient(${/*direction*/'right'}, ${/*colors.join(', ')*/'red, green'})`,
+      background: `linear-gradient(${profileUser != null ? profileUser.title.gradientDirection : 'default'}, ${profileUser != null ? profileUser.title.colors.join(', ') : "black"})`,
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text',
@@ -135,10 +144,22 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       fontSize: '100%'
   };
 
-  if (loading || !profileUser) {
-    return <p>Chargement du profil...</p>;
+  if (!(status=='connected')) {
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Connexion à la base de données...</h2>
+      </div>
+    );
   }
-
+  if (!profileUser) {
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Chargement du profil...</h2>
+      </div>
+    );
+  }
   return (
     <div id="account-grid" className="page-container" data-isediting={isEditing}>
       <div id="profil-infos" >
@@ -152,7 +173,11 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
           </div>
           <div id="username">
             <h1>{profileUser.username}</h1>
-            <h2 onClick={() => {if(isEditing) setPickerType("title")}} style={profileUser.title.isGradientActive ? gradientStyle : {}} data-isediting={isEditing}> {profileUser.title?.text ?? ''} </h2>
+            <h2 onClick={() => { if (isEditing) setPickerType("title") }} 
+              style={profileUser.title.isGradientActive ? gradientStyle : {}}
+              data-isediting={isEditing}>
+              {profileUser.title.text || 'default'}
+            </h2>
           </div>
           <div id="badges-display">
             {profileUser.badgeURL?.map((badge, i) => (
@@ -249,8 +274,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                   {badge.name}
                 </button>
               )) : pickerType == "title" ? ownedTitles.map((title) => (
-                <button key={title.name} onClick={() => selectCardForSlot(title)}>
-                  {badge.name}
+                <button key={title.text} onClick={() => selectCardForSlot(title)}>
+                  {title.text}
                 </button>
               )) : ""}
 
