@@ -17,13 +17,13 @@ const userSchema = new mongoose.Schema({
   },
   badgeURL: { type: [String], default: ['default', 'default'] },
   collectibles: [{
-    badges: { type: [String], default: [] },
+    badges: [{ URL : { type: String, default: 'default' }}],
     titles: [{
       text: { type: String, default: '' },
       gradientDirection: { type: String, default: 'to right' },
       colors: { type: [String], default: ['black'] },
       isGradientActive: { type: Boolean, default: false },
-    }]
+    }],
   }],
   stats: { type: [Number], default: [0, 0, 0, 0, 0, 0] },
   displayedCards: { type: [Number], default: [-1, -1, -1, -1] },
