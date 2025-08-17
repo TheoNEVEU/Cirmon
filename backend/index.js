@@ -10,6 +10,8 @@ const port = process.env.PORT || 3000;
 
 const Card = require('./models/Cards');
 const User = require('./models/User');
+const Title = require('.models/Title');
+const Badge = require('.models/Badge');
 
 app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
@@ -146,6 +148,57 @@ app.get('/users/:username', async (req, res) => {
     res.status(500).json({ success: false, message: 'Erreur serveur.' });
   }
 });
+
+// Récupérer les titres possédés par un joueur
+app.get('/collectibles/titles', async (req, res) => {
+  const ids = (req.query.ids || '').split(',').filter(Boolean);
+  const titles = await Title.find({ _id: { $in: ids } }).lean();
+  res.json({ success: true, titles });
+});
+
+// Récupérer les badges possédés par un joueur
+app.get('/collectibles/badges', async (req, res) => {
+  const ids = (req.query.ids || '').split(',').filter(Boolean);
+  const badges = await Badge.find({ _id: { $in: ids } }).lean();
+  res.json({ success: true, badges });
+});
+
+// PATCH /users/me/equip
+app.patch('/users/me/equip', auth, async (req, res) => {
+  const { titleId, badgeIds } = req.body;
+  const user = await User.findById(req.user.id);
+
+  // --- Gestion du titre ---
+  if (titleId) {
+    if (!user.collectibles.titleIds.includes(titleId)) return res.status(400).json({ success: false, message: 'Titre non débloqué.' });
+    const t = await Title.findById(titleId).lean();
+    if (!t) return res.status(404).json({ success: false, message: 'Titre introuvable.' });
+    user.title = {
+      text: t.text,
+      gradientDirection: t.gradientDirection,
+      colors: t.colors,
+      isGradientActive: t.isGradientActive
+    };
+  }
+
+  // --- Gestion des badges ---
+  if (badgeIds) {
+    const ownsAll = badgeIds.every(id => user.collectibles.badgeIds.includes(id));
+    if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
+    user.badgesEquipped = badgeIds.slice(0, 2); // limite à 2 badges
+  }
+
+  // --- Sauvegarde unique ---
+  await user.save();
+
+  res.json({
+    success: true,
+    title: user.title,
+    badgesEquipped: user.badgesEquipped
+  });
+});
+
+
 
 // récupère les amis d'un utilisateur
 app.get('/users/friends/:username', async (req, res) => {
