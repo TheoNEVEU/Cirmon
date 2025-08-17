@@ -6,6 +6,7 @@ interface PreCard {
 }
 
 export interface TitleWithEffect {
+  _id: string; 
   text: string;
   gradientDirection: string;
   colors: string[];
@@ -13,19 +14,26 @@ export interface TitleWithEffect {
 };
 
 export interface User {
+  // Infos générales
   username: string;
   password: string;
   diamonds: number;
+  
+  // Actuellement équipés
   ppURL: string;
-  title: TitleWithEffect,
-  badgeURL: String[],
+  title: TitleWithEffect | null;
+  badgeURL: string[];
   displayedCards: number[];
-  collectibles: {
-    titles: TitleWithEffect[];
+
+  // Inventaire
+  collectibles: { // Tous les collectibles débloqués
+    titles: string[];
     badges: string[];
   };
-  stats: number[];
   cards: PreCard[];
+
+  // Autres informations
+  stats: number[];
   friends: string[];
   requests: string[];
 }

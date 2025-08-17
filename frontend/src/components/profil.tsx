@@ -37,108 +37,102 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
 
   useEffect(() => {
-  let cancelled = false;
+    let cancelled = false;
 
-  const loadProfileUser = async () => {
-    try {
-      // On fetch toutes les cartes du jeu
-      const allRes = await fetch("https://testcirmon.onrender.com/cards");
-      const allData = await allRes.json();
-      const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
+    const loadProfileUser = async () => {
+      try {
+        // On fetch toutes les cartes du jeu
+        const allRes = await fetch("https://testcirmon.onrender.com/cards");
+        const allData = await allRes.json();
+        const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
 
-      if (isOwnProfile && user) {
-        if (!cancelled) {
-          setProfileUser(user);
+        if (isOwnProfile && user) {
+          if (!cancelled) {
+            setProfileUser(user);
 
-          // featured cards (displayedCards -> on prend les cartes correspondantes)
-          // const displayedIds = user.displayedCards ?? [];
-          // const featuredCards = allCards.filter((c: any) =>
-          //   displayedIds.includes(c.idPokedex)
-          // );
-          // setFeatured(featuredCards);
-          const displayedIds = user.displayedCards ?? [];
-          const featuredCards = displayedIds.map((idPokedex: number) => {
-            if (idPokedex == null) return null;
-            return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
-          });
+            //featured cards (displayedCards -> on prend les cartes correspondantes)
+            const displayedIds = user.displayedCards ?? [];
+            const featuredCards = displayedIds.map((idPokedex: number) => {
+              if (idPokedex == null) return null;
+              return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
+            });
 
-          // toujours 4 emplacements (compléter avec null si besoin)
-          while (featuredCards.length < 4) {
-            featuredCards.push(null);
+            // toujours 4 emplacements (compléter avec null si besoin)
+            while (featuredCards.length < 4) {
+              featuredCards.push(null);
+            }
+
+            setFeatured(featuredCards);
+            setSelectedBadges(user.badgeURL);
+            setSelectedTitle(user.title);
+
+            // Récupérer les cartes possédés
+            const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
+            console.log(ownedIds);
+            const ownedCardsInit = allCards.filter((c: any) =>
+              ownedIds.includes(c.idPokedex)
+            );
+            setOwnedCards(ownedCardsInit);
+
+            // Récupérer les titres possédés
+            const titlesRes = await fetch(`/collectibles/titles?ids=${user.collectibles.titles.join(',')}`);
+            const titlesData = await titlesRes.json();
+            setOwnedTitles(titlesData.titles);
+
+            // Récupérer les badges possédés
+            const badgesRes = await fetch( `/collectibles/badges?ids=${user.collectibles.badges.join(',')}`);
+            const badgesData = await badgesRes.json();
+            setOwnedBadges(badgesData.badges);
+
+            //On peut forcer des valeurs pour le moment pour les tests
+            //setOwnedBadges(["Dark", "Fire", "Psy", "Water", "Fight", "Electric", "Normal", "Grass"])
+            //setOwnedTitles([{_id:"", text: "caca",gradientDirection: "to right",colors: ['brown, red'],isGradientActive: true},{_id:"", text: "boudin",gradientDirection: "to top",colors: ['brown, black'],isGradientActive: true}])
+
+            setIsEditingAllowed(true);
           }
+        } else {
+          // Profil d’un autre utilisateur
+          const res = await fetch(`https://testcirmon.onrender.com/users/${username}`);
+          const data = await res.json();
 
-          setFeatured(featuredCards);
-          setSelectedBadges(user.badgeURL);
-          setSelectedTitle(user.title);
+          if (!cancelled && data?.success && data.user) {
+            const profile = data.user;
+            setProfileUser(profile);
 
-          // ownedCards (seulement celles que le user a dans son inventaire)
-          const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
-          console.log(ownedIds);
-          const ownedCardsInit = allCards.filter((c: any) =>
-            ownedIds.includes(c.idPokedex)
-          );
-          setOwnedCards(ownedCardsInit);
+            // featured
+            const displayedIds = profile.displayedCards ?? [];
+            const featuredCards = allCards.filter((c: any) =>
+              displayedIds.includes(c.idPokedex)
+            );
+            setFeatured(featuredCards);
 
-          setOwnedBadges(user.collectibles.badges);
-          setOwnedTitles(user.collectibles.titles);
+            // ownedCards
+            const ownedIds = profile.cards?.map((c: any) => c.idPokedex) ?? [];
+            const ownedCards = allCards.filter((c: any) =>
+              ownedIds.includes(c.idPokedex)
+            );
+            setOwnedCards(ownedCards);
 
-          setIsEditingAllowed(true);
+            // collectibles
+            setOwnedBadges(profile.collectibles.filter((c: any) => c.type === "badge"));
+            setOwnedTitles(profile.collectibles.filter((c: any) => c.type === "title"));
+          }
         }
-      } else {
-        // Profil d’un autre utilisateur
-        const res = await fetch(`https://testcirmon.onrender.com/users/${username}`);
-        const data = await res.json();
-
-        if (!cancelled && data?.success && data.user) {
-          const profile = data.user;
-          setProfileUser(profile);
-
-          // featured
-          const displayedIds = profile.displayedCards ?? [];
-          const featuredCards = allCards.filter((c: any) =>
-            displayedIds.includes(c.idPokedex)
-          );
-          setFeatured(featuredCards);
-
-          // ownedCards
-          const ownedIds = profile.cards?.map((c: any) => c.idPokedex) ?? [];
-          const ownedCards = allCards.filter((c: any) =>
-            ownedIds.includes(c.idPokedex)
-          );
-          setOwnedCards(ownedCards);
-
-          // collectibles
-          setOwnedBadges(profile.collectibles.filter((c: any) => c.type === "badge"));
-          setOwnedTitles(profile.collectibles.filter((c: any) => c.type === "title"));
-        }
+      } catch (e) {
+        console.error("Erreur chargement profil :", e);
       }
-    } catch (e) {
-      console.error("Erreur chargement profil :", e);
-    }
-  };
+    };
 
-  loadProfileUser();
-  return () => {
-    cancelled = true;
-  };
-}, [isOwnProfile, username, user]);
-
-
-
-
-
-
-
-
-
-
-
+      loadProfileUser();
+      return () => {
+        cancelled = true;
+      };
+  }, [isOwnProfile, username, user]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.reload();
   };
-
 
   const handleDelete = async () => {
     try {
@@ -165,13 +159,42 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     }
   };
 
-  const handleModifications = async () => {}
+  const handleModifications = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Token manquant');
+      return;
+    }
+
+    const response = await fetch('https://testcirmon.onrender.com/users/me/equip', {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        titleId: selectedTitle?._id,
+        badgeIds: selectedBadges
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setProfileUser(prev => ({
+        ...(prev as User),
+        title: data.title,
+        badgesEquipped: data.badgesEquipped
+      }));
+      setIsEditing(false);
+    } else {
+      const error = await response.json();
+      console.error('Erreur:', error.message);
+    }
+  };
 
   const openPickerForSlot = (slotIndex: number) => {
     if (!isEditingAllowed) return;
     setSelectedSlot(slotIndex);
-    setPickerType('cards');
-    console.log('cards');
     setPickerOpen(true);
   };
 
@@ -190,27 +213,35 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
 
   const selectBadgeForSlot = (badge: string) => {
     if (selectedSlot == null) return;
-    const next = [...selectedBadges];
-    next[selectedSlot] = badge;
-    setSelectedBadges(next);
+    const next = profileUser as User;
+    next.badgeURL[selectedSlot] = badge;
+    setProfileUser(next);
+    console.log(profileUser?.badgeURL)
     closePicker();
   }
 
   const selectTitle = (title: TitleWithEffect) => {
+    if(title == null) return;
+    const next = profileUser as User;
+    next.title = title;
     setSelectedTitle(title);
+    setProfileUser(next);
     closePicker();
   }
 
-  const gradientStyle = {
-      background: `linear-gradient(${profileUser != null ? profileUser.title.gradientDirection : 'default'}, ${profileUser != null ? profileUser.title.colors.join(', ') : "black"})`,
+  function getGradientStyle(gradientDirection: string, colors: string[]) {
+    return {
+      backgroundImage: `linear-gradient(${gradientDirection}, ${colors.join(', ')})`,
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text',
       color: 'transparent',
       width: 'fit-content',
       paddingLeft: '3%',
-      fontSize: '100%'
-  };
+      fontSize: '100%',
+      fontWeight: 'bold'
+    };
+  }
 
   if (!(status=='connected')) {
     return (
@@ -245,15 +276,15 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
           </div>
           <div id="username">
             <h1>{profileUser.username}</h1>
-            <h2 onClick={() => { if (isEditing) setPickerType("title") }} 
-              style={profileUser.title.isGradientActive ? gradientStyle : {}}
+            <h2 key={-1} onClick={() => { if (isEditing) {setPickerType("title");openPickerForSlot(-1)} }} 
+              style={profileUser.title?.isGradientActive ? getGradientStyle(profileUser.title?.gradientDirection ?? "to right", profileUser?.title.colors ?? ["black"]) : {}}
               data-isediting={isEditing}>
-              {profileUser.title.text || 'default'}
+              {profileUser.title?.text || 'default'}
             </h2>
           </div>
           <div id="badges-display">
             {profileUser.badgeURL?.map((badge, i) => (
-              <div key={i} className="badge" onClick={() => {if(isEditing) setPickerType("badges")}}>
+              <div key={i+""+badge} className="badge" onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
                 {(badge != "default" || isEditing) && 
                 <SmartImage
                   src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`}
@@ -319,7 +350,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       <div id="profil-cards">
         {featured.map((card, id) => {
           return (
-            <div key={id} className="displayedCard-slot" onClick={() => {if(isOwnProfile && isEditing) openPickerForSlot(id);}}>
+            <div key={id} className="displayedCard-slot" onClick={() => {if(isOwnProfile && isEditing) {setPickerType('cards');openPickerForSlot(id);}}}>
               {card ? <CardDetails card={card} /> : (
                 <div className="emptyDisplayedCard-slot">
                   <span>{isEditing ? "+" : ""}</span>
@@ -334,7 +365,11 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
         <div id="picker-backdrop" onClick={closePicker}>
           <div id="picker-panel" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-              <h3>Choisis une carte à exposer</h3>
+              <h3>Choisir un{
+                  pickerType == "cards" ? "e carte" :
+                  pickerType == "badges" ? " badge" : 
+                  pickerType == "title" ? " titre" : 
+                  " objet"} à exposer</h3>
               <button onClick={closePicker}>Fermer</button>
             </div>
 
@@ -343,21 +378,31 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                 <button key={card.idPokedex} onClick={() => selectCardForSlot(card)}>
                   <CardDetails card={card}/>
                 </button>
-              )) : pickerType == "badges" ? ownedBadges.map((badge, index) => (
+              )) : pickerType == "badges" ? ownedBadges?.map((badge, index) => (
                 <button key={index} onClick={() => selectBadgeForSlot(badge as string)}>
-                  {badge}
+                  <SmartImage src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`}></SmartImage><br></br>{badge}
                 </button>
-              )) : pickerType == "title" ? ownedTitles.map((title) => (
+              )) : pickerType == "title" ? ownedTitles?.map((title) => (
                 <button key={title.text} onClick={() => selectTitle(title)}>
-                  {title.text}
+                  <p style={getGradientStyle(title.gradientDirection ?? "to right", title.colors ?? ["black"])}>
+                    {title.text || 'default'}
+                  </p>
                 </button>
               )) : ""}
 
-              {ownedCards.length === 0 && (
-                <div style={{ padding: 24, textAlign: 'center', color: '#666' }}>
-                  Aucune carte possédée à afficher.
-                </div>
-              )}
+              {pickerType == "cards" && (ownedCards.length == 0 || !ownedCards) ? (
+                  <div style={{ padding: 24, textAlign: 'center', color: '#666' }}>
+                    Aucune carte à afficher.
+                  </div>
+                ) : pickerType == "badges" && (ownedBadges?.length == 0 || !ownedBadges) ? (
+                  <div style={{ padding: 24, textAlign: 'center', color: '#666' }}>
+                    Aucun badge à afficher.
+                  </div>
+                ) : pickerType == "title" && (ownedTitles?.length == 0 || !ownedTitles) ? (
+                  <div style={{ padding: 24, textAlign: 'center', color: '#666' }}>
+                    Aucun titre à afficher.
+                  </div>
+                ) : ""}
             </div>
           </div>
         </div>
