@@ -10,8 +10,8 @@ const port = process.env.PORT || 3000;
 
 const Card = require('./models/Cards');
 const User = require('./models/User');
-const Title = require('.models/Title');
-const Badge = require('.models/Badge');
+const Title = require('./models/Title');
+const Badge = require('./models/Badge');
 
 app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
