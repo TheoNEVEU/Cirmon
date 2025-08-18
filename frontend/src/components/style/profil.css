@@ -84,6 +84,7 @@
 
 #account-grid[data-isediting="true"] #username h2 {
   border: 3px dashed var(--editing-color);
+  cursor: pointer;
   opacity: 0.6;
 }
 
@@ -135,6 +136,10 @@
   filter: drop-shadow(0px 0px 4px lightgrey);
   position: relative;
   background-color: whitesmoke;
+}
+
+.badge[data-isEditing=true] {
+  cursor: pointer;
 }
 
 .badge img {
@@ -246,12 +251,12 @@
   filter: invert(1);
 }
 
-.account-button:hover {
+.account-button:hover, #picker-close-button:hover {
   filter: brightness(0.8);
 }
 
-.account-button:active {
-  filter: brightness(0.5);
+.account-button:active, #picker-close-button:active {
+  filter: brightness(0.6);
 }
 
 #profilpartC p {
@@ -331,6 +336,28 @@
   overflow: hidden;
 }
 
+#picker-close-button {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: nowrap;
+
+  background-color: lightgrey;
+  border: none;
+
+  border-radius: 6px;
+  width: auto;
+  padding: 0.6% 2% 0.6% 2%;
+  
+  font-size: 60%;
+  font-weight: bold;
+}
+
+#picker-close-button img {
+  height: 10px;
+  aspect-ratio: 1/1;
+  margin: 3% 5% 0% 0%;
+}
+
 #owned-collectibles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -350,5 +377,11 @@
   border: none;
 
   background-color: transparent;
-  cursor: pointer;
+}
+
+.collectibles-error {
+  width: 100%;
+  padding: 24px;
+  text-align: center;
+  color: grey;
 }
