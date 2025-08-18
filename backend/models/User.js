@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
-const Title = require('./models/Title');
-const Badge = require('./models/Badge');
+const Title = require('./Title');
+const Badge = require('./Badge');
 
 const TitleEmbedded = new mongoose.Schema({
   text: { type: String, default: '' },
