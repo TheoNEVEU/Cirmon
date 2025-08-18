@@ -13,6 +13,8 @@ const User = require('./models/User');
 const Title = require('./models/Title');
 const Badge = require('./models/Badge');
 
+const auth = require('./middleware/auth');
+
 app.use(express.json());  // Important pour POST /register et POST /login
 app.use(cors());
 
@@ -39,6 +41,7 @@ const TestSchema = new mongoose.Schema({
   message: String,
 });
 const Test = mongoose.model('Test', TestSchema);
+
 app.get('/test', async (req, res) => {
   try {
     let doc = await Test.findOne();
@@ -124,6 +127,20 @@ app.get('/users', async (req, res) => {
   }
 });
 
+// Suppression du compte utilisateur
+app.delete('/users', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+
+    await User.findByIdAndDelete(req.user.id);
+    res.json({ success: true, message: 'Compte supprimé avec succès.' });
+  } catch (err) {
+    console.error('Erreur suppression :', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur lors de la suppression.' });
+  }
+});
+
 // Récupération des infos publiques du compte
 app.get('/users/:username', async (req, res) => {
   const { username } = req.params;
@@ -166,7 +183,7 @@ app.get('/collectibles/badges', async (req, res) => {
   res.json({ success: true, badges });
 });
 
-// PATCH /users/me/equip
+// Mettre à jour les modifications du profil d'un joueur
 app.patch('/users/me/equip', auth, async (req, res) => {
   const { titleId, badgeIds } = req.body;
   const user = await User.findById(req.user.id);
@@ -201,8 +218,6 @@ app.patch('/users/me/equip', auth, async (req, res) => {
   });
 });
 
-
-
 // récupère les amis d'un utilisateur
 app.get('/users/friends/:username', async (req, res) => {
   const { username } = req.params;
@@ -234,73 +249,7 @@ app.get('/users/friends/:username', async (req, res) => {
   }
 });
 
-// Suppression du compte utilisateur
-app.delete('/users', async (req, res) => {
-  const authHeader = req.headers['authorization'];
-
-  if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
-  const token = authHeader.split(' ')[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-
-    if (!user) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
-    await User.findByIdAndDelete(decoded.userId);
-
-    res.json({ success: true, message: 'Compte supprimé avec succès.' });
-  } catch (err) {
-    console.error('Erreur de token ou suppression :', err);
-    res.status(401).json({ success: false, message: 'Token invalide ou suppression impossible.' });
-  }
-});
-
-// Exemple dans Express
-app.get('/booster', async (req, res) => {
-  const boosterSize = 5;
-
-  const pickRarity = () => {
-    const rand = Math.random();
-    let sum = 0;
-    for (let i = rarityChances.length - 1; i >= 0; i--) {
-      sum += rarityChances[i].chance;
-      if (rand <= sum) return rarityChances[i].rarity;
-    }
-    return 5;
-  };
-
-  const boosterCards = [];
-  const usedIds = new Set();
-
-  try {
-    for (let i = 0; i < boosterSize; i++) {
-      let tries = 0;
-      let card = null;
-
-      while (tries < 10) {
-        const rarity = pickRarity();
-        const pool = await Card.aggregate([
-          { $match: { rarity } },
-          { $sample: { size: 1 } }
-        ]);
-
-        if (pool.length > 0 && !usedIds.has(pool[0]._id.toString())) {
-          card = pool[0];
-          usedIds.add(card._id.toString());
-          boosterCards.push(card);
-          break;
-        }
-
-        tries++;
-      }
-    }
-
-    res.json({ success: true, booster: boosterCards });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
+// Ouvrir un booster et ajouter les cartes au compte de l'utilisateur
 app.post('/booster/open', async (req, res) => {
   const { username } = req.body;
   const boosterCost = 200;
@@ -388,7 +337,7 @@ app.post('/booster/open', async (req, res) => {
 });
 
 
-// A garder à la fin du fichier !
+//!\ A garder à la fin du fichier /!\
 app.use((req, res) => {
   res.status(404).json({ error: "Route non trouvée" });
 });
