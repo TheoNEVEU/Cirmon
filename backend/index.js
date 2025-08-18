@@ -198,12 +198,25 @@ app.patch('/users/me/equip', auth, async (req, res) => {
     };
   }
 
+  // // --- Gestion des badges ---
+  // if (badgeIds) {
+  //   const ownsAll = badgeIds.every(id => user.collectibles.badgeIds.includes(id));
+  //   if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
+  //   user.badgesEquipped = badgeIds.slice(0, 2); // limite à 2 badges
+  // }
+
   // --- Gestion des badges ---
   if (badgeIds) {
     const ownsAll = badgeIds.every(id => user.collectibles.badgeIds.includes(id));
     if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
-    user.badgesEquipped = badgeIds.slice(0, 2); // limite à 2 badges
+    const badges = await Badge.find({ _id: { $in: badgeIds } }).lean();
+    user.badgesEquipped = badges.slice(0, 2).map(b => ({
+      _id: b._id,
+      label: b.label,
+      image: b.image
+    }));
   }
+
 
   // --- Sauvegarde unique ---
   await user.save();

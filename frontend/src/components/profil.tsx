@@ -193,7 +193,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       return;
     }
 
-    console.log("selectedBadges IDs:", selectedBadges.map(b => b._id));
+    console.log("selectedBadges :", selectedBadges);
     console.log("user collectibles:", user?.collectibles.badgeIds);
 
 
@@ -204,8 +204,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        titleId: selectedTitle?._id,
-        badgeIds: selectedBadges.map(badge => badge?._id)
+        titleId: selectedTitle,
+        badgeIds: selectedBadges
       })
     });
 
