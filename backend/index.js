@@ -210,15 +210,19 @@ app.patch('/users/me/equip', auth, async (req, res) => {
 
   // --- Gestion des badges ---
   if (badgeIds) {
-    const ownsAll = badgeIds.every(id => user.collectibles.badgeIds.includes(id));
+    const ownsAll = badgeIds.every(id => id === 'default' || user.collectibles.badgeIds.includes(id));
     if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
-    const badges = await Badge.find({ _id: { $in: badgeIds } }).lean();
-    user.badgesEquipped = badges.slice(0, 2).map(b => ({
-      _id: b._id,
-      label: b.label,
-      image: b.image
-    }));
+    const badges = await Badge.find({ _id: { $in: badgeIds.filter(id => id !== 'default') } }).lean();
+    const finalBadges = badgeIds.map(id => {
+      if (id === 'default') return { _id: 'default', label: 'default', image: 'default' };
+      return {
+        _id: badges.find(b => b._id.toString() === id)?._id,
+        label: badges.find(b => b._id.toString() === id)?.label,
+        image: badges.find(b => b._id.toString() === id)?.image
+      };
+    });
   }
+
 
 
   // --- Sauvegarde unique ---
