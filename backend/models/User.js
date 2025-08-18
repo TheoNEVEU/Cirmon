@@ -1,13 +1,16 @@
 const mongoose = require('mongoose');
 
-const Title = require('./Title');
-const Badge = require('./Badge');
-
 const TitleEmbedded = new mongoose.Schema({
   text: { type: String, default: '' },
   gradientDirection: { type: String, default: 'to right' },
   colors: { type: [String], default: ['black'] },
   isGradientActive: { type: Boolean, default: false }
+}, { _id: false });
+
+const BadgeEmbedded = new mongoose.Schema({
+  _id: { type: String, required: true },
+  label: { type: String, required: true },
+  image: { type: String, required: true }
 }, { _id: false });
 
 const userSchema = new mongoose.Schema({
@@ -20,7 +23,7 @@ const userSchema = new mongoose.Schema({
   ppURL: { type: String, default: 'NoPP' },
   title: { type: TitleEmbedded, default: null },
   badgesEquipped: { 
-    type: [Badge], 
+    type: [BadgeEmbedded], 
     default: [{ _id: 'default', label: 'default', image: 'default' },{ _id: 'default', label: 'default', image: 'default' }] 
   },
   displayedCards: { type: [Number], default: [0, 0, 0, 0] },
