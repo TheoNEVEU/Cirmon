@@ -175,7 +175,7 @@ app.get('/collectibles/titles', async (req, res) => {
 
 // Récupérer les badges possédés par un joueur
 app.get('/collectibles/badges', async (req, res) => {
-  const ids = (req.query.ids || '').split(',').filter(Boolean);
+  const ids = (req.query.ids || '').split(',').filter(Boolean).map(id => mongoose.Types.ObjectId(id));
   const badges = await Badge.find({ _id: { $in: ids } }).lean();
   res.json({ success: true, badges });
 });
