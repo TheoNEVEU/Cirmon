@@ -13,6 +13,12 @@ export interface TitleWithEffect {
   isGradientActive: boolean;
 };
 
+export interface Badge {
+  _id: string,
+  label: string,
+  image: string,
+}
+
 export interface User {
   // Infos générales
   username: string;

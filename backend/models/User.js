@@ -1,38 +1,5 @@
 const mongoose = require('mongoose');
 
-/*
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  diamonds: { type: Number, required: true, default: 0,},
-  cards: [{
-    idPokedex: { type: Number, required: true },
-    quantity: { type: Number, required: true }
-  }],
-  ppURL: { type: String, default: 'NoPP' },
-  title: {
-    text: { type: String, default: '' },
-    gradientDirection: { type: String, default: 'to right' },
-    colors: { type: [String], default: ['black'] },
-    isGradientActive: { type: Boolean, default: false }
-  },
-  badgeURL: { type: [String], default: ['default', 'default'] },
-  collectibles: [{
-    badges: { type: [String], default: ['default'] },
-    titles: [{
-      text: { type: String, default: '' },
-      gradientDirection: { type: String, default: 'to right' },
-      colors: { type: [String], default: ['black'] },
-      isGradientActive: { type: Boolean, default: false },
-    }],
-  }],
-  stats: { type: [Number], default: [0, 0, 0, 0, 0, 0] },
-  displayedCards: { type: [Number], default: [-1, -1, -1, -1] },
-  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-});
-*/
-
 const TitleEmbedded = new mongoose.Schema({
   text: { type: String, default: '' },
   gradientDirection: { type: String, default: 'to right' },
@@ -49,8 +16,8 @@ const userSchema = new mongoose.Schema({
   // Actuellement équipés
   ppURL: { type: String, default: 'NoPP' },
   title: { type: TitleEmbedded, default: null },
-  badgesEquipped: { type: [String], default: [] },
-  displayedCards: { type: [Number], default: [-1, -1, -1, -1] },
+  badgesEquipped: { type: [String], default: ['default', 'default'] },
+  displayedCards: { type: [Number], default: [0, 0, 0, 0] },
 
   // Inventaire
   collectibles: { // Tous les collectibles débloqués
