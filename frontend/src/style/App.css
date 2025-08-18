@@ -148,8 +148,6 @@ html::-webkit-scrollbar {
   justify-content: center;
   flex-wrap: wrap;
 
-  cursor: pointer;
-
   height: auto;
   width: 70%;
   aspect-ratio: 1;
