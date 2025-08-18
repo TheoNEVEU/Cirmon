@@ -175,10 +175,11 @@ app.get('/collectibles/titles', async (req, res) => {
 
 // Récupérer les badges possédés par un joueur
 app.get('/collectibles/badges', async (req, res) => {
-  const ids = (req.query.ids || '').split(',').filter(Boolean).map(id => mongoose.Types.ObjectId(id));
+  const ids = (req.query.ids || '').split(',').filter(Boolean).map(id => new mongoose.Types.ObjectId(id)); // <- utiliser `new`
   const badges = await Badge.find({ _id: { $in: ids } }).lean();
   res.json({ success: true, badges });
 });
+
 
 // Mettre à jour les modifications du profil d'un joueur
 app.patch('/users/me/equip', auth, async (req, res) => {
