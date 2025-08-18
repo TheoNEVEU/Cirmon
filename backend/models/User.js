@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const Title = require('./models/Title');
+const Badge = require('./models/Badge');
+
 const TitleEmbedded = new mongoose.Schema({
   text: { type: String, default: '' },
   gradientDirection: { type: String, default: 'to right' },
@@ -16,7 +19,10 @@ const userSchema = new mongoose.Schema({
   // Actuellement équipés
   ppURL: { type: String, default: 'NoPP' },
   title: { type: TitleEmbedded, default: null },
-  badgesEquipped: { type: [String], default: ['default', 'default'] },
+  badgesEquipped: { 
+    type: [Badge], 
+    default: [{ _id: 'default', label: 'default', image: 'default' },{ _id: 'default', label: 'default', image: 'default' }] 
+  },
   displayedCards: { type: [Number], default: [0, 0, 0, 0] },
 
   // Inventaire

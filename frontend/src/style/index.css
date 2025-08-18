@@ -2,10 +2,19 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  user-select: none;
 }
 
 body {
   font-family: Arial, sans-serif;
+}
+
+button:not([data-locked="true"]) {
+  cursor: pointer;
+}
+
+button[data-locked="true"] {
+  cursor: default;
 }
 
 .App {

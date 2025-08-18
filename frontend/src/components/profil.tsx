@@ -16,9 +16,11 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const { user } = useUser();
   const { status } = useConnection();
 
+  const [allCards, setAllCards] = useState<Card[]>([])
+
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [featured, setFeatured] = useState<(Card | null)[]>([null, null, null, null]);
-  const [selectedBadges, setSelectedBadges] = useState<String[]>([]);
+  const [selectedBadges, setSelectedBadges] = useState<Badge[]>([]);
   const [selectedTitle, setSelectedTitle] = useState<TitleWithEffect | null>(null);
   
   const [isEditingAllowed, setIsEditingAllowed] = useState(false);
@@ -37,12 +39,15 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
 
   useEffect(() => {
-    console.log("ownedBadges mis à jour :", ownedBadges);
-  }, [ownedBadges]);
-
-  useEffect(() => {
-    console.log("ownedTitles mis à jour :", ownedTitles);
-  }, [ownedTitles]);
+    // Récupérer les cartes possédés
+    if(user){
+      const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
+      const ownedCardsInit = allCards.filter((c: any) =>
+        ownedIds.includes(c.idPokedex)
+      );
+      setOwnedCards(ownedCardsInit);
+    }
+  }, [allCards]);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +57,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
         // On fetch toutes les cartes du jeu
         const allRes = await fetch("https://testcirmon.onrender.com/cards");
         const allData = await allRes.json();
-        const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
+        //const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
+        setAllCards(Array.isArray(allData) ? allData : (allData.cards ?? []))
 
         if (isOwnProfile && user) {
           if (!cancelled) {
@@ -162,12 +168,34 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     }
   };
 
+  const handleAnnulations = async () => {
+    if(!user || !profileUser) return;
+    const displayedIds = user.displayedCards || [];
+
+    const featuredCards = displayedIds.map((idPokedex: number) => {
+      if (idPokedex == null) return null;
+      return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
+    });
+    while (featuredCards.length < 4) { // toujours 4 emplacements (compléter avec null si besoin)
+      featuredCards.push(null);
+    }
+
+    setFeatured(featuredCards);
+    setSelectedBadges(user.badgesEquipped || []);
+    setSelectedTitle(profileUser.title || null);
+    setIsEditing(false);
+  }
+
   const handleModifications = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('Token manquant');
       return;
     }
+
+    console.log("selectedBadges IDs:", selectedBadges.map(b => b._id));
+    console.log("user collectibles:", user?.collectibles.badgeIds);
+
 
     const response = await fetch('https://testcirmon.onrender.com/users/me/equip', {
       method: 'PATCH',
@@ -177,7 +205,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       },
       body: JSON.stringify({
         titleId: selectedTitle?._id,
-        badgeIds: selectedBadges
+        badgeIds: selectedBadges.map(badge => badge?._id)
       })
     });
 
@@ -214,21 +242,17 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     closePicker();
   };
 
-  const selectBadgeForSlot = (badge: string) => {
+const selectBadgeForSlot = (badge: Badge) => {
     if (selectedSlot == null) return;
-    const next = profileUser as User;
-    next.badgesEquipped[selectedSlot] = badge;
-    setProfileUser(next);
-    console.log(profileUser?.badgesEquipped)
+    const next = [...selectedBadges];
+    next[selectedSlot] = badge;
+    setSelectedBadges(next);
     closePicker();
   }
 
   const selectTitle = (title: TitleWithEffect) => {
     if(title == null) return;
-    const next = profileUser as User;
-    next.title = title;
     setSelectedTitle(title);
-    setProfileUser(next);
     closePicker();
   }
 
@@ -279,22 +303,22 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
           <div id="username">
             <h1>{profileUser.username}</h1>
             <h2 key={-1} onClick={() => { if (isEditing) {setPickerType("title");openPickerForSlot(-1)} }} 
-              style={profileUser.title?.isGradientActive ? getGradientStyle(profileUser.title?.gradientDirection ?? "to right", profileUser?.title.colors ?? ["black"]) : {}}
+              style={selectedTitle?.isGradientActive ? getGradientStyle(selectedTitle?.gradientDirection ?? "to right", selectedTitle?.colors ?? ["black"]) : {}}
               data-isediting={isEditing}>
-              {profileUser.title?.text || 'default'}
+              {selectedTitle?.text || 'default'}
             </h2>
           </div>
           <div id="badges-display">
-            {profileUser.badgesEquipped?.map((badge, i) => (
-              <div key={i+""+badge} className="badge" onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
-                {(badge != "default" || isEditing) && 
+            {selectedBadges?.map((badge, i) => (
+              <div key={i+""+badge._id} className="badge" data-isediting={isEditing ? true : false} onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
+                {(badge.image != "default" || isEditing) && 
                 <SmartImage
-                  src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`}
+                  src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
                   alt=""
                   fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
-                />}
-                {!(badge != "default" || isEditing) && 
-              <SmartImage style={{opacity: 0}} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
+              />}
+              {!(badge.image != "default" || isEditing) && 
+                <SmartImage style={{opacity: 0}} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
               </div>
             ))}
           </div>
@@ -322,7 +346,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                 </>
               ) : isEditing ? (
                 <>
-                  <button className="account-button" onClick={() => setIsEditing(false)}>
+                  <button className="account-button" onClick={handleAnnulations}>
                     <img src={`${import.meta.env.BASE_URL}img/icones/retour.png`} alt='' /> Annuler
                   </button>
                   <button className="account-button" id="valid" onClick={handleModifications}>
@@ -372,8 +396,24 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                   pickerType == "badges" ? " badge" : 
                   pickerType == "title" ? " titre" : 
                   " objet"} à exposer</h3>
-              <button onClick={closePicker}>Fermer</button>
+              <button id="picker-close-button" onClick={closePicker}>Fermer
+                <img src={`${import.meta.env.BASE_URL}img/icones/retour.png`} alt='' />
+              </button>
             </div>
+
+            {pickerType == "cards" && (ownedCards.length == 0 || !ownedCards) ? (
+                <div className="collectibles-error">
+                  Vous ne possédez aucune carte à afficher.
+                </div>
+              ) : pickerType == "badges" && (ownedBadges?.length == 0 || !ownedBadges) ? (
+                <div className="collectibles-error">
+                  Vous ne possédez aucun badge à afficher.
+                </div>
+              ) : pickerType == "title" && (ownedTitles?.length == 0 || !ownedTitles) ? (
+                <div className="collectibles-error">
+                  Vous ne possédez aucun titre à afficher.
+                </div>
+              ) : ""}
 
             <div id="owned-collectibles-grid">
               {pickerType == "cards" ? ownedCards.map((card) => (
@@ -381,7 +421,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                   <CardDetails card={card}/>
                 </button>
               )) : pickerType == "badges" ? ownedBadges?.map((badge, index) => (
-                <button key={index} onClick={() => selectBadgeForSlot(badge.image as string)}>
+                <button key={index} onClick={() => selectBadgeForSlot(badge)}>
                   <SmartImage src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}></SmartImage><br></br>{badge.label}
                 </button>
               )) : pickerType == "title" ? ownedTitles?.map((title) => (
@@ -391,20 +431,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                   </p>
                 </button>
               )) : ""}
-
-              {pickerType == "cards" && (ownedCards.length == 0 || !ownedCards) ? (
-                  <div style={{ padding: 24, textAlign: 'center', color: '#666' }}>
-                    Aucune carte à afficher.
-                  </div>
-                ) : pickerType == "badges" && (ownedBadges?.length == 0 || !ownedBadges) ? (
-                  <div style={{ padding: 24, textAlign: 'center', color: '#666' }}>
-                    Aucun badge à afficher.
-                  </div>
-                ) : pickerType == "title" && (ownedTitles?.length == 0 || !ownedTitles) ? (
-                  <div style={{ padding: 24, textAlign: 'center', color: '#666' }}>
-                    Aucun titre à afficher.
-                  </div>
-                ) : ""}
             </div>
           </div>
         </div>

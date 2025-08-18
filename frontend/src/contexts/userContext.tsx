@@ -28,7 +28,7 @@ export interface User {
   // Actuellement équipés
   ppURL: string;
   title: TitleWithEffect | null;
-  badgesEquipped: string[];
+  badgesEquipped: Badge[];
   displayedCards: number[];
 
   // Inventaire
