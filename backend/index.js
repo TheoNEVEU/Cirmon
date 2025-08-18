@@ -210,8 +210,9 @@ app.patch('/users/me/equip', auth, async (req, res) => {
 
   // --- Gestion des badges ---
   if (badgeIds) {
+    console.log(badgeIds);
     const ownsAll = badgeIds.every(id => id === 'default' || user.collectibles.badgeIds.includes(id));
-    if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
+    if (!ownsAll) {console.log(user); return res.status(400).json({ success: false, message: 'Badge non débloqué.' });}
     const badges = await Badge.find({ _id: { $in: badgeIds.filter(id => id !== 'default') } }).lean();
     const finalBadges = badgeIds.map(id => {
       if (id === 'default') return { _id: 'default', label: 'default', image: 'default' };
