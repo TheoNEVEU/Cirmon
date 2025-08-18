@@ -169,7 +169,7 @@ app.get('/users/:username', async (req, res) => {
 // Récupérer les titres possédés par un joueur
 app.get('/collectibles/titles', async (req, res) => {
   const ids = (req.query.ids || '').split(',').filter(Boolean);
-  const titles = await Title.find({ _id: { $in: ids } }).lean();
+  const titles = await Title.find(/*{ _id: { $in: ids } }*/).lean();
   res.json({ success: true, titles });
 });
 
@@ -179,7 +179,6 @@ app.get('/collectibles/badges', async (req, res) => {
   const badges = await Badge.find({ _id: { $in: ids } }).lean();
   res.json({ success: true, badges });
 });
-
 
 // Mettre à jour les modifications du profil d'un joueur
 app.patch('/users/me/equip', auth, async (req, res) => {
