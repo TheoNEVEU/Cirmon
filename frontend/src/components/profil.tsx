@@ -3,7 +3,7 @@ import SmartImage from './smartImage';
 import CardDetails, {type Card} from '../components/card';
 
 import { useConnection } from '../contexts/connectedContext'
-import { useUser, type User, type TitleWithEffect } from '../contexts/userContext';
+import { useUser, type User, type TitleWithEffect, type Badge } from '../contexts/userContext';
 
 import './style/profil.css';
 
@@ -30,11 +30,19 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   
   const [ownedCards, setOwnedCards] = useState<Card[]>([]);
-  const [ownedBadges, setOwnedBadges] = useState<String[]>([]);
+  const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
   const [ownedTitles, setOwnedTitles] = useState<TitleWithEffect[]>([]);
 
 
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
+
+  useEffect(() => {
+    console.log("ownedBadges mis à jour :", ownedBadges);
+  }, [ownedBadges]);
+
+  useEffect(() => {
+    console.log("ownedTitles mis à jour :", ownedTitles);
+  }, [ownedTitles]);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,9 +73,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             setSelectedBadges(user.badgesEquipped);
             setSelectedTitle(user.title);
 
-            console.log(selectedBadges);
-            console.log(user.badgesEquipped);
-
             // Récupérer les cartes possédés
             const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
             const ownedCardsInit = allCards.filter((c: any) =>
@@ -78,18 +83,13 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             // Récupérer les titres possédés
             const titlesRes = await fetch(`https://testcirmon.onrender.com/collectibles/titles?ids=${user.collectibles?.titleIds.join(',')}`);
             const titlesData = await titlesRes.json();
-            setOwnedTitles(titlesData.titles || []);
-            console.log(ownedBadges);
+            if(titlesData.success) setOwnedTitles(titlesData.titles || []);
 
 
             // Récupérer les badges possédés
             const badgesRes = await fetch( `https://testcirmon.onrender.com/collectibles/badges?ids=${user.collectibles.badgeIds.join(',')}`);
             const badgesData = await badgesRes.json();
-            setOwnedBadges(badgesData.badges);
-
-            //On peut forcer des valeurs pour le moment pour les tests
-            //setOwnedBadges(["Dark", "Fire", "Psy", "Water", "Fight", "Electric", "Normal", "Grass"])
-            //setOwnedTitles([{_id:"", text: "caca",gradientDirection: "to right",colors: ['brown, red'],isGradientActive: true},{_id:"", text: "boudin",gradientDirection: "to top",colors: ['brown, black'],isGradientActive: true}])
+            if(badgesData.success) setOwnedBadges(badgesData.badges as Badge[] || []);
 
             setIsEditingAllowed(true);
           }
@@ -381,8 +381,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
                   <CardDetails card={card}/>
                 </button>
               )) : pickerType == "badges" ? ownedBadges?.map((badge, index) => (
-                <button key={index} onClick={() => selectBadgeForSlot(badge as string)}>
-                  <SmartImage src={`${import.meta.env.BASE_URL}img/badges/${badge}.png`}></SmartImage><br></br>{badge}
+                <button key={index} onClick={() => selectBadgeForSlot(badge.image as string)}>
+                  <SmartImage src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}></SmartImage><br></br>{badge.label}
                 </button>
               )) : pickerType == "title" ? ownedTitles?.map((title) => (
                 <button key={title.text} onClick={() => selectTitle(title)}>
