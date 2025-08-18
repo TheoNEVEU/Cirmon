@@ -52,35 +52,38 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
 
             //featured cards (displayedCards -> on prend les cartes correspondantes)
             const displayedIds = user.displayedCards ?? [];
+
             const featuredCards = displayedIds.map((idPokedex: number) => {
               if (idPokedex == null) return null;
               return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
             });
-
-            // toujours 4 emplacements (compléter avec null si besoin)
-            while (featuredCards.length < 4) {
+            while (featuredCards.length < 4) { // toujours 4 emplacements (compléter avec null si besoin)
               featuredCards.push(null);
             }
 
             setFeatured(featuredCards);
-            setSelectedBadges(user.badgeURL);
+            setSelectedBadges(user.badgesEquipped);
             setSelectedTitle(user.title);
+
+            console.log(selectedBadges);
+            console.log(user.badgesEquipped);
 
             // Récupérer les cartes possédés
             const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
-            console.log(ownedIds);
             const ownedCardsInit = allCards.filter((c: any) =>
               ownedIds.includes(c.idPokedex)
             );
             setOwnedCards(ownedCardsInit);
 
             // Récupérer les titres possédés
-            const titlesRes = await fetch(`/collectibles/titles?ids=${user.collectibles.titles.join(',')}`);
+            const titlesRes = await fetch(`https://testcirmon.onrender.com/collectibles/titles?ids=${user.collectibles?.titleIds.join(',')}`);
             const titlesData = await titlesRes.json();
-            setOwnedTitles(titlesData.titles);
+            setOwnedTitles(titlesData.titles || []);
+            console.log(ownedBadges);
+
 
             // Récupérer les badges possédés
-            const badgesRes = await fetch( `/collectibles/badges?ids=${user.collectibles.badges.join(',')}`);
+            const badgesRes = await fetch( `https://testcirmon.onrender.com/collectibles/badges?ids=${user.collectibles.badgeIds.join(',')}`);
             const badgesData = await badgesRes.json();
             setOwnedBadges(badgesData.badges);
 
@@ -214,9 +217,9 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const selectBadgeForSlot = (badge: string) => {
     if (selectedSlot == null) return;
     const next = profileUser as User;
-    next.badgeURL[selectedSlot] = badge;
+    next.badgesEquipped[selectedSlot] = badge;
     setProfileUser(next);
-    console.log(profileUser?.badgeURL)
+    console.log(profileUser?.badgesEquipped)
     closePicker();
   }
 
@@ -259,7 +262,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       </div>
     );
   }
-  console.log(profileUser.ppURL)
   return (
     <div id="account-grid" className="page-container" data-isediting={isEditing}>
       <div id="profil-infos" >
@@ -283,7 +285,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             </h2>
           </div>
           <div id="badges-display">
-            {profileUser.badgeURL?.map((badge, i) => (
+            {profileUser.badgesEquipped?.map((badge, i) => (
               <div key={i+""+badge} className="badge" onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
                 {(badge != "default" || isEditing) && 
                 <SmartImage

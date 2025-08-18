@@ -22,13 +22,13 @@ export interface User {
   // Actuellement équipés
   ppURL: string;
   title: TitleWithEffect | null;
-  badgeURL: string[];
+  badgesEquipped: string[];
   displayedCards: number[];
 
   // Inventaire
   collectibles: { // Tous les collectibles débloqués
-    titles: string[];
-    badges: string[];
+    titleIds: string[];
+    badgeIds: string[];
   };
   cards: PreCard[];
 
