@@ -12,6 +12,7 @@ const Card = require('./models/Cards');
 const User = require('./models/User');
 const Title = require('./models/Title');
 const Badge = require('./models/Badge');
+const ProfPic = require('./models/ProfPic');
 
 const auth = require('./middleware/auth');
 
@@ -169,17 +170,30 @@ app.get('/users/:username', async (req, res) => {
   }
 });
 
-// Récupérer les titres possédés par un joueur
+// Récupérer les photos de profil
+app.get('/collectibles/profPic', async (req, res) => {
+  const ids = (req.query.ids || '').split(',').filter(Boolean);
+  let profPics;
+  if (ids.length > 0) profPics = await ProfPic.find({ _id: { $in: ids } }).lean();
+  else profPics = await ProfPic.find().lean();
+  res.json({ success: true, profPics });
+});
+
+// Récupérer les titres
 app.get('/collectibles/titles', async (req, res) => {
   const ids = (req.query.ids || '').split(',').filter(Boolean);
-  const titles = await Title.find({ _id: { $in: ids } }).lean();
+  let titles;
+  if (ids.length > 0) titles = await Title.find({ _id: { $in: ids } }).lean();
+  else titles = await Title.find().lean();
   res.json({ success: true, titles });
 });
 
-// Récupérer les badges possédés par un joueur
+// Récupérer les badges
 app.get('/collectibles/badges', async (req, res) => {
   const ids = (req.query.ids || '').split(',').filter(Boolean);
-  const badges = await Badge.find({ _id: { $in: ids } }).lean();
+  let badges;
+  if (ids.length > 0) badges = await Badge.find({ _id: { $in: ids } }).lean();
+  else badges = await Badge.find().lean();
   res.json({ success: true, badges });
 });
 
@@ -190,15 +204,16 @@ app.patch('/users/me/equip', auth, async (req, res) => {
 
   // --- Gestion du titre ---
   if (titleId) {
-    if (!user.collectibles.titleIds.includes(titleId)) return res.status(400).json({ success: false, message: 'Titre non débloqué.' });
-    const t = await Title.findById(titleId).lean();
-    if (!t) return res.status(404).json({ success: false, message: 'Titre introuvable.' });
-    user.title = {
-      text: t.text,
-      gradientDirection: t.gradientDirection,
-      colors: t.colors,
-      isGradientActive: t.isGradientActive
-    };
+    if (!user.collectibles.titleIds.includes(titleId))
+      return res.status(400).json({ success: false, message: 'Titre non débloqué.' });
+    user.titleEquipped = titleId;
+  }
+
+  // --- Gestion des badges ---
+  if (badgeIds) {
+    if (!badgeIds.every(id => id === 'default' || user.collectibles.badgeIds.includes(id))) 
+      return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
+    user.badgesEquipped = badgeIds;
   }
 
   // // --- Gestion des badges ---
@@ -208,30 +223,12 @@ app.patch('/users/me/equip', auth, async (req, res) => {
   //   user.badgesEquipped = badgeIds.slice(0, 2); // limite à 2 badges
   // }
 
-  // --- Gestion des badges ---
-  if (badgeIds) {
-    console.log(badgeIds);
-    const ownsAll = badgeIds.every(id => id === 'default' || user.collectibles.badgeIds.includes(id));
-    if (!ownsAll) {console.log(user); return res.status(400).json({ success: false, message: 'Badge non débloqué.' });}
-    const badges = await Badge.find({ _id: { $in: badgeIds.filter(id => id !== 'default') } }).lean();
-    const finalBadges = badgeIds.map(id => {
-      if (id === 'default') return { _id: 'default', label: 'default', image: 'default' };
-      return {
-        _id: badges.find(b => b._id.toString() === id)?._id,
-        label: badges.find(b => b._id.toString() === id)?.label,
-        image: badges.find(b => b._id.toString() === id)?.image
-      };
-    });
-  }
-
-
-
   // --- Sauvegarde unique ---
   await user.save();
 
   res.json({
     success: true,
-    title: user.title,
+    title: user.titleEquippedy,
     badgesEquipped: user.badgesEquipped
   });
 });

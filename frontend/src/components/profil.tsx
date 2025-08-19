@@ -3,7 +3,9 @@ import SmartImage from './smartImage';
 import CardDetails, {type Card} from '../components/card';
 
 import { useConnection } from '../contexts/connectedContext'
-import { useUser, type User, type TitleWithEffect, type Badge } from '../contexts/userContext';
+import { usePage } from '../contexts/pageContext';
+import { useUser, type User, type TitleWithEffect, type Badge, type ProfPicture } from '../contexts/userContext';
+import { useApi } from '../contexts/ApiProviderContext';
 
 import './style/profil.css';
 
@@ -14,14 +16,23 @@ interface ProfileProps {
 
 export default function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const { user } = useUser();
+  const { activePage } = usePage();
   const { status } = useConnection();
+  const { baseUrl } = useApi();
 
   const [allCards, setAllCards] = useState<Card[]>([])
 
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [featured, setFeatured] = useState<(Card | null)[]>([null, null, null, null]);
+
   const [selectedBadges, setSelectedBadges] = useState<Badge[]>([]);
   const [selectedTitle, setSelectedTitle] = useState<TitleWithEffect | null>(null);
+  const [selectedProfilePicture, setSelectedProfilePicture] = useState<ProfPicture | null>(null);
+
+  const [ownedCards, setOwnedCards] = useState<Card[]>([]);
+  const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
+  const [ownedTitles, setOwnedTitles] = useState<TitleWithEffect[]>([]);
+  const [ownedProfilePictures, setOwnedProfilePictures] = useState<ProfPicture[]>([]);
   
   const [isEditingAllowed, setIsEditingAllowed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -31,9 +42,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   
-  const [ownedCards, setOwnedCards] = useState<Card[]>([]);
-  const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
-  const [ownedTitles, setOwnedTitles] = useState<TitleWithEffect[]>([]);
 
 
   const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
@@ -50,12 +58,19 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   }, [allCards]);
 
   useEffect(() => {
+    if(activePage != "account") {
+      setIsDeleting(false);
+      handleAnnulations
+    }
+  }, [activePage]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const loadProfileUser = async () => {
       try {
         // On fetch toutes les cartes du jeu
-        const allRes = await fetch("https://testcirmon.onrender.com/cards");
+        const allRes = await fetch(`${baseUrl}/cards`);
         const allData = await allRes.json();
         //const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
         setAllCards(Array.isArray(allData) ? allData : (allData.cards ?? []))
@@ -66,7 +81,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
 
             //featured cards (displayedCards -> on prend les cartes correspondantes)
             const displayedIds = user.displayedCards ?? [];
-
             const featuredCards = displayedIds.map((idPokedex: number) => {
               if (idPokedex == null) return null;
               return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
@@ -74,10 +88,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             while (featuredCards.length < 4) { // toujours 4 emplacements (compléter avec null si besoin)
               featuredCards.push(null);
             }
-
             setFeatured(featuredCards);
-            setSelectedBadges(user.badgesEquipped);
-            setSelectedTitle(user.title);
 
             // Récupérer les cartes possédés
             const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
@@ -86,46 +97,85 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             );
             setOwnedCards(ownedCardsInit);
 
-            // Récupérer les titres possédés
-            const titlesRes = await fetch(`https://testcirmon.onrender.com/collectibles/titles?ids=${user.collectibles?.titleIds.join(',')}`);
-            const titlesData = await titlesRes.json();
-            if(titlesData.success) setOwnedTitles(titlesData.titles || []);
+            // Récupérer le titres équipé
+            if(user.titleEquipped == 'default') setSelectedTitle(null);
+            else{
+              let titlesRes = await fetch(`${baseUrl}/collectibles/titles?ids=${user.titleEquipped}`);
+              let titlesData = await titlesRes.json();
+              if(titlesData.success) setSelectedTitle(titlesData.titles[0] as TitleWithEffect);
+            }
 
+            // Récupérer les titres possédés
+            if(user.collectibles?.titleIds.length < 1) setOwnedTitles([]);
+            else {
+              let titlesRes = await fetch(`${baseUrl}/collectibles/titles?ids=${user.collectibles?.titleIds.join(',')}`);
+              let titlesData = await titlesRes.json();
+              if(titlesData.success) setOwnedTitles(titlesData.titles as TitleWithEffect[] || []);
+            }
+
+            // Récupérer les badges équipés
+            if(user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',') == "") setSelectedBadges([{_id:'default', label:'default', image:'default'},{_id:'default', label:'default', image:'default'}]);
+            else {
+              let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
+              let badgesData = await badgesRes.json();
+              if(badgesData.success) setSelectedBadges(badgesData.badges as Badge[]);
+            }
 
             // Récupérer les badges possédés
-            const badgesRes = await fetch( `https://testcirmon.onrender.com/collectibles/badges?ids=${user.collectibles.badgeIds.join(',')}`);
-            const badgesData = await badgesRes.json();
-            if(badgesData.success) setOwnedBadges(badgesData.badges as Badge[] || []);
+            if (user.collectibles.badgeIds.length < 1) setOwnedBadges([]);
+            else {
+              let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.collectibles.badgeIds.join(',')}`);
+              let badgesData = await badgesRes.json();
+              if(badgesData.success) setOwnedBadges(badgesData.badges as Badge[] || []);
+            }
+
+            // Récupérer la photo de profil équipée
+            if(user.profPicEquipped == 'default') setSelectedProfilePicture(null);
+            else {
+              let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${user.profPicEquipped}`);
+              let profPictureData = await profPictureRes.json();
+              if(profPictureData.success) setSelectedProfilePicture(profPictureData.profPics[0] as ProfPicture || null);
+            }
+
+            // Récupérer les photos de profil possédées
+            if (user.collectibles.profPicIds.length < 1) setOwnedProfilePictures([]);
+            else {
+              let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${user.collectibles.profPicIds.join(',')}`);
+              let profPictureData = await profPictureRes.json();
+              if(profPictureData.success) setOwnedProfilePictures(profPictureData.profPics as ProfPicture[]);
+            }
+
+      
 
             setIsEditingAllowed(true);
           }
         } else {
-          // Profil d’un autre utilisateur
-          const res = await fetch(`https://testcirmon.onrender.com/users/${username}`);
-          const data = await res.json();
+          // // Profil d’un autre utilisateur
+          // const res = await fetch(`${baseUrl}/users/${username}`);
+          // const data = await res.json();
 
-          if (!cancelled && data?.success && data.user) {
-            const profile = data.user;
-            setProfileUser(profile);
+          // if (!cancelled && data?.success && data.user) {
+          //   const profile = data.user;
+          //   setProfileUser(profile);
 
-            // featured
-            const displayedIds = profile.displayedCards ?? [];
-            const featuredCards = allCards.filter((c: any) =>
-              displayedIds.includes(c.idPokedex)
-            );
-            setFeatured(featuredCards);
+          //   // featured
+          //   const displayedIds = profile.displayedCards ?? [];
+          //   const featuredCards = allCards.filter((c: any) =>
+          //     displayedIds.includes(c.idPokedex)
+          //   );
+          //   setFeatured(featuredCards);
 
-            // ownedCards
-            const ownedIds = profile.cards?.map((c: any) => c.idPokedex) ?? [];
-            const ownedCards = allCards.filter((c: any) =>
-              ownedIds.includes(c.idPokedex)
-            );
-            setOwnedCards(ownedCards);
+          //   // ownedCards
+          //   const ownedIds = profile.cards?.map((c: any) => c.idPokedex) ?? [];
+          //   const ownedCards = allCards.filter((c: any) =>
+          //     ownedIds.includes(c.idPokedex)
+          //   );
+          //   setOwnedCards(ownedCards);
 
-            // collectibles
-            setOwnedBadges(profile.collectibles.filter((c: any) => c.type === "badge"));
-            setOwnedTitles(profile.collectibles.filter((c: any) => c.type === "title"));
-          }
+          //   // collectibles
+          //   setOwnedBadges(profile.collectibles.filter((c: any) => c.type === "badge"));
+          //   setOwnedTitles(profile.collectibles.filter((c: any) => c.type === "title"));
+          // }
         }
       } catch (e) {
         console.error("Erreur chargement profil :", e);
@@ -150,7 +200,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
         console.error('No token found');
         return;
       }
-      const response = await fetch('https://testcirmon.onrender.com/users', {
+      const response = await fetch(`${baseUrl}/users`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -179,10 +229,33 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     while (featuredCards.length < 4) { // toujours 4 emplacements (compléter avec null si besoin)
       featuredCards.push(null);
     }
-
     setFeatured(featuredCards);
-    setSelectedBadges(user.badgesEquipped || []);
-    setSelectedTitle(profileUser.title || null);
+
+    // Récupérer le titres équipé
+    if(user.titleEquipped == 'default') setSelectedTitle(null);
+    else{
+      let titlesRes = await fetch(`${baseUrl}/collectibles/titles?ids=${user.titleEquipped}`);
+      let titlesData = await titlesRes.json();
+      if(titlesData.success) setSelectedTitle(titlesData.titles[0] as TitleWithEffect);
+    }
+
+    // Récupérer les badges équipés
+    if(user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',') == "") setSelectedBadges([{_id:'default', label:'default', image:'default'},{_id:'default', label:'default', image:'default'}]);
+    else {
+      let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
+      let badgesData = await badgesRes.json();
+      if(badgesData.success) setSelectedBadges(badgesData.badges as Badge[]);
+    }
+
+    // Récupérer la photo de profil équipée
+    if(user.profPicEquipped == 'default') setSelectedProfilePicture(null);
+    else {
+      let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${user.profPicEquipped}`);
+      let profPictureData = await profPictureRes.json();
+      if(profPictureData.success) setSelectedProfilePicture(profPictureData.profPics[0] as ProfPicture || null);
+    }
+
+
     setIsEditing(false);
   }
 
@@ -197,15 +270,16 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     console.log("user collectibles:", user?.collectibles.badgeIds);
 
 
-    const response = await fetch('https://testcirmon.onrender.com/users/me/equip', {
+    const response = await fetch(`${baseUrl}/users/me/equip`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        titleId: selectedTitle,
-        badgeIds: selectedBadges
+        titleId: selectedTitle?._id,
+        badgeIds: selectedBadges.map(b => b._id),
+        profPicIds: selectedProfilePicture?._id,
       })
     });
 
@@ -291,13 +365,13 @@ const selectBadgeForSlot = (badge: Badge) => {
       <div id="profil-infos" >
         <div id="profilpartA">
           <div id="pp-container">
-            {(profileUser.ppURL != "NoPP" || isEditing) && 
+            {(selectedProfilePicture?.image != "default" || isEditing) && 
               <SmartImage data-isediting={isEditing ? true : false}
-              src={`${import.meta.env.BASE_URL}img/profiles/${profileUser.ppURL}.png`}
+              src={`${import.meta.env.BASE_URL}img/profiles/${selectedProfilePicture?.image}.png`}
               alt=""
               fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
             />}
-            {!(profileUser.ppURL != "NoPP" || isEditing) && 
+            {!(selectedProfilePicture?.image != "default" || isEditing) && 
               <SmartImage style={{opacity: 0}} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
           </div>
           <div id="username">
