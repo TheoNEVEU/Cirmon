@@ -22,7 +22,7 @@
 //     setFlippedCards([]);
 
 //     try {
-//       const response = await fetch("https://testcirmon.onrender.com/booster/open", {
+//       const response = await fetch(`${baseUrl}/booster/open`, {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
 //         body: JSON.stringify({ username: user?.username })
@@ -98,14 +98,16 @@ import { useState } from 'react';
 import CardDetails, { type Card } from "../components/card";
 import { useUser } from '../contexts/userContext'; // J'imagine que tu as un setUser ici aussi
 import { usePage } from '../contexts/pageContext';
+import { useApi } from '../contexts/ApiProviderContext';
 
 import '../style/BoosterOpening.css';
 
 export default function BoosterOpening() {
   const { user, setUser } = useUser();  // <-- Récupérer setUser aussi
-  const [cards, setCards] = useState<Card[]>([]);
   const { activePage, setActivePage } = usePage();
-
+  const { baseUrl } = useApi();
+  
+  const [cards, setCards] = useState<Card[]>([]);
   const [isAnimation, setAnimation] = useState<boolean>(false);
   const [spreadCards, setSpreadCards] = useState(false);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
@@ -120,7 +122,7 @@ export default function BoosterOpening() {
     setFinalizedCards([]);
 
     try {
-      const response = await fetch("https://testcirmon.onrender.com/booster/open", {
+      const response = await fetch(`${baseUrl}/booster/open`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: user.username }),

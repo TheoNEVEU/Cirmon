@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import './style/App.css';
 
 import Home from './pages/Home';
@@ -11,6 +11,7 @@ import StatusSquare from './components/statusSquare';
 
 import { useUser } from './contexts/userContext';
 import { usePage, type Page } from './contexts/pageContext';
+import { useApi } from './contexts/ApiProviderContext';
 
 function App() {
   const [indicatorTop, setIndicatorTop] = useState(0);
@@ -18,6 +19,7 @@ function App() {
 
   const { user, setUser } = useUser();
   const { activePage, setActivePage } = usePage();
+  const { baseUrl } = useApi();
 
   const buttonRefs: Record<Page, React.RefObject<HTMLButtonElement | null>> = {
     home: useRef<HTMLButtonElement | null>(null),
@@ -52,7 +54,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      fetch('https://testcirmon.onrender.com/users', {
+      fetch(`${baseUrl}/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
         .then(res => res.json())

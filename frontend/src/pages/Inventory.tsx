@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
+import { useApi } from '../contexts/ApiProviderContext';
 import CardDetails, { type Card as CardType } from "../components/card";
 
 import '../style/Inventory.css';
@@ -9,6 +10,7 @@ import '../style/Inventory.css';
 export default function Inventory() {
   const { user } = useUser();
   const { status } = useConnection();
+  const { baseUrl } = useApi();
 
   const [cards, setCards] = useState<any[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
@@ -24,7 +26,7 @@ export default function Inventory() {
       if (!user) return;
 
       try {
-        const allRes = await fetch("https://testcirmon.onrender.com/cards");
+        const allRes = await fetch(`${baseUrl}/cards`);
         const allData = await allRes.json();
 
         // supporte response = [] ou { cards: [...] }
