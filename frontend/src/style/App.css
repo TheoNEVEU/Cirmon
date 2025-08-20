@@ -1,4 +1,8 @@
 html {
+  overflow: hidden;
+}
+
+#regular_background {
   background: linear-gradient(
     120deg,
     #fce8e8,
@@ -7,12 +11,46 @@ html {
     #dadaf8,
     #fce0e0
   );
+  z-index: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
-html[data-animated=true] {
-  background-size: 400% 400%;
-  animation: subtleShift 30s ease infinite; 
+#gold_background {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+
+  background: linear-gradient(
+    120deg,
+  #fce8b2,
+  #fcedc7,
+  #fcecbf,
+  #fbde74,
+  #f9e8b4,
+  #faebc2,
+  #fee17a,
+  #fcf1ca
+  );
+  transition: opacity 1s ease-in-out;
+}
+
+#gold_background[data-godPack=true] {
+  opacity: 1;
+}
+
+#gold_background:not([data-godPack=true]) {
+  opacity: 0;  
+}
+
+#regular_background[data-animated=true][data-godPack=false], #gold_background[data-animated=true][data-godPack=true] {
+  background-size: 200% 200%;
+  animation: subtleShift 20s ease infinite;
 }
 
 @keyframes subtleShift {
@@ -39,6 +77,7 @@ html::-webkit-scrollbar {
 
 #statusSquare {
   position: absolute;
+  z-index: 100;
   top: 2%;
   left: 1%;
   width: 10px;
@@ -58,7 +97,7 @@ html::-webkit-scrollbar {
   height: 15%;
   width: 40%;
   margin: 1%;
-  
+
   overflow: hidden;
 }
 
@@ -84,6 +123,7 @@ html::-webkit-scrollbar {
 }
 
 #sidebar, #grid-container-content {
+  z-index: 10;
   transition: transform 2s ease;
 }
 
@@ -92,12 +132,12 @@ html::-webkit-scrollbar {
   grid-template-columns: 1fr 8fr;
   grid-template-rows: 100%;
   grid-column-gap: 1%;
-  
+
   height: 100vh;
   width: 100vw;
   padding: 2% 2% 2% 2%;
-  z-index: 1;
-  
+  z-index: 2;
+
   font-family: sans-serif;
 }
 
@@ -135,8 +175,7 @@ html::-webkit-scrollbar {
 
   width: 90%;
   height: 90%;
-  z-index: 10;
-  
+
   border-radius: 30px;
   background-color: white;
   filter: drop-shadow(0 0 10px gray);
@@ -196,7 +235,7 @@ html::-webkit-scrollbar {
   box-sizing: border-box;
   transition: top 0.3s ease, left 0.3s ease;
   pointer-events: none;
-  z-index: 1000;
+  z-index: 20;
 }
 
 
@@ -204,7 +243,7 @@ html::-webkit-scrollbar {
 .page {
   display: none;
   position: absolute;
-  
+
   opacity: 0;
   width: 98%;
   height: 90%;

@@ -16,22 +16,29 @@ const ProfPic = require('./models/ProfPic');
 
 const auth = require('./middleware/auth');
 
-app.use(express.json());  // Important pour POST /register et POST /login
+app.use(express.json());
 app.use(cors());
 
-const rarityChances = [
-  { rarity: 1, chance: 0.002 },
-  { rarity: 2, chance: 0.01 },
-  { rarity: 3, chance: 0.10 },
-  { rarity: 4, chance: 0.30 },
-  { rarity: 5, chance: 0.60 },
+// Probas GodPack
+const slotGodPackWeights = [
+  { rarity: 1, chances: 10 },
+  { rarity: 2, chances: 32.5},
+  { rarity: 3, chances: 42.5 },
+  { rarity: 4, chances: 15 },
+  { rarity: 5, chances: 0 },
+];
+
+// Probas Regular Pack
+const slotCommonPackWeights = [
+  { rarity: 1, chances: 0.1 },
+  { rarity: 2, chances: 1 },
+  { rarity: 3, chances: 12 },
+  { rarity: 4, chances: 32.3 },
+  { rarity: 5, chances: 54.6 },
 ];
 
 // Connexion MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('MongoDB connecté'))
 .catch(err => console.error('Erreur MongoDB :', err));
 
@@ -55,11 +62,11 @@ app.get('/test', async (req, res) => {
   }
 });
 
-// Route pour récupérer les infos d'une carte selon l'idPokedex
-app.get('/cards/:idPokedex', async (req, res) => {
-  const idPokedex = parseInt(req.params.idPokedex, 10);
+// Route pour récupérer les infos d'une carte selon l'id
+app.get('/cards/:id', async (req, res) => {
+  const _id = parseInt(req.params._id, 10);
   try {
-    const card = await Card.findOne({ idPokedex: idPokedex });
+    const card = await Card.findOne({ _id: _id });
     if (card) {
       res.json({ success: true, card }); // On renvoie tout le document
     } else {
@@ -199,7 +206,7 @@ app.get('/collectibles/badges', async (req, res) => {
 
 // Mettre à jour les modifications du profil d'un joueur
 app.patch('/users/me/equip', auth, async (req, res) => {
-  const { titleId, badgeIds } = req.body;
+  const { titleId, badgeIds, profPicId, featuredIds } = req.body;
   const user = await User.findById(req.user.id);
 
   // --- Gestion du titre ---
@@ -216,20 +223,30 @@ app.patch('/users/me/equip', auth, async (req, res) => {
     user.badgesEquipped = badgeIds;
   }
 
-  // // --- Gestion des badges ---
-  // if (badgeIds) {
-  //   const ownsAll = badgeIds.every(id => user.collectibles.badgeIds.includes(id));
-  //   if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
-  //   user.badgesEquipped = badgeIds.slice(0, 2); // limite à 2 badges
-  // }
+  // --- Gestion de la photo de pofil ---
+  if (profPicId) {
+    if (!user.collectibles.profPicIds.includes(profPicId))
+      return res.status(400).json({ success: false, message: 'Photo de profil non débloqué.' });
+    user.profPicEquipped = profPicId;
+  }
+
+  // --- Gestion des cartes ---
+  if (featuredIds) {
+    if (!featuredIds.every(id => id == null || id == undefined || user.cards.some(c => c._id == id)))
+      return res.status(400).json({ success: false, message: 'Carte non découverte.' });
+    featuredIds.map(id => {if(id == null || id == undefined) id = 0});
+    user.displayedCards = featuredIds;
+  }
 
   // --- Sauvegarde unique ---
   await user.save();
 
   res.json({
     success: true,
-    title: user.titleEquippedy,
-    badgesEquipped: user.badgesEquipped
+    newTitleEquipped: user.titleEquipped,
+    newBadgesEquipped: user.badgesEquipped,
+    newProfPicEquipped: user.profPicEquipped,
+    newDisplayedCards : user.displayedCards
   });
 });
 
@@ -270,33 +287,34 @@ app.post('/booster/open', async (req, res) => {
   const boosterCost = 200;
   const boosterSize = 5;
 
+  const pickWeighted = (weights) => {
+    const total = weights.reduce((s, chances) => s + chances.chances, 0);
+    let r = Math.random() * total;
+    for (const { rarity, chances } of weights) {
+      if ((r -= chances) < 0) return rarity;
+    }
+    return weights[weights.length - 1].rarity;
+  }
+
   try {
-    // --- Tirage des cartes ---
-
-    const pickRarity = () => {
-      let rand = Math.random(), sum = 0;
-      for (let i = rarityChances.length - 1; i >= 0; i--) {
-        sum += rarityChances[i].chance;
-        if (rand <= sum) return rarityChances[i].rarity;
-      }
-      return 5;
-    };
-
     const boosterCards = [];
-    const usedIds = new Set();
+    const isGodPack = Math.random() > 0.999;
     for (let i = 0; i < boosterSize; i++) {
       let tries = 0;
       while (tries < 10) {
-        const rarity = pickRarity();
+        let rarity = 0;
+        if(isGodPack) {rarity = pickWeighted(slotGodPackWeights);}
+        else {rarity = pickWeighted(slotCommonPackWeights);}
         const pool = await Card.aggregate([{ $match: { rarity } }, { $sample: { size: 1 } }]);
-        if (pool.length /*&& !usedIds.has(pool[0]._id.toString())*/) {
+        if (pool.length) {
           boosterCards.push(pool[0]);
-          usedIds.add(pool[0]._id.toString());
           break;
         }
         tries++;
       }
     }
+    boosterCards.sort((a, b) => b.rarity - a.rarity);
+
 
     // --- Transaction Mongo ---
     const session = await mongoose.startSession();
@@ -318,12 +336,12 @@ app.post('/booster/open', async (req, res) => {
     let newCards = 0;
     let FACard = 0;
     for (const card of boosterCards) {
-      const existing = user.cards.find(c => c.idPokedex == card.idPokedex);
+      const existing = user.cards.find(c => c._id == card._id);
       if(card.rarity == 1) FACard++;
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
       } else {
-        user.cards.push({ idPokedex: card.idPokedex, quantity: 1 });
+        user.cards.push({ _id: card._id, quantity: 1 });
         newCards++;
       }
     }
@@ -342,7 +360,8 @@ app.post('/booster/open', async (req, res) => {
       success: true,
       booster: boosterCards,
       diamonds: user.diamonds,
-      inventory: user.cards
+      inventory: user.cards,
+      isGodPack: isGodPack,
     });
 
   } catch (err) {

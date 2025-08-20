@@ -20,9 +20,10 @@ export type Card = {
 interface CardDetailsProps {
   card: Card;
   style?: React.CSSProperties;
+  hoverEffects?: boolean;
 }
 
-export default function CardDetails({ card, style }: CardDetailsProps) {
+export default function CardDetails({ card, style, hoverEffects }: CardDetailsProps) {
   const rarities = ["rainbow", "crown", "star", "diamond", "triangle"];
 
   if (!card) return (
@@ -30,7 +31,7 @@ export default function CardDetails({ card, style }: CardDetailsProps) {
       <img src={`${import.meta.env.BASE_URL}img/cardback.png`}/>
     </div></>);
   return (
-    <div className="card" id={`card-${card.idPokedex}`} data-shiny={card.rarity == 2} data-rainbow={card.rarity == 1} data-dark={card.type === "Dark"} style={style}>
+    <div className="card" id={`card-${card.idPokedex}`} data-shiny={card.rarity == 2 && hoverEffects} data-rainbow={card.rarity == 1 && hoverEffects} data-dark={card.type === "Dark"} data-hovereffects={hoverEffects == true} style={style}>
       <img
         src={`${import.meta.env.BASE_URL}img/fondsCartes/${card.type}.png`}
         alt={`${card.type} background`}

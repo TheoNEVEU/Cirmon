@@ -38,7 +38,7 @@
 //         setTimeout(() => {
 //           setSpreadCards(true);
 
-//           data.booster.forEach((_ : { idPokedex: number; quantity: number }, i: number) => {
+//           data.booster.forEach((_ : { _id: number; quantity: number }, i: number) => {
 //             setTimeout(() => {
 //               setFlippedCards(prev => [...prev, i]);
 //               setTimeout(() => {
@@ -94,7 +94,7 @@
 //   );
 // }
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CardDetails, { type Card } from "../components/card";
 import { useUser } from '../contexts/userContext'; // J'imagine que tu as un setUser ici aussi
 import { usePage } from '../contexts/pageContext';
@@ -109,9 +109,14 @@ export default function BoosterOpening() {
   
   const [cards, setCards] = useState<Card[]>([]);
   const [isAnimation, setAnimation] = useState<boolean>(false);
+  const [isGodPack, setIsGodPack] = useState<boolean>(false);
   const [spreadCards, setSpreadCards] = useState(false);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [finalizedCards, setFinalizedCards] = useState<number[]>([]);
+
+  useEffect(() => {
+    document.getElementById("gold_background")?.setAttribute("data-godPack", isGodPack ? "true" : "false");
+  }, [isGodPack]);
 
   const pickRandomCards = async () => {
     if (!user) return;
@@ -137,10 +142,11 @@ export default function BoosterOpening() {
         cards: data.inventory,
       });
       setCards(data.booster);
+      setIsGodPack(data.isGodPack);
       setAnimation(true);
       setTimeout(() => {
         setSpreadCards(true);
-        data.booster.forEach((_ : { idPokedex: number; quantity: number }, i: number) => {
+        data.booster.forEach((_ : { _id: string; quantity: number }, i: number) => {
           setTimeout(() => {
             setFlippedCards(prev => [...prev, i]);
             setTimeout(() => {
@@ -168,6 +174,7 @@ export default function BoosterOpening() {
               <CardDetails
                 key={index}
                 card={card}
+                hoverEffects={true}
                 style={{
                   left: `calc(50% + ${offset}vw)`,
                 }}
@@ -202,6 +209,7 @@ export default function BoosterOpening() {
             setSpreadCards(false);
             setFlippedCards([]);
             setFinalizedCards([]);
+            setIsGodPack(false);
           }}>Collecter</button>
         )}
       </div>
