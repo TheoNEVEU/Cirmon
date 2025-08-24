@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const CardSchema = new mongoose.Schema({
+  _id: { type: mongoose.Schema.Types.ObjectId, required: true },
   idPokedex: Number,
-  generation: Number,
+  idcollection: Number,
   name: String,
   illustration: String,
   rarity: Number,

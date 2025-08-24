@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 import CardDetails, { type Card as CardType } from "../components/card";
 
 import '../style/Inventory.css';
@@ -9,6 +10,7 @@ import '../style/Inventory.css';
 export default function Inventory() {
   const { user } = useUser();
   const { status } = useConnection();
+  const { baseUrl, socket } = useApiSocket();
 
   const [cards, setCards] = useState<any[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
@@ -24,28 +26,28 @@ export default function Inventory() {
       if (!user) return;
 
       try {
-        const allRes = await fetch("https://testcirmon.onrender.com/cards");
+        const allRes = await fetch(`${baseUrl}/cards`);
         const allData = await allRes.json();
 
         // supporte response = [] ou { cards: [...] }
         const allCards: any[] = Array.isArray(allData) ? allData : (allData.cards ?? []);
 
         // map user -> quantity (assure Number)
-        const userCardMap = new Map<number, number>(
-          (user.cards || []).map((c: { idPokedex: number; quantity: number }) => [
-            Number(c.idPokedex),
+        const userCardMap = new Map<string, number>(
+          (user.cards || []).map((c: { _id: string; quantity: number }) => [
+            String(c._id),
             Number(c.quantity),
           ])
         );
 
-        // fusion : on prend idPokedex (ou numPokedex si présent) et on met quantity
+        // fusion : on prend _id (ou numPokedex si présent) et on met quantity
         const mergedCards: (CardType & { quantity: number; isPlaceholder: boolean })[] =
           allCards.map((card: any) => {
-            const id = Number(card.idPokedex ?? card.numPokedex ?? card._id ?? -1);
+            const id = String(card._id ?? -1);
             const quantity = userCardMap.get(id) ?? 0;
             return {
               ...card,
-              idPokedex: id,
+              _id: id,
               quantity,
               isPlaceholder: quantity === 0,
             };
@@ -185,12 +187,12 @@ export default function Inventory() {
           if (activeRarityFilter !== 'none' && card.rarity.toString() !== activeRarityFilter) return null;
           if (card.isPlaceholder) {
             return (
-              <div key={card.idPokedex} className="empty-card">
+              <div key={card._id} className="empty-card">
                 <span>???<br></br>(N°{card.idPokedex})</span>
               </div>
             );
           }
-          return <CardDetails key={card.idPokedex} card={card}/>;
+          return <CardDetails key={card._id} card={card} hoverEffects={true}/>;
         })}
       </div>
     </div>

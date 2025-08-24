@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface PreCard {
-  idPokedex: number;
+  _id: string;
   quantity: number;
 }
 
@@ -19,6 +19,12 @@ export interface Badge {
   image: string,
 }
 
+export interface ProfPicture {
+  _id: string,
+  label: string,
+  image: string,
+}
+
 export interface User {
   // Infos générales
   username: string;
@@ -26,13 +32,14 @@ export interface User {
   diamonds: number;
   
   // Actuellement équipés
-  ppURL: string;
-  title: TitleWithEffect | null;
-  badgesEquipped: Badge[];
-  displayedCards: number[];
+  profPicEquipped: string;
+  titleEquipped: string;
+  badgesEquipped: string[];
+  displayedCards: string[];
 
   // Inventaire
   collectibles: { // Tous les collectibles débloqués
+    profPicIds: string[];
     titleIds: string[];
     badgeIds: string[];
   };

@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const http = require('http');
+const { Server } = require('socket.io');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -8,22 +10,38 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" },
+});
+app.use(express.json());
+app.use(cors());
+
 const Card = require('./models/Cards');
 const User = require('./models/User');
 const Title = require('./models/Title');
 const Badge = require('./models/Badge');
+const ProfPic = require('./models/ProfPic');
+const Message = require('./models/Message');
 
 const auth = require('./middleware/auth');
 
-app.use(express.json());  // Important pour POST /register et POST /login
-app.use(cors());
+// Probas GodPack
+const slotGodPackWeights = [
+  { rarity: 1, chances: 10 },
+  { rarity: 2, chances: 32.5},
+  { rarity: 3, chances: 42.5 },
+  { rarity: 4, chances: 15 },
+  { rarity: 5, chances: 0 },
+];
 
-const rarityChances = [
-  { rarity: 1, chance: 0.002 },
-  { rarity: 2, chance: 0.01 },
-  { rarity: 3, chance: 0.10 },
-  { rarity: 4, chance: 0.30 },
-  { rarity: 5, chance: 0.60 },
+// Probas Regular Pack
+const slotCommonPackWeights = [
+  { rarity: 1, chances: 0.1 },
+  { rarity: 2, chances: 1 },
+  { rarity: 3, chances: 12 },
+  { rarity: 4, chances: 32.3 },
+  { rarity: 5, chances: 54.6 },
 ];
 
 // Connexion MongoDB
@@ -51,11 +69,11 @@ app.get('/test', async (req, res) => {
   }
 });
 
-// Route pour récupérer les infos d'une carte selon l'idPokedex
-app.get('/cards/:idPokedex', async (req, res) => {
-  const idPokedex = parseInt(req.params.idPokedex, 10);
+// Route pour récupérer les infos d'une carte selon l'id
+app.get('/cards/:id', async (req, res) => {
+  const _id = parseInt(req.params._id, 10);
   try {
-    const card = await Card.findOne({ idPokedex: idPokedex });
+    const card = await Card.findOne({ _id: _id });
     if (card) {
       res.json({ success: true, card }); // On renvoie tout le document
     } else {
@@ -166,73 +184,80 @@ app.get('/users/:username', async (req, res) => {
   }
 });
 
-// Récupérer les titres possédés par un joueur
+// Récupérer les photos de profil
+app.get('/collectibles/profPic', async (req, res) => {
+  const ids = (req.query.ids || '').split(',').filter(Boolean);
+  let profPics;
+  if (ids.length > 0) profPics = await ProfPic.find({ _id: { $in: ids } }).lean();
+  else profPics = await ProfPic.find().lean();
+  res.json({ success: true, profPics });
+});
+
+// Récupérer les titres
 app.get('/collectibles/titles', async (req, res) => {
   const ids = (req.query.ids || '').split(',').filter(Boolean);
-  const titles = await Title.find({ _id: { $in: ids } }).lean();
+  let titles;
+  if (ids.length > 0) titles = await Title.find({ _id: { $in: ids } }).lean();
+  else titles = await Title.find().lean();
   res.json({ success: true, titles });
 });
 
-// Récupérer les badges possédés par un joueur
+// Récupérer les badges
 app.get('/collectibles/badges', async (req, res) => {
   const ids = (req.query.ids || '').split(',').filter(Boolean);
-  const badges = await Badge.find({ _id: { $in: ids } }).lean();
+  let badges;
+  if (ids.length > 0) badges = await Badge.find({ _id: { $in: ids } }).lean();
+  else badges = await Badge.find().lean();
   res.json({ success: true, badges });
 });
 
 // Mettre à jour les modifications du profil d'un joueur
 app.patch('/users/me/equip', auth, async (req, res) => {
-  const { titleId, badgeIds } = req.body;
+  const { titleId, badgeIds, profPicId, featuredIds } = req.body;
   const user = await User.findById(req.user.id);
 
   // --- Gestion du titre ---
   if (titleId) {
-    if (!user.collectibles.titleIds.includes(titleId)) return res.status(400).json({ success: false, message: 'Titre non débloqué.' });
-    const t = await Title.findById(titleId).lean();
-    if (!t) return res.status(404).json({ success: false, message: 'Titre introuvable.' });
-    user.title = {
-      text: t.text,
-      gradientDirection: t.gradientDirection,
-      colors: t.colors,
-      isGradientActive: t.isGradientActive
-    };
+    if (!user.collectibles.titleIds.includes(titleId))
+      return res.status(400).json({ success: false, message: 'Titre non débloqué.' });
+    user.titleEquipped = titleId;
   }
-
-  // // --- Gestion des badges ---
-  // if (badgeIds) {
-  //   const ownsAll = badgeIds.every(id => user.collectibles.badgeIds.includes(id));
-  //   if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
-  //   user.badgesEquipped = badgeIds.slice(0, 2); // limite à 2 badges
-  // }
 
   // --- Gestion des badges ---
   if (badgeIds) {
-    const ownsAll = badgeIds.every(id => id === 'default' || user.collectibles.badgeIds.includes(id));
-    if (!ownsAll) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
-    const badges = await Badge.find({ _id: { $in: badgeIds.filter(id => id !== 'default') } }).lean();
-    const finalBadges = badgeIds.map(id => {
-      if (id === 'default') return { _id: 'default', label: 'default', image: 'default' };
-      return {
-        _id: badges.find(b => b._id.toString() === id)?._id,
-        label: badges.find(b => b._id.toString() === id)?.label,
-        image: badges.find(b => b._id.toString() === id)?.image
-      };
-    });
+    if (!badgeIds.every(id => id === 'default' || user.collectibles.badgeIds.includes(id))) 
+      return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
+    user.badgesEquipped = badgeIds;
   }
 
+  // --- Gestion de la photo de pofil ---
+  if (profPicId) {
+    if (!user.collectibles.profPicIds.includes(profPicId))
+      return res.status(400).json({ success: false, message: 'Photo de profil non débloqué.' });
+    user.profPicEquipped = profPicId;
+  }
 
+  // --- Gestion des cartes ---
+  if (featuredIds) {
+    if (!featuredIds.every(id => id == null || id == undefined || user.cards.some(c => c._id == id)))
+      return res.status(400).json({ success: false, message: 'Carte non découverte.' });
+    featuredIds.map(id => {if(id == null || id == undefined) id = 0});
+    user.displayedCards = featuredIds;
+  }
 
   // --- Sauvegarde unique ---
   await user.save();
 
   res.json({
     success: true,
-    title: user.title,
-    badgesEquipped: user.badgesEquipped
+    newTitleEquipped: user.titleEquipped,
+    newBadgesEquipped: user.badgesEquipped,
+    newProfPicEquipped: user.profPicEquipped,
+    newDisplayedCards : user.displayedCards
   });
 });
 
-// récupère les amis d'un utilisateur
+// Récupérer les amis d'un utilisateur
 app.get('/users/friends/:username', async (req, res) => {
   const { username } = req.params;
 
@@ -269,33 +294,34 @@ app.post('/booster/open', async (req, res) => {
   const boosterCost = 200;
   const boosterSize = 5;
 
+  const pickWeighted = (weights) => {
+    const total = weights.reduce((s, chances) => s + chances.chances, 0);
+    let r = Math.random() * total;
+    for (const { rarity, chances } of weights) {
+      if ((r -= chances) < 0) return rarity;
+    }
+    return weights[weights.length - 1].rarity;
+  }
+
   try {
-    // --- Tirage des cartes ---
-
-    const pickRarity = () => {
-      let rand = Math.random(), sum = 0;
-      for (let i = rarityChances.length - 1; i >= 0; i--) {
-        sum += rarityChances[i].chance;
-        if (rand <= sum) return rarityChances[i].rarity;
-      }
-      return 5;
-    };
-
     const boosterCards = [];
-    const usedIds = new Set();
+    const isGodPack = Math.random() > 0.999;
     for (let i = 0; i < boosterSize; i++) {
       let tries = 0;
       while (tries < 10) {
-        const rarity = pickRarity();
+        let rarity = 0;
+        if(isGodPack) {rarity = pickWeighted(slotGodPackWeights);}
+        else {rarity = pickWeighted(slotCommonPackWeights);}
         const pool = await Card.aggregate([{ $match: { rarity } }, { $sample: { size: 1 } }]);
-        if (pool.length /*&& !usedIds.has(pool[0]._id.toString())*/) {
+        if (pool.length) {
           boosterCards.push(pool[0]);
-          usedIds.add(pool[0]._id.toString());
           break;
         }
         tries++;
       }
     }
+    boosterCards.sort((a, b) => b.rarity - a.rarity);
+
 
     // --- Transaction Mongo ---
     const session = await mongoose.startSession();
@@ -317,12 +343,20 @@ app.post('/booster/open', async (req, res) => {
     let newCards = 0;
     let FACard = 0;
     for (const card of boosterCards) {
-      const existing = user.cards.find(c => c.idPokedex == card.idPokedex);
-      if(card.rarity == 1) FACard++;
+      const existing = user.cards.find(c => c._id == card._id);
+      if(card.rarity == 1) {
+        FACard++
+        await new Message({
+          type: "DROP",
+          content: `${username} vient de pack`,
+          card: card._id,
+          expiresAt: new Date(Date.now() + 24*60*60*1000),
+        }).save();
+      };
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
       } else {
-        user.cards.push({ idPokedex: card.idPokedex, quantity: 1 });
+        user.cards.push({ _id: card._id, quantity: 1 });
         newCards++;
       }
     }
@@ -341,7 +375,8 @@ app.post('/booster/open', async (req, res) => {
       success: true,
       booster: boosterCards,
       diamonds: user.diamonds,
-      inventory: user.cards
+      inventory: user.cards,
+      isGodPack: isGodPack,
     });
 
   } catch (err) {
@@ -350,6 +385,62 @@ app.post('/booster/open', async (req, res) => {
   }
 });
 
+// Envoyer des messages
+app.post("/messages/send", async (req, res) => {
+  const { type, content, duration } = req.body;
+
+  try {
+    const message = new Message({
+      type,
+      content,
+      expiresAt: new Date(Date.now() + (duration || 24 * 60 * 60 * 1000)) // par défaut 24h
+    });
+    await message.save();
+    res.json({ success: true, message });
+  } catch (err) {
+    console.error("Erreur /messages/send:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Lire les messages
+app.get("/messages/inbox", async (req, res) => {
+  try {
+    const messages = await Message.find({ expiresAt: { $gt: new Date() } })
+      .sort({ createdAt: -1 })
+      .populate("card"); // <-- récupère les infos de la carte
+    res.json({ success: true, messages });
+  } catch (err) {
+    console.error("Erreur /messages/inbox:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+/* FIN DES ROUTES API */
+/* DEBUT DU CANAL SOCKET.IO */
+
+io.on("connection", (socket) => {
+  console.log("Un client est connecté :", socket.id);
+
+  // Écoute d'un événement 'sendMessage' depuis le client
+  socket.on("sendMessage", (msg) => {
+    console.log("Message reçu :", msg);
+
+    // On renvoie le message à tous les clients connectés
+    io.emit("receiveMessage", msg);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client déconnecté :", socket.id);
+  });
+});
+
+// Supprimer automatiquement les messages expirés (toutes les heures)
+setInterval(async () => {
+  await Message.deleteMany({ expiresAt: { $lte: new Date() } });
+}, 60 * 60 * 1000);
+
 
 //!\ A garder à la fin du fichier /!\
 app.use((req, res) => {
@@ -357,6 +448,4 @@ app.use((req, res) => {
 });
 
 // Démarrage serveur
-app.listen(port, () => {
-  console.log(`Serveur démarré sur le port ${port}`);
-});
+server.listen(port, () => console.log("Serveur Socket.IO démarré sur port 3000"));

@@ -49,7 +49,7 @@
   right: -12px;
   bottom: -12px;
   border-radius: 16px;
-  z-index: 1;
+  z-index: 20;
 
   background: linear-gradient(83deg,red,orange,yellow,rgb(3, 199, 3),cyan,blue,violet,red,orange,yellow,rgb(3, 199, 3),cyan);
   background-size: 400% 400%;
@@ -73,7 +73,7 @@
 }
 
 
-.card:hover {
+.card:hover[data-hovereffects=true] {
   transform: scale(1.05);
   box-shadow: 0 0 20px grey;
 }
@@ -89,7 +89,7 @@
   top: 0%;
   height: 100%;
   width: 100%;
-  z-index: 3;
+  z-index: 22;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -102,7 +102,7 @@
   width: 50%;
   height: 5%;
   font-size: 1.72vh;
-  z-index: 3;
+  z-index: 23;
 
   font-weight: bold;
   text-align: left;
@@ -120,7 +120,7 @@
   font-size: 1.72vh;
   font-weight: bold;
   text-align: end;
-  z-index: 3;
+  z-index: 23;
 }
 
 .hp p {
@@ -138,13 +138,13 @@
   left: 8%;
   width: 84%;
   height: 37.6%;
-  z-index: 2;
+  z-index: 21;
 }
 
 .illustration img {
   width: 100%;
   height: 100%;
-  z-index: 1;
+  z-index: 21;
 }
 
 /* Attaques */
@@ -155,7 +155,7 @@
   width: 82%;
   height: 25%;
   padding: 10px;
-  z-index: 3;
+  z-index: 23;
   font-size: 1.72vh;
 }
 
@@ -166,7 +166,7 @@
   left: 66%;
   width: 10%;
   height: 3%;
-  z-index: 3;
+  z-index: 23;
   justify-content: left;
   align-items: center;
   flex-wrap: nowrap;
@@ -186,7 +186,7 @@
   left: 6%;
   width: 10%;
   height: 7%;
-  z-index: 3;
+  z-index: 23;
   justify-content: left;
   align-items: center;
   flex-wrap: nowrap;
@@ -209,7 +209,7 @@
   border: none;
   border-top-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  z-index: 10;
+  z-index: 24;
   width: 18%;
   height: 7%;
   align-items: center;

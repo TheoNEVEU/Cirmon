@@ -1,18 +1,5 @@
 const mongoose = require('mongoose');
 
-const TitleEmbedded = new mongoose.Schema({
-  text: { type: String, default: '' },
-  gradientDirection: { type: String, default: 'to right' },
-  colors: { type: [String], default: ['black'] },
-  isGradientActive: { type: Boolean, default: false }
-}, { _id: false });
-
-const BadgeEmbedded = new mongoose.Schema({
-  _id: { type: String, required: true },
-  label: { type: String, required: true },
-  image: { type: String, required: true }
-}, { _id: false });
-
 const userSchema = new mongoose.Schema({
   // Infos générales
   username: { type: String, required: true, unique: true },
@@ -20,22 +7,21 @@ const userSchema = new mongoose.Schema({
   diamonds: { type: Number, required: true, default: 0 },
 
   // Actuellement équipés
-  ppURL: { type: String, default: 'NoPP' },
-  title: { type: TitleEmbedded, default: null },
-  badgesEquipped: { 
-    type: [BadgeEmbedded], 
-    default: [{ _id: 'default', label: 'default', image: 'default' },{ _id: 'default', label: 'default', image: 'default' }] 
+  profPicEquipped: { type: String, default: '68a3c55266fffb8ab45028d3' },
+  titleEquipped: { type: String , default: '68a3c4da66fffb8ab45028cf' },
+  badgesEquipped: { type: [String], default: [{_id: 'default'},{_id: 'default'}] 
   },
-  displayedCards: { type: [Number], default: [0, 0, 0, 0] },
+  displayedCards: { type: [String], default: [0, 0, 0, 0] },
 
   // Inventaire
   collectibles: { // Tous les collectibles débloqués
-    titleIds: { type: [String], default: [] },
-    badgeIds: { type: [String], default: [] }
+    profPicIds: { type: [String], default: ['68a3c55266fffb8ab45028d3'] },
+    titleIds: { type: [String], default: ['68a3c4da66fffb8ab45028cf'] },
+    badgeIds: { type: [String], default: ['68a3c51666fffb8ab45028d1'] }
   },
 
   cards: [{
-    idPokedex: { type: Number, required: true },
+    _id: { type: String, ref: "Card", required: true },
     quantity: { type: Number, required: true }
   }],
 

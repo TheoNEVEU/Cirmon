@@ -1,17 +1,19 @@
 import { useEffect } from 'react';
 import { useConnection } from '../contexts/connectedContext'
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 import '../style/App.css'
 
 export default function StatusSquare() {
   const { status, setStatus } = useConnection();
+  const { baseUrl, socket } = useApiSocket();
 
   useEffect(() => {
     setStatus('connecting');
-    fetch('https://testcirmon.onrender.com/test')
+    fetch(`${baseUrl}/test`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) 
-          setStatus('connected');
+        if (data.success) setStatus('connected');
+        else setStatus('error')
       })
       .catch(() => {
         setStatus('error')

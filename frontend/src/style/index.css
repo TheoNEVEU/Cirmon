@@ -9,7 +9,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-button:not([data-locked="true"]) {
+button:not([data-locked="true"]), #booster-opening {
   cursor: pointer;
 }
 
