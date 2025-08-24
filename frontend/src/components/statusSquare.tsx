@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useConnection } from '../contexts/connectedContext'
-import { useApi } from '../contexts/ApiProviderContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 import '../style/App.css'
 
 export default function StatusSquare() {
   const { status, setStatus } = useConnection();
-  const { baseUrl } = useApi();
+  const { baseUrl, socket } = useApiSocket();
 
   useEffect(() => {
     setStatus('connecting');

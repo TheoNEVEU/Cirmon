@@ -5,7 +5,7 @@ import CardDetails, {type Card} from '../components/card';
 import { useConnection } from '../contexts/connectedContext'
 import { usePage } from '../contexts/pageContext';
 import { useUser, type User, type TitleWithEffect, type Badge, type ProfPicture } from '../contexts/userContext';
-import { useApi } from '../contexts/ApiProviderContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 
 import './style/profil.css';
 
@@ -18,7 +18,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const { user } = useUser();
   const { activePage } = usePage();
   const { status } = useConnection();
-  const { baseUrl } = useApi();
+  const { baseUrl, socket } = useApiSocket();
 
   const [allCards, setAllCards] = useState<Card[]>([])
 
@@ -38,7 +38,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const [pickerType, setPickerType] = useState<"title" | "badges" | "cards" | null>(null);
+  const [pickerType, setPickerType] = useState<"profPic" | "title" | "badges" | "cards" | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   
@@ -49,10 +49,8 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   useEffect(() => {
     // Récupérer les cartes possédés
     if(user){
-      const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
-      const ownedCardsInit = allCards.filter((c: any) =>
-        ownedIds.includes(c.idPokedex)
-      );
+      const ownedIds = user.cards?.map(c => c._id) ?? [];
+      const ownedCardsInit = allCards.filter((c: any) => ownedIds.includes(c._id));
       setOwnedCards(ownedCardsInit);
     }
   }, [allCards]);
@@ -81,9 +79,9 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
 
             //featured cards (displayedCards -> on prend les cartes correspondantes)
             const displayedIds = user.displayedCards ?? [];
-            const featuredCards = displayedIds.map((idPokedex: number) => {
-              if (idPokedex == null) return null;
-              return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
+            const featuredCards = displayedIds.map((_id: string) => {
+              if (_id == null) return null;
+              return allCards.find((c: any) => c._id === _id) ?? null;
             });
             while (featuredCards.length < 4) { // toujours 4 emplacements (compléter avec null si besoin)
               featuredCards.push(null);
@@ -91,9 +89,9 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             setFeatured(featuredCards);
 
             // Récupérer les cartes possédés
-            const ownedIds = user.cards?.map(c => c.idPokedex) ?? [];
+            const ownedIds = user.cards?.map(c => c._id) ?? [];
             const ownedCardsInit = allCards.filter((c: any) =>
-              ownedIds.includes(c.idPokedex)
+              ownedIds.includes(c._id)
             );
             setOwnedCards(ownedCardsInit);
 
@@ -118,7 +116,9 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             else {
               let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
               let badgesData = await badgesRes.json();
-              if(badgesData.success) setSelectedBadges(badgesData.badges as Badge[]);
+              if(badgesData.success) {
+                while(badgesData.badges.length < 2) badgesData.badges.push({_id:'default', label:'default', image:'default'});
+                setSelectedBadges(badgesData.badges as Badge[]);}
             }
 
             // Récupérer les badges possédés
@@ -130,7 +130,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
             }
 
             // Récupérer la photo de profil équipée
-            if(user.profPicEquipped == 'default') setSelectedProfilePicture(null);
+            if(user.profPicEquipped == 'default') setSelectedProfilePicture({_id:'default', label:'default', image:'default'});
             else {
               let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${user.profPicEquipped}`);
               let profPictureData = await profPictureRes.json();
@@ -161,14 +161,14 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
           //   // featured
           //   const displayedIds = profile.displayedCards ?? [];
           //   const featuredCards = allCards.filter((c: any) =>
-          //     displayedIds.includes(c.idPokedex)
+          //     displayedIds.includes(c._id)
           //   );
           //   setFeatured(featuredCards);
 
           //   // ownedCards
-          //   const ownedIds = profile.cards?.map((c: any) => c.idPokedex) ?? [];
+          //   const ownedIds = profile.cards?.map((c: any) => c._id) ?? [];
           //   const ownedCards = allCards.filter((c: any) =>
-          //     ownedIds.includes(c.idPokedex)
+          //     ownedIds.includes(c._id)
           //   );
           //   setOwnedCards(ownedCards);
 
@@ -222,9 +222,9 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     if(!user || !profileUser) return;
     const displayedIds = user.displayedCards || [];
 
-    const featuredCards = displayedIds.map((idPokedex: number) => {
-      if (idPokedex == null) return null;
-      return allCards.find((c: any) => c.idPokedex === idPokedex) ?? null;
+    const featuredCards = displayedIds.map((_id: string) => {
+      if (_id == null) return null;
+      return allCards.find((c: any) => c._id === _id) ?? null;
     });
     while (featuredCards.length < 4) { // toujours 4 emplacements (compléter avec null si besoin)
       featuredCards.push(null);
@@ -244,11 +244,13 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
     else {
       let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
       let badgesData = await badgesRes.json();
-      if(badgesData.success) setSelectedBadges(badgesData.badges as Badge[]);
+      if(badgesData.success) {
+        while(badgesData.badges.length < 2) badgesData.badges.push({_id:'default', label:'default', image:'default'});
+        setSelectedBadges(badgesData.badges as Badge[]);}
     }
 
     // Récupérer la photo de profil équipée
-    if(user.profPicEquipped == 'default') setSelectedProfilePicture(null);
+    if(user.profPicEquipped == 'default') setSelectedProfilePicture({_id:'default', label:'default', image:'default'});
     else {
       let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${user.profPicEquipped}`);
       let profPictureData = await profPictureRes.json();
@@ -266,10 +268,6 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       return;
     }
 
-    console.log("selectedBadges :", selectedBadges);
-    console.log("user collectibles:", user?.collectibles.badgeIds);
-
-
     const response = await fetch(`${baseUrl}/users/me/equip`, {
       method: 'PATCH',
       headers: {
@@ -278,8 +276,9 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
       },
       body: JSON.stringify({
         titleId: selectedTitle?._id,
-        badgeIds: selectedBadges.map(b => b._id),
-        profPicIds: selectedProfilePicture?._id,
+        badgeIds: selectedBadges.map(b => b?._id),
+        profPicId: selectedProfilePicture?._id,
+        featuredIds: featured.map(c => c?._id)
       })
     });
 
@@ -330,17 +329,15 @@ const selectBadgeForSlot = (badge: Badge) => {
     closePicker();
   }
 
+  const selectProfPic = (profPic: ProfPicture) => {
+    if (profPic == null) return;
+    setSelectedProfilePicture(profPic);
+    closePicker();
+  }
+
   function getGradientStyle(gradientDirection: string, colors: string[]) {
     return {
       backgroundImage: `linear-gradient(${gradientDirection}, ${colors.join(', ')})`,
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
-      color: 'transparent',
-      width: 'fit-content',
-      paddingLeft: '3%',
-      fontSize: '100%',
-      fontWeight: 'bold'
     };
   }
 
@@ -364,15 +361,14 @@ const selectBadgeForSlot = (badge: Badge) => {
     <div id="account-grid" className="page-container" data-isediting={isEditing}>
       <div id="profil-infos" >
         <div id="profilpartA">
-          <div id="pp-container">
-            {(selectedProfilePicture?.image != "default" || isEditing) && 
-              <SmartImage data-isediting={isEditing ? true : false}
-              src={`${import.meta.env.BASE_URL}img/profiles/${selectedProfilePicture?.image}.png`}
-              alt=""
-              fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
-            />}
-            {!(selectedProfilePicture?.image != "default" || isEditing) && 
-              <SmartImage style={{opacity: 0}} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
+          <div id="pp-container" data-isediting={isEditing ? true : false} onClick={() => { if (isEditing) {setPickerType("profPic");openPickerForSlot(-1)} }} >
+            {(selectedProfilePicture?.image != "default" || isEditing) ? (
+              <SmartImage key={selectedProfilePicture?._id+"_A"} 
+                src={`${import.meta.env.BASE_URL}img/profiles/${selectedProfilePicture?.image}.png`}
+                alt=""
+                fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
+              />
+            ) : <SmartImage key={selectedProfilePicture?._id+"_B"} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
           </div>
           <div id="username">
             <h1>{profileUser.username}</h1>
@@ -385,14 +381,13 @@ const selectBadgeForSlot = (badge: Badge) => {
           <div id="badges-display">
             {selectedBadges?.map((badge, i) => (
               <div key={i+""+badge._id} className="badge" data-isediting={isEditing ? true : false} onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
-                {(badge.image != "default" || isEditing) && 
-                <SmartImage
-                  src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
-                  alt=""
-                  fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
-              />}
-              {!(badge.image != "default" || isEditing) && 
-                <SmartImage style={{opacity: 0}} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
+                {(badge.image != "default" || isEditing) ? (
+                  <SmartImage key={i+"2"+badge._id}
+                    src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
+                    alt=""
+                    fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
+                  />
+                ) : <SmartImage key={i+"3"+badge._id} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
               </div>
             ))}
           </div>
@@ -451,7 +446,7 @@ const selectBadgeForSlot = (badge: Badge) => {
         {featured.map((card, id) => {
           return (
             <div key={id} className="displayedCard-slot" onClick={() => {if(isOwnProfile && isEditing) {setPickerType('cards');openPickerForSlot(id);}}}>
-              {card ? <CardDetails card={card} /> : (
+              {card ? <CardDetails card={card} hoverEffects={true}/> : (
                 <div className="emptyDisplayedCard-slot">
                   <span>{isEditing ? "+" : ""}</span>
                 </div>
@@ -487,22 +482,46 @@ const selectBadgeForSlot = (badge: Badge) => {
                 <div className="collectibles-error">
                   Vous ne possédez aucun titre à afficher.
                 </div>
+              ) : pickerType == "profPic" && (ownedProfilePictures?.length == 0 || !ownedProfilePictures) ? (
+                <div className="collectibles-error">
+                  Vous ne possédez aucune photo de profil à afficher.
+                </div>
               ) : ""}
 
             <div id="owned-collectibles-grid">
               {pickerType == "cards" ? ownedCards.map((card) => (
-                <button key={card.idPokedex} onClick={() => selectCardForSlot(card)}>
+                <button key={card._id} onClick={() => selectCardForSlot(card)}>
                   <CardDetails card={card}/>
                 </button>
               )) : pickerType == "badges" ? ownedBadges?.map((badge, index) => (
-                <button key={index} onClick={() => selectBadgeForSlot(badge)}>
-                  <SmartImage src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}></SmartImage><br></br>{badge.label}
+                <button className="badge_selection" key={index} onClick={() => selectBadgeForSlot(badge)}>
+                  {badge.image == 'default' ? (
+                  <SmartImage id="default_badge" src={`${import.meta.env.BASE_URL}img/icones/plus.png`}></SmartImage>
+                  ) : (
+                  <SmartImage 
+                    src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
+                    fallbackSrc={`${import.meta.env.BASE_URL}img/void.png`}>
+                  </SmartImage>)}
+                  <p>{badge.label}</p>
                 </button>
               )) : pickerType == "title" ? ownedTitles?.map((title) => (
-                <button key={title.text} onClick={() => selectTitle(title)}>
-                  <p style={getGradientStyle(title.gradientDirection ?? "to right", title.colors ?? ["black"])}>
-                    {title.text || 'default'}
-                  </p>
+                <button className="titre_selection" key={title.text} onClick={() => selectTitle(title)}>
+                  {title.text == '' ? (
+                    <p style={getGradientStyle("to right", ["black"])}>Aucun</p>
+                  ) : (
+                    <p style={getGradientStyle(title.gradientDirection ?? "to right", title.colors ?? ["black"])}>{title.text}</p>
+                  )}
+                </button>
+              )) : pickerType == "profPic" ? ownedProfilePictures?.map((profPic) => (
+                <button className="profPic_selection" key={profPic.label} onClick={() => selectProfPic(profPic)}>
+                  {profPic.image == 'default' ? (
+                  <SmartImage id="default_profPic" src={`${import.meta.env.BASE_URL}img/icones/plus.png`}></SmartImage>
+                  ) : (
+                  <SmartImage 
+                    src={`${import.meta.env.BASE_URL}img/profiles/${profPic.image}.png`}
+                    fallbackSrc={`${import.meta.env.BASE_URL}img/void.png`}>
+                  </SmartImage>)}
+                  <p>{profPic.label}</p>
                 </button>
               )) : ""}
             </div>

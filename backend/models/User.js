@@ -7,11 +7,11 @@ const userSchema = new mongoose.Schema({
   diamonds: { type: Number, required: true, default: 0 },
 
   // Actuellement équipés
-  profPicEquipped: { type: String, default: 'default' },
-  titleEquipped: { type: String , default: 'default' },
+  profPicEquipped: { type: String, default: '68a3c55266fffb8ab45028d3' },
+  titleEquipped: { type: String , default: '68a3c4da66fffb8ab45028cf' },
   badgesEquipped: { type: [String], default: [{_id: 'default'},{_id: 'default'}] 
   },
-  displayedCards: { type: [Number], default: [0, 0, 0, 0] },
+  displayedCards: { type: [String], default: [0, 0, 0, 0] },
 
   // Inventaire
   collectibles: { // Tous les collectibles débloqués
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
 
   cards: [{
-    idPokedex: { type: Number, required: true },
+    _id: { type: String, ref: "Card", required: true },
     quantity: { type: Number, required: true }
   }],
 
