@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const http = require('http');
+const { Server } = require('socket.io');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -8,16 +10,21 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" },
+});
+app.use(express.json());
+app.use(cors());
+
 const Card = require('./models/Cards');
 const User = require('./models/User');
 const Title = require('./models/Title');
 const Badge = require('./models/Badge');
 const ProfPic = require('./models/ProfPic');
+const Message = require('./models/Message');
 
 const auth = require('./middleware/auth');
-
-app.use(express.json());
-app.use(cors());
 
 // Probas GodPack
 const slotGodPackWeights = [
@@ -250,7 +257,7 @@ app.patch('/users/me/equip', auth, async (req, res) => {
   });
 });
 
-// récupère les amis d'un utilisateur
+// Récupérer les amis d'un utilisateur
 app.get('/users/friends/:username', async (req, res) => {
   const { username } = req.params;
 
@@ -337,7 +344,15 @@ app.post('/booster/open', async (req, res) => {
     let FACard = 0;
     for (const card of boosterCards) {
       const existing = user.cards.find(c => c._id == card._id);
-      if(card.rarity == 1) FACard++;
+      if(card.rarity == 1) {
+        FACard++
+        await new Message({
+          type: "DROP",
+          content: `${username} vient de pack`,
+          card: card._id,
+          expiresAt: new Date(Date.now() + 24*60*60*1000),
+        }).save();
+      };
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
       } else {
@@ -370,6 +385,62 @@ app.post('/booster/open', async (req, res) => {
   }
 });
 
+// Envoyer des messages
+app.post("/messages/send", async (req, res) => {
+  const { type, content, duration } = req.body;
+
+  try {
+    const message = new Message({
+      type,
+      content,
+      expiresAt: new Date(Date.now() + (duration || 24 * 60 * 60 * 1000)) // par défaut 24h
+    });
+    await message.save();
+    res.json({ success: true, message });
+  } catch (err) {
+    console.error("Erreur /messages/send:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Lire les messages
+app.get("/messages/inbox", async (req, res) => {
+  try {
+    const messages = await Message.find({ expiresAt: { $gt: new Date() } })
+      .sort({ createdAt: -1 })
+      .populate("card"); // <-- récupère les infos de la carte
+    res.json({ success: true, messages });
+  } catch (err) {
+    console.error("Erreur /messages/inbox:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+/* FIN DES ROUTES API */
+/* DEBUT DU CANAL SOCKET.IO */
+
+io.on("connection", (socket) => {
+  console.log("Un client est connecté :", socket.id);
+
+  // Écoute d'un événement 'sendMessage' depuis le client
+  socket.on("sendMessage", (msg) => {
+    console.log("Message reçu :", msg);
+
+    // On renvoie le message à tous les clients connectés
+    io.emit("receiveMessage", msg);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client déconnecté :", socket.id);
+  });
+});
+
+// Supprimer automatiquement les messages expirés (toutes les heures)
+setInterval(async () => {
+  await Message.deleteMany({ expiresAt: { $lte: new Date() } });
+}, 60 * 60 * 1000);
+
 
 //!\ A garder à la fin du fichier /!\
 app.use((req, res) => {
@@ -377,6 +448,4 @@ app.use((req, res) => {
 });
 
 // Démarrage serveur
-app.listen(port, () => {
-  console.log(`Serveur démarré sur le port ${port}`);
-});
+server.listen(port, () => console.log("Serveur Socket.IO démarré sur port 3000"));

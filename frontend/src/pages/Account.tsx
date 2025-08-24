@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
-import { useApi } from '../contexts/ApiProviderContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 import Profile from '../components/profil';
 
 import '../style/Account.css';
@@ -10,7 +10,7 @@ import '../style/Account.css';
 export default function Account() {
   const { user, setUser } = useUser();
   const { status } = useConnection();
-  const { baseUrl } = useApi();
+  const { baseUrl, socket } = useApiSocket();
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

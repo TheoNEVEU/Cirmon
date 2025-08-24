@@ -11,7 +11,7 @@ import StatusSquare from './components/statusSquare';
 
 import { useUser } from './contexts/userContext';
 import { usePage, type Page } from './contexts/pageContext';
-import { useApi } from './contexts/ApiProviderContext';
+import { useApiSocket } from './contexts/ApiSocketContext';
 
 function App() {
   const [indicatorTop, setIndicatorTop] = useState(0);
@@ -19,7 +19,7 @@ function App() {
 
   const { user, setUser } = useUser();
   const { activePage, setActivePage } = usePage();
-  const { baseUrl } = useApi();
+  const { baseUrl } = useApiSocket();
 
   const buttonRefs: Record<Page, React.RefObject<HTMLButtonElement | null>> = {
     home: useRef<HTMLButtonElement | null>(null),

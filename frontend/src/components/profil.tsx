@@ -5,7 +5,7 @@ import CardDetails, {type Card} from '../components/card';
 import { useConnection } from '../contexts/connectedContext'
 import { usePage } from '../contexts/pageContext';
 import { useUser, type User, type TitleWithEffect, type Badge, type ProfPicture } from '../contexts/userContext';
-import { useApi } from '../contexts/ApiProviderContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 
 import './style/profil.css';
 
@@ -18,7 +18,7 @@ export default function Profile({ username, isOwnProfile = false }: ProfileProps
   const { user } = useUser();
   const { activePage } = usePage();
   const { status } = useConnection();
-  const { baseUrl } = useApi();
+  const { baseUrl, socket } = useApiSocket();
 
   const [allCards, setAllCards] = useState<Card[]>([])
 

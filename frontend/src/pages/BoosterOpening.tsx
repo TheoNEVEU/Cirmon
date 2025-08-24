@@ -98,14 +98,14 @@ import { useState, useEffect } from 'react';
 import CardDetails, { type Card } from "../components/card";
 import { useUser } from '../contexts/userContext'; // J'imagine que tu as un setUser ici aussi
 import { usePage } from '../contexts/pageContext';
-import { useApi } from '../contexts/ApiProviderContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 
 import '../style/BoosterOpening.css';
 
 export default function BoosterOpening() {
   const { user, setUser } = useUser();  // <-- Récupérer setUser aussi
   const { activePage, setActivePage } = usePage();
-  const { baseUrl } = useApi();
+  const { baseUrl, socket } = useApiSocket();
   
   const [cards, setCards] = useState<Card[]>([]);
   const [isAnimation, setAnimation] = useState<boolean>(false);

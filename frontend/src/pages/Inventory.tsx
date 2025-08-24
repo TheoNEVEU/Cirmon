@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
-import { useApi } from '../contexts/ApiProviderContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 import CardDetails, { type Card as CardType } from "../components/card";
 
 import '../style/Inventory.css';
@@ -10,7 +10,7 @@ import '../style/Inventory.css';
 export default function Inventory() {
   const { user } = useUser();
   const { status } = useConnection();
-  const { baseUrl } = useApi();
+  const { baseUrl, socket } = useApiSocket();
 
   const [cards, setCards] = useState<any[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);

@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
 
   cards: [{
-    _id: { type: mongoose.Schema.Types.ObjectId, ref: "Card", required: true },
+    _id: { type: String, ref: "Card", required: true },
     quantity: { type: Number, required: true }
   }],
 
