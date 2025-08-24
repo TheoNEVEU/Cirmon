@@ -2,20 +2,22 @@ import { useState } from 'react';
 
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
 import Profile from '../components/profil';
 
 import '../style/Account.css';
 
 export default function Account() {
   const { user, setUser } = useUser();
-  const { isConnected } = useConnection();
+  const { status } = useConnection();
+  const { baseUrl, socket } = useApiSocket();
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
 
   const handleLogin = () => {
-    fetch('https://testcirmon.onrender.com/login', {
+    fetch(`${baseUrl}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -25,7 +27,7 @@ export default function Account() {
       if (data.success) {
         localStorage.setItem('token', data.token);
         // Aller chercher l'utilisateur après login :
-        fetch('https://testcirmon.onrender.com/users', {
+        fetch(`${baseUrl}/users`, {
           headers: { 'Authorization': `Bearer ${data.token}` }
         })
         .then(res => res.json())
@@ -55,7 +57,7 @@ export default function Account() {
       stats: [0, 0, 0, 0, 0, 0],
       cards: []
     };
-    fetch('https://testcirmon.onrender.com/register', {
+    fetch(`${baseUrl}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newUser)
@@ -77,11 +79,11 @@ export default function Account() {
     });
   };
   
-  if (!isConnected) {
+  if (!(status=="connected")) {
     return (
       <div id="page-container-loading">
         <img className="loadingImg"  src="img/loading.png" alt="car"/>
-        <h2>Connexion de la base de donnée...</h2>
+        <h2>Connexion à la base de données...</h2>
       </div>
     );
   }

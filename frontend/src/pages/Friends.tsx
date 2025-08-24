@@ -3,10 +3,14 @@ import '../style/Friend.css';
 import { useConnection } from '../contexts/connectedContext'
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/userContext';
+import { useApiSocket  } from '../contexts/ApiSocketContext';
+
+import '../style/App.css'
 
 export default function Friends() {
   const isConnected = useConnection();
   const {user} = useUser();
+  const { baseUrl, socket } = useApiSocket();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +20,7 @@ export default function Friends() {
     user?.friends.sort((a, b) => a.localeCompare(b));
     const fetchCard = async () => {
       try {
-        const response = await fetch(`https://testcirmon.onrender.com/users/friends/${user?.username}`);
+        const response = await fetch(`${baseUrl}/users/friends/${user?.username}`);
         const data = await response.json();
         if (data.success) {
           setFriends(data.friends);
@@ -47,7 +51,7 @@ export default function Friends() {
     else {
       return (
         <div id="page-container" className="page-container-no-friends">
-          <h1>vous n'avez aucun ami :(</h1>
+          <h1>vous n'avez aucun ami :</h1>
           <p>{friends.length}</p>
           <img className="noFriends" src="img/yoshi.gif" alt="no friends"/>
         </div>

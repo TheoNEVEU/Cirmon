@@ -4,7 +4,12 @@ import SmartImage from './smartImage';
 export default function ProfileDisplay() {
   const { user } = useUser();
   
-  if (!user) return <p>Pas de profil connecté</p>;
+  if (!user) {
+    return (
+      <div id="profile_display">
+        <div></div><h1>Déconnecté</h1>
+      </div>
+    )}
   else {
     return (
       <div id="profile_display">

@@ -1,23 +1,52 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-interface Card {
-  numPokedex: number;
+interface PreCard {
+  _id: string;
   quantity: number;
 }
 
+export interface TitleWithEffect {
+  _id: string; 
+  text: string;
+  gradientDirection: string;
+  colors: string[];
+  isGradientActive: boolean;
+};
+
+export interface Badge {
+  _id: string,
+  label: string,
+  image: string,
+}
+
+export interface ProfPicture {
+  _id: string,
+  label: string,
+  image: string,
+}
+
 export interface User {
+  // Infos générales
   username: string;
   password: string;
-  ppURL: string;
-  title: {
-    text: string;
-    gradientDirection: string;
-    colors: string[];
-    isGradientActive: boolean;
+  diamonds: number;
+  
+  // Actuellement équipés
+  profPicEquipped: string;
+  titleEquipped: string;
+  badgesEquipped: string[];
+  displayedCards: string[];
+
+  // Inventaire
+  collectibles: { // Tous les collectibles débloqués
+    profPicIds: string[];
+    titleIds: string[];
+    badgeIds: string[];
   };
-  badgeURL: string[];
+  cards: PreCard[];
+
+  // Autres informations
   stats: number[];
-  cards: Card[];
   friends: string[];
   requests: string[];
 }

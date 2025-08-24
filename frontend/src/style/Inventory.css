@@ -20,6 +20,7 @@
 
   top: 0%;
   left: 0%;
+  padding-top: 0.6%;
 
   background-color: whitesmoke;
   filter: drop-shadow(0px 0px 5px grey);
@@ -30,11 +31,11 @@
   width: 85%;
   align-self: center;
   text-align: left;
-  color: grey;
+  color: rgb(114, 114, 114);
   font-weight: bold;
 }
 
-#sortlist, #filterlist {
+#sortlist, #filterlist, #otherlist {
   display: flex;
   position: relative;
   flex-direction: column;
@@ -44,6 +45,39 @@
   border-bottom: 2px solid lightgray;
 }
 
+.invButtons, #suppfilters {
+  width: 95%;
+  height: 4vh;
+  margin: 1% 0 4% 0;
+  align-self: center;
+  font-size: 2vh;
+  font-weight: bolder;
+
+  border: none;
+  border-radius: 40px;
+
+  filter: drop-shadow(0px 0px 5px lightgrey);
+}
+
+.invButtons {
+  transition: all 0.3s ease;
+}
+
+.invButtons[data-selected], #suppfilters:active {
+  background-color: rgb(184, 184, 184);
+  filter: drop-shadow(0px 0px 5px rgb(91, 91, 91));
+  color: rgb(56, 56, 56);
+}
+
+.invButtons:not([data-selected]), #suppfilters {
+  background-color: white;
+  color: gray;
+}
+
+.invButtons:not([data-selected]):hover, #suppfilters:hover {
+  background-color: rgb(221, 221, 221);
+}
+
 .filter-parram {
   display: flex;
   position: relative;
@@ -51,8 +85,10 @@
   flex-direction: row;
   align-content: center;
   justify-content: space-around;
+  align-self: center;
 
-  padding: 8% 2% 2% 1%;
+  width: 95%;
+  padding: 2% 2% 2% 2%;
   margin-bottom: 4%;
 
   border: 1px solid lightgray;
@@ -73,32 +109,6 @@
   transform: translateY(-20%);
 }
 
-.sortbuttons {
-  width: 95%;
-  height: 4vh;
-  margin: 1% 0 4% 0;
-  align-self: center;
-  font-size: 2vh;
-
-  border: none;
-  border-radius: 40px;
-
-  background-color: white;
-  filter: drop-shadow(0px 0px 5px lightgrey);
-}
-
-.sortbuttons[data-selectedsort] {
-  background-color: rgb(184, 184, 184);
-  filter: drop-shadow(0px 0px 5px rgb(170, 170, 170));
-}
-
-.sortbuttons:not([data-selectedsort]):hover {
-  background-color: rgb(221, 221, 221);
-}
-
-.sortbuttons[data-selectedsort].hover {
-  background-color: lightgray;
-}
 
 .filtertypebuttons, .filterraritybuttons {
   display: flex;
@@ -110,19 +120,27 @@
   border: none;
   border-radius: 40px;
 
-  filter: drop-shadow(0px 0px 5px lightgrey);
+  background-color: transparent;
 }
 
-.filtertypebuttons img, .filterraritybuttons img {
+.filtertypebuttons img {
   width: 100%;
   aspect-ratio: 1/1;
   transition: all 0.2s linear;
+  border-radius: 100%;
+}
+
+.filterraritybuttons img {
+  width: 115%;
+  aspect-ratio: 1/1;
+  transition: all 0.2s linear;
+  border-radius: 100%;
 }
 
 .filtertypebuttons:not([data-selectedfilter]) img, .filterraritybuttons:not([data-selectedfilter]) img {
   filter: grayscale(1);
+  background-color: rgb(236, 236, 236);
 }
-
 
 /* Inventaire des cartes */
 #cards-container {
@@ -141,207 +159,28 @@
   overflow-y: scroll;
 }
 
-.card[data-dark=true] {
-  color: white;
-}
-
-.card[data-error=true] {
-  filter: grayscale(0.8) brightness(0.5);
-}
-
-.card {
-  position: relative;
-  display: block;
-  z-index: 4;
-
-  height: 30vh;
-  aspect-ratio: 0.7128712871;
-
-  border-radius: 8px;
-  transition: all 0.5s ease;
-  box-shadow: 0 0 10px grey;
+#cards-container .card {
+  z-index: 20;
+  width: 22%;
   margin: 0 3% 2% 0;
 }
 
-.card[data-shiny] {
-  overflow: hidden;
-}
-
-.card[data-shiny]::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    0deg, 
-    transparent, 
-    transparent 10%, 
-    white
-  );
-  transform: rotate(-45deg);
-  transition: all 0.5s ease;
-  opacity: 0;
-  z-index: 100; /* Mettre au-dessus des éléments */
-  mix-blend-mode: overlay; /* Effet lumineux */
-  pointer-events: none;
-}
-
-.card[data-rainbow]::after {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  border-radius: 16px;
-  z-index: 1;
-
-  background: linear-gradient(83deg,red,orange,yellow,rgb(3, 199, 3),cyan,blue,violet,red,orange,yellow,rgb(3, 199, 3),cyan);
-  background-size: 400% 400%;
-  filter: blur(4px);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.card[data-rainbow]:hover::after {
-  opacity: 0.2;
-  animation: rainbow 6s linear infinite;
-}
-
-@keyframes rainbow {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
-
-.card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px grey;
-}
-
-.card:hover::before {
-  opacity: 1;
-  transform: rotate(-45deg) translateY(100%);
-}
-
-.card > img {
-  position: absolute;
-  left: 0%;
-  top: 0%;
-  height: 100%;
-  width: 100%;
-  z-index: 3;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* Nom du Pokémon */
-.name {
-  position: absolute;
-  top: 1vh; /* Ajustez pour correspondre à l'emplacement réel */
-  left: 20%;
-  width: 50%;
-  font-size: 1.4vh;
-  z-index: 3;
-
-  font-weight: bold;
-  text-align: left;
-}
-
-/* Points de vie (HP) */
-.hp {
+#cards-container .empty-card {
   display: flex;
-  flex-direction: row;;
-  position: absolute;
-  height: 5%;
-  font-size: 1.7vh;
-  top: .8vh;
-  right: 14%;
-  font-weight: bold;
-  z-index: 3;
-}
-
-.hp > p {
-  margin-top: .85vh;
-  margin-right: .2vh;
-  font-size: .8vh;
-}
-
-/* Illustration du Pokémon */
-.illustration {
-  position: absolute;
-  top: 9.5%;
-  left: 8%;
-  width: 84%;
-  height: 37.6%;
-  z-index: 2;
-}
-
-.illustration img {
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-/* Attaques */
-.attacks {
-  position: absolute;
-  top: 52%;
-  left: 5%;
-  width: 82%;
-  height: 25%;
-  padding: 10px;
-  z-index: 3;
-  font-size: 1.72vh;
-}
-
-.retreat {
-  display: flex;
-  position: absolute;
-  bottom: 11%;
-  left: 66%;
-  width: 10%;
-  height: 3%;
-  z-index: 3;
-  justify-content: left;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-
-.retreat img{
-  top: 0%;
-  left: 0%;
-  height: 90%;
-  aspect-ratio: 1;
-}
-
-.quantity {
-  position: absolute;
-  display: flex;
-  right: 0%;
-  bottom: 0%;
-  background-color: whitesmoke;
-  border: 1px solid lightgray;
-  border: none;
-  border-top-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  z-index: 10;
-  width: 18%;
-  height: 7%;
-  align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 0 2px darkgray);
+  align-items: center;
+
+  z-index: 20;
+  width: 22%;
+  margin: 0 3% 2% 0;
+  border: 4px dashed rgba(128, 128, 128, 0.365);
+  background: transparent;
 }
-.quantity span {
-  color: black;
-  font-size: 1.72vh;
+
+#cards-container .empty-card span {
+  color: grey;
   font-weight: bold;
+  margin-bottom: 20%;
 }
 
 /* Masquer la barre de slide */

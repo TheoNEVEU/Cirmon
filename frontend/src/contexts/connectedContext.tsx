@@ -1,17 +1,19 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
+type ConnectionStatus = 'connected' | 'connecting' | 'error';
+
 type ConnectionContextType = {
-  isConnected: boolean;
-  setIsConnected: (value: boolean) => void;
+  status: ConnectionStatus;
+  setStatus: (value: ConnectionStatus) => void;
 };
 
 const ConnectionContext = createContext<ConnectionContextType | undefined>(undefined);
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
-  const [isConnected, setIsConnected] = useState(false);
+  const [status, setStatus] = useState<ConnectionStatus>('error'); // ou 'connecting' ou 'connected' par défaut
 
   return (
-    <ConnectionContext.Provider value={{ isConnected, setIsConnected }}>
+    <ConnectionContext.Provider value={{ status, setStatus }}>
       {children}
     </ConnectionContext.Provider>
   );

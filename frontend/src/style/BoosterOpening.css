@@ -1,0 +1,151 @@
+#booster-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+
+  position: absolute;
+  top: 10vh;
+  left: 5vw;
+  z-index: 5;
+
+  height: 80vh;
+  width: 90vw;
+}
+
+#booster-container:not([data-booster]) {
+  display: none;
+}
+
+#booster-opening {
+  display: flex;
+  position: absolute;
+
+  width: 20%;
+  height: 70%;
+  z-index: 6;
+}
+
+#booster-container:not([data-clicked="true"]) #booster-opening {
+  background-color: aqua;
+}
+
+#booster-container[data-clicked="true"] #booster-opening {
+  background-color: red;
+  animation: ouverture 3s ease forwards;
+}
+
+/* Keyframes for the animation */
+@keyframes ouverture {
+  0% {
+  }
+  50% {
+    transform: translateY(50%);
+    width: 40%;
+    height: 140%;
+  }
+  100% {
+    transform: translateY(180%);
+    width: 40%;
+    height: 140%;
+  }
+}
+
+/* #boosterCardsDisplay .card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: 15vw;
+  border-radius: 8px;
+  
+  box-shadow: 0 0 10px grey;
+  transform: translate(-50%, -50%);
+  transition: left 0.6s ease, top 0.6s ease, transform 0.6s ease;
+} */
+
+#boosterCardsDisplay {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+
+  top: 100%;
+  width: 100%;
+  height: 50vh;
+
+  transition: top 3s ease;
+}
+
+#booster-container[data-clicked="true"] #boosterCardsDisplay {
+  top: 10%;
+}
+
+#booster-container .card-flip-wrapper, #booster-container .card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: 15vw;
+  aspect-ratio: 0.7128712871;
+  border-radius: 8px;
+  
+  transform: translate(-50%, -50%);
+  transition: left 0.6s ease;
+  perspective: 1000px;
+}
+
+#booster-container .card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  box-shadow: 0 0 10px grey;
+  transition: transform 0.8s ease;
+  transform-style: preserve-3d;
+  border-radius: 8px;
+}
+
+#booster-container .card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+#booster-container .card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#booster-container .card-back {
+  background-color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#booster-container .card-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#booster-container .card-front {
+  transform: rotateY(180deg);
+}
+
+#booster-conatiner .card-final {
+  width: 200px;
+  height: 280px;
+  transition: transform 0.5s ease;
+  z-index: 6;
+}
+
+#booster-conatiner .card-final .card {
+  width: 100%;
+}
+

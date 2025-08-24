@@ -2,10 +2,19 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  user-select: none;
 }
 
 body {
   font-family: Arial, sans-serif;
+}
+
+button:not([data-locked="true"]), #booster-opening {
+  cursor: pointer;
+}
+
+button[data-locked="true"] {
+  cursor: default;
 }
 
 .App {
@@ -14,4 +23,28 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Style Généraux pour des éléments communs */
+
+.green-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  position: absolute;
+  bottom: 5%;
+  left: calc((100% - 15%) / 2);
+
+  width: 15%;
+  height: 10%;
+  margin: 3% 0% 0% 0%;
+
+  background-color: rgb(82, 237, 82);
+  border: 2px solid white;
+  border-radius: 50px;
+
+  font-weight: bold;
+  color: white;
+  filter: drop-shadow(0 0 10px darkgray);
 }
