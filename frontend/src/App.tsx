@@ -3,7 +3,7 @@ import './style/App.css';
 
 import Home from './pages/Home';
 import Inventory from './pages/Inventory';
-//import Friends from './pages/Friends';
+import Friends from './pages/Friends';
 import Shop from './pages/Shop';
 import Account from './pages/Account';
 import BoosterOpening from './pages/BoosterOpening';
@@ -97,7 +97,7 @@ function App() {
       <div id="grid-container-content">
           <div className={`page ${activePage === 'home'|| activePage === 'boosters' ? 'active' : ''}`}><Home /></div>
           <div className={`page ${activePage === 'inventory' ? 'active' : ''}`}><Inventory /></div>
-          {/* <div className={`page ${activePage === 'friends' ? 'active' : ''}`}><Friends /></div> */}
+          <div className={`page ${activePage === 'friends' ? 'active' : ''}`}><Friends /></div>
           <div className={`page ${activePage === 'shop' ? 'active' : ''}`}><Shop /></div>
           <div className={`page ${activePage === 'account' ? 'active' : ''}`}><Account /></div>
       </div>

@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
 const app = express();
+app.use(cors());
 const port = process.env.PORT || 3000;
 
 const server = http.createServer(app);
@@ -15,7 +16,6 @@ const io = new Server(server, {
   cors: { origin: "*" },
 });
 app.use(express.json());
-app.use(cors());
 
 const Card = require('./models/Cards');
 const User = require('./models/User');
@@ -97,9 +97,10 @@ app.get('/cards', async (req, res) => {
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   try {
+    cleanUsername = username.replace(/[^a-zA-Z0-9_\-]/g, "");
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hashedPassword });
-    res.json({ success: true, message: 'Utilisateur créé', user: { username: user.username } });
+    const user = await User.create({ cleanUsername, password: hashedPassword });
+    res.json({ success: true, message: 'Utilisateur créé', user: { cleanUsername: user.username } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -346,10 +347,16 @@ app.post('/booster/open', async (req, res) => {
       const existing = user.cards.find(c => c._id == card._id);
       if(card.rarity == 1) {
         FACard++
+        io.emit("newAlert", {
+          type: "DROP",
+          content: `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/rainbow.png"></img><b>${card.name}</b>`,
+          createdAt: Date.now(),
+          expiresAt: new Date(Date.now() + 24*60*60*1000),
+        });
         await new Message({
           type: "DROP",
-          content: `${username} vient de pack`,
-          card: card._id,
+          content: `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/rainbow.png"></img><b>${card.name}</b>`,
+          createdAt: Date.now(),
           expiresAt: new Date(Date.now() + 24*60*60*1000),
         }).save();
       };
@@ -428,7 +435,7 @@ io.on("connection", (socket) => {
     console.log("Message reçu :", msg);
 
     // On renvoie le message à tous les clients connectés
-    io.emit("receiveMessage", msg);
+    io.emit("newAlert", msg);
   });
 
   socket.on("disconnect", () => {

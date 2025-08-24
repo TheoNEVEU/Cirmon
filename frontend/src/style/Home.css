@@ -32,17 +32,116 @@
 }
 
 #message-display {
-  display: flex;
-
-
   position: absolute;
   bottom: 4%;
   left: 2%;
-  height: 40%;
   width: 25%;
+  padding-bottom: 1vh;
   border-radius: 20px;
 
   background-color: whitesmoke;
+  border: 1px solid lightgrey;
+  filter: drop-shadow(0px 0px 5px lightgrey);
+  transition: height 0.5s ease-in-out;
+}
+
+#message-display > div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#message-display[data-open=true] {
+  height: 60%;
+}
+
+#message-display:not([data-open=true]) {
+  height: 20vh;
+}
+
+#message-display-opener {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  z-index: 100;
+
+  left: 50%;
+  top: calc(0% + 1px);
+  width: 15%;
+  aspect-ratio: 1.5;
+
+  transform: translate(-50%, -100%);
+  border: 1px solid lightgrey;
+  border-bottom: 1px solid whitesmoke;
+  border-radius: 10px 10px 0 0;
+  background-color: whitesmoke;
+}
+
+#message-display-opener > div {
+  display: flex;
+  height: 55%;
+  aspect-ratio: 1;
+
+  border-left: 2px solid lightgrey;
+  border-bottom: 2px solid lightgrey;
+  transition: transform 0.5s ease;
+}
+
+
+#message-display-opener > div[data-open=true] {
+  margin-bottom: 20%;
+  transform: rotate(-45deg);
+}
+
+#message-display-opener > div:not([data-open=true]) {
+  margin-top: 20%;
+  transform: rotate(135deg);  
+}
+
+.single-message {
+  display: flex;
+  flex-wrap: wrap;
+
+  height: 8vh;
+  min-height: 8vh;
+  width: 90%;
+
+  margin-top: 2vh;
+  padding: 0% 2% 0% 4%;
+
+  font-size: 12px;
+  border-bottom: 2px solid lightgray;
+}
+
+.single-message p {
+  display: flex;
+  align-items: center;
+
+  color: gray;
+
+  height: 50%;
+  max-height: 50%;
+  width: 100%;
+  left: 0%;
+}
+
+.single-message-time {
+  top: 0%;
+}
+
+.single-message-content {
+  bottom: 0%;
+}
+
+.single-message-content img {
+  height: 100%;
+  aspect-ratio: 1/1;
 }
 
 #booster-cover {
