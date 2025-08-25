@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useUser } from '../contexts/userContext';
 import { useConnection } from '../contexts/connectedContext';
 import { useApiSocket  } from '../contexts/ApiSocketContext';
-import Profile from '../components/profil';
+import { Profile } from '../components/profil';
 
 import '../style/Account.css';
 

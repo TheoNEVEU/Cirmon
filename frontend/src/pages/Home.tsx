@@ -3,17 +3,10 @@ import { useConnection } from '../contexts/connectedContext'
 import { useUser } from '../contexts/userContext';
 import { usePage } from '../contexts/pageContext';
 import { useApiSocket } from "../contexts/ApiSocketContext";
-
-import ProfileDisplay from '../components/profileDisplay'
+import { ProfileDisplay } from '../components/profil';
+import MessageDisplay, {type Message} from '../components/message';
 
 import '../style/Home.css'
-
-interface Message {
-  type: String,
-  content: String,
-  createdAt: Date,
-  expiresAt: Date
-};
 
 export default function Home() {
   const { user } = useUser();
@@ -28,7 +21,8 @@ export default function Home() {
 
     // Écoute des messages du serveur
     socket.on("newAlert", (msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
+      msg.timeValue = new Date(msg.timeValue);
+      setMessages((prev) => [...prev].concat(msg)/*.sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime())*/);
     });
 
     return () => {
@@ -54,10 +48,7 @@ export default function Home() {
           <button id='message-display-opener' onClick={() => setIsChatOpened(!isChatOpened)}><div data-open={isChatOpened ? true : false}></div></button>
           <div>
             {messages.map((m, i) => (
-              <div key={i} className='single-message'>
-                <p className='single-message-time'>{"> "+ new Date(m.createdAt).toLocaleTimeString('fr-FR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
-                <p className='single-message-content' dangerouslySetInnerHTML={{ __html: m.content }}></p>
-              </div>
+              <MessageDisplay key={m._id+"_"+i} message={m}></MessageDisplay>
             ))}
           </div>
           {/* <div>

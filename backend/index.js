@@ -28,10 +28,10 @@ const auth = require('./middleware/auth');
 
 // Probas GodPack
 const slotGodPackWeights = [
-  { rarity: 1, chances: 10 },
-  { rarity: 2, chances: 32.5},
-  { rarity: 3, chances: 42.5 },
-  { rarity: 4, chances: 15 },
+  { rarity: 1, chances: 16 },
+  { rarity: 2, chances: 32 },
+  { rarity: 3, chances: 42 },
+  { rarity: 4, chances: 10 },
   { rarity: 5, chances: 0 },
 ];
 
@@ -304,9 +304,20 @@ app.post('/booster/open', async (req, res) => {
     return weights[weights.length - 1].rarity;
   }
 
+  const newAlert = async (Type, TimeType, Time, Content) => {
+    const message = {
+      type: Type,
+      content: Content,
+      timeType: TimeType,
+      timeValue: Time,
+    };
+    io.emit("newAlert", message);
+    await new Message(message).save();
+  }
+
   try {
     const boosterCards = [];
-    const isGodPack = Math.random() > 0.999;
+    const isGodPack = Math.random() > 0.2;//0.999;
     for (let i = 0; i < boosterSize; i++) {
       let tries = 0;
       while (tries < 10) {
@@ -347,18 +358,10 @@ app.post('/booster/open', async (req, res) => {
       const existing = user.cards.find(c => c._id == card._id);
       if(card.rarity == 1) {
         FACard++
-        io.emit("newAlert", {
-          type: "DROP",
-          content: `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/rainbow.png"></img><b>${card.name}</b>`,
-          createdAt: Date.now(),
-          expiresAt: new Date(Date.now() + 24*60*60*1000),
-        });
-        await new Message({
-          type: "DROP",
-          content: `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/rainbow.png"></img><b>${card.name}</b>`,
-          createdAt: Date.now(),
-          expiresAt: new Date(Date.now() + 24*60*60*1000),
-        }).save();
+        newAlert('DROP', "CREATION", new Date(), `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/rainbow.png"></img><b>${card.name}</b>&nbsp;!`);
+      };
+      if(card.rarity == 2) {
+        newAlert('DROP', "CREATION", new Date(), `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/crown.png"></img><b>${card.name}</b>&nbsp;!`);
       };
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;

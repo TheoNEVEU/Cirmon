@@ -2,10 +2,10 @@
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema({
-  type: { type: String, enum: ["DROP"], required: true },
+  type: { type: String, enum: ["DROP", "ALERT", "EVENT"], required: true },
   content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  expiresAt: { type: Date, required: true }
+  timeType: { type: String, enum: ["CREATION", "EXPIRE"], required: true },
+  timeValue: { type: Date, required: true, default: Date.now() }
 });
 
 module.exports = mongoose.model("Message", messageSchema);
