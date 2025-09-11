@@ -99,10 +99,11 @@ app.post('/register', async (req, res) => {
   try {
     cleanUsername = username.replace(/[^a-zA-Z0-9_\-]/g, "");
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ cleanUsername, password: hashedPassword });
+    const user = await User.create({ username: cleanUsername, password: hashedPassword });
     res.json({ success: true, message: 'Utilisateur créé', user: { cleanUsername: user.username } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+    console.log(err)
   }
 });
 
@@ -317,7 +318,7 @@ app.post('/booster/open', async (req, res) => {
 
   try {
     const boosterCards = [];
-    const isGodPack = Math.random() > 0.2;//0.999;
+    const isGodPack = Math.random() > 0.999;
     for (let i = 0; i < boosterSize; i++) {
       let tries = 0;
       while (tries < 10) {

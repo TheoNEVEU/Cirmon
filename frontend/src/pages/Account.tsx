@@ -70,6 +70,7 @@ export default function Account() {
       } 
       else {
         console.error('Erreur API (register):', data.message);
+        console.error('Erreur API (register):', data);
         handleLogin();
       }
     })
