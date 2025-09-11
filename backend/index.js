@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
 const app = express();
+app.use(cors());
 const port = process.env.PORT || 3000;
 
 const server = http.createServer(app);
@@ -15,7 +16,6 @@ const io = new Server(server, {
   cors: { origin: "*" },
 });
 app.use(express.json());
-app.use(cors());
 
 const Card = require('./models/Cards');
 const User = require('./models/User');
@@ -28,10 +28,10 @@ const auth = require('./middleware/auth');
 
 // Probas GodPack
 const slotGodPackWeights = [
-  { rarity: 1, chances: 10 },
-  { rarity: 2, chances: 32.5},
-  { rarity: 3, chances: 42.5 },
-  { rarity: 4, chances: 15 },
+  { rarity: 1, chances: 16 },
+  { rarity: 2, chances: 32 },
+  { rarity: 3, chances: 42 },
+  { rarity: 4, chances: 10 },
   { rarity: 5, chances: 0 },
 ];
 
@@ -97,11 +97,13 @@ app.get('/cards', async (req, res) => {
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   try {
+    cleanUsername = username.replace(/[^a-zA-Z0-9_\-]/g, "");
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hashedPassword });
-    res.json({ success: true, message: 'Utilisateur créé', user: { username: user.username } });
+    const user = await User.create({ username: cleanUsername, password: hashedPassword });
+    res.json({ success: true, message: 'Utilisateur créé', user: { cleanUsername: user.username } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+    console.log(err)
   }
 });
 
@@ -303,6 +305,17 @@ app.post('/booster/open', async (req, res) => {
     return weights[weights.length - 1].rarity;
   }
 
+  const newAlert = async (Type, TimeType, Time, Content) => {
+    const message = {
+      type: Type,
+      content: Content,
+      timeType: TimeType,
+      timeValue: Time,
+    };
+    io.emit("newAlert", message);
+    await new Message(message).save();
+  }
+
   try {
     const boosterCards = [];
     const isGodPack = Math.random() > 0.999;
@@ -346,12 +359,10 @@ app.post('/booster/open', async (req, res) => {
       const existing = user.cards.find(c => c._id == card._id);
       if(card.rarity == 1) {
         FACard++
-        await new Message({
-          type: "DROP",
-          content: `${username} vient de pack`,
-          card: card._id,
-          expiresAt: new Date(Date.now() + 24*60*60*1000),
-        }).save();
+        newAlert('DROP', "CREATION", new Date(), `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/rainbow.png"></img><b>${card.name}</b>&nbsp;!`);
+      };
+      if(card.rarity == 2) {
+        newAlert('DROP', "CREATION", new Date(), `<b>${username}</b>&nbsp;vient de pack&nbsp;<img src="img/rarities/crown.png"></img><b>${card.name}</b>&nbsp;!`);
       };
       if (existing) {
         existing.quantity = parseInt(existing.quantity) + 1;
@@ -428,7 +439,7 @@ io.on("connection", (socket) => {
     console.log("Message reçu :", msg);
 
     // On renvoie le message à tous les clients connectés
-    io.emit("receiveMessage", msg);
+    io.emit("newAlert", msg);
   });
 
   socket.on("disconnect", () => {
