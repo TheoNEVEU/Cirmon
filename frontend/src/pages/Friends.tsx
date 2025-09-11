@@ -1,11 +1,9 @@
-import '../style/App.css'
-import '../style/Friend.css';
 import { useConnection } from '../contexts/connectedContext'
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/userContext';
 import { useApiSocket  } from '../contexts/ApiSocketContext';
 
-import '../style/App.css'
+import '../style/Friend.css';
 
 export default function Friends() {
   const isConnected = useConnection();
@@ -19,27 +17,26 @@ export default function Friends() {
   useEffect(() => {
     user?.friends.sort((a, b) => a.localeCompare(b));
     const fetchCard = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/users/friends/${user?.username}`);
-        const data = await response.json();
-        if (data.success) {
-          setFriends(data.friends);
-        }
-        else {
-          setError(`Liste d'amis de ${user?.username} introuvable`);
-        }
-      } catch (err) {
-        setError('Erreur lors du chargement des données');
-      } finally {
-        setLoading(false);
-      }
+      // try {
+      //   const response = await fetch(`${baseUrl}/users/friends/${user?.username}`);
+      //   const data = await response.json();
+      //   if (data.success) {
+      //     setFriends(data.friends);
+      //   }
+      //   else {
+      //     setError(`Liste d'amis de ${user?.username} introuvable`);
+      //   }
+      // } catch (err) {
+      //   setError('Erreur lors du chargement des données');
+      // } finally {
+      //   setLoading(false);
+      // }
     };
 
     fetchCard();
   });
 
   if (isConnected) {
-    console.log(friends);
     if (friends.length > 0) {
       return (
         <div id="page-container">

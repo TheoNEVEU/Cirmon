@@ -5,7 +5,7 @@ import CardDetails, {type Card} from '../components/card';
 import { useConnection } from '../contexts/connectedContext'
 import { usePage } from '../contexts/pageContext';
 import { useUser, type User, type TitleWithEffect, type Badge, type ProfPicture } from '../contexts/userContext';
-import { useApiSocket  } from '../contexts/ApiSocketContext';
+import { useApiSocket } from '../contexts/ApiSocketContext';
 
 import './style/profil.css';
 
@@ -14,7 +14,42 @@ interface ProfileProps {
   isOwnProfile?: boolean;
 }
 
-export default function Profile({ username, isOwnProfile = false }: ProfileProps) {
+export function ProfileDisplay() {
+  const { user } = useUser();
+  const { baseUrl } = useApiSocket();
+  const [selectedProfilePicture, setSelectedProfilePicture] = useState<ProfPicture | null>(null);
+
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      try {
+        let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${user?.profPicEquipped}`);
+        let profPictureData = await profPictureRes.json();
+        if(profPictureData.success) setSelectedProfilePicture(profPictureData.profPics[0] as ProfPicture || null);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if(user?.profPicEquipped) loadProfilePicture();    
+  }, [user]);  
+  
+  if (!user) {
+    return (
+      <div id="profile_display">
+        <div></div><h1>Déconnecté</h1>
+      </div>
+    )}
+  else {
+    return (
+      <div id="profile_display">
+        <SmartImage key={selectedProfilePicture?._id} src={`${import.meta.env.BASE_URL}img/profiles/${selectedProfilePicture?.image}.png`} alt="" fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`} />
+        <h1>{user.username}</h1>
+      </div>
+    )
+  };
+};
+
+export function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const { user } = useUser();
   const { activePage } = usePage();
   const { status } = useConnection();
