@@ -22,7 +22,7 @@ export default function Home() {
     // Écoute des messages du serveur
     socket.on("newAlert", (msg: Message) => {
       msg.timeValue = new Date(msg.timeValue);
-      setMessages((prev) => [...prev].concat(msg)/*.sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime())*/);
+      setMessages((prev) => [...prev].concat(msg).sort((a, b) => new Date(b.timeValue).getTime() - new Date(a.timeValue).getTime()));
     });
 
     return () => {

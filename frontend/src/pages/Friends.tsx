@@ -2,65 +2,47 @@ import { useConnection } from '../contexts/connectedContext'
 import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/userContext';
 import { useApiSocket  } from '../contexts/ApiSocketContext';
+import { MicroProfile } from '../components/profil';
 
 import '../style/Friend.css';
 
 export default function Friends() {
-  const isConnected = useConnection();
+  const { status } = useConnection();
   const {user} = useUser();
-  const { baseUrl, socket } = useApiSocket();
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [friends, setFriends] = useState<string[]>([]);
+  const { baseUrl } = useApiSocket();
+  const [ users, setUsers ] = useState<Array<any>>([]);
 
   useEffect(() => {
-    user?.friends.sort((a, b) => a.localeCompare(b));
-    const fetchCard = async () => {
-      // try {
-      //   const response = await fetch(`${baseUrl}/users/friends/${user?.username}`);
-      //   const data = await response.json();
-      //   if (data.success) {
-      //     setFriends(data.friends);
-      //   }
-      //   else {
-      //     setError(`Liste d'amis de ${user?.username} introuvable`);
-      //   }
-      // } catch (err) {
-      //   setError('Erreur lors du chargement des données');
-      // } finally {
-      //   setLoading(false);
-      // }
-    };
+      fetch(`${baseUrl}/users`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.users)) {
+          setUsers(data.users);
+          console.log(data.users);
+        } else {
+          console.error('Erreur API :', data.message);
+        }
+      })
+      .catch(err => console.error('Erreur réseau :', err));
+  }, [setUsers]);
 
-    fetchCard();
-  });
 
-  if (isConnected) {
-    if (friends.length > 0) {
-      return (
-        <div id="page-container">
-          <h1>Amis</h1>
-          <p>{friends.length}</p>
-        </div>
-      );
-    }
-    else {
-      return (
-        <div id="page-container" className="page-container-no-friends">
-          <h1>vous n'avez aucun ami :</h1>
-          <p>{friends.length}</p>
-          <img className="noFriends" src="img/yoshi.gif" alt="no friends"/>
-        </div>
-      );
-    }
-  }
-  else {
+  if (!(status=="connected")) {
     return (
       <div id="page-container-loading">
         <img className="loadingImg"  src="img/loading.png" alt="car"/>
         <h2>Connexion de la base de donnée...</h2>
       </div>
-    );
+    );    
   }
+  else {
+    return (
+    <>
+      <div className="user-list">
+        {users.map(user => (
+          <MicroProfile userToDisplay={user} key={user._id} />
+        ))}
+      </div>
+    </>
+  );}
 }

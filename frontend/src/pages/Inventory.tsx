@@ -118,7 +118,7 @@ export default function Inventory() {
       <div id="inventory-menu">
         <div id="sortlist">
           <span>Trier par :</span>
-          <button value="number" className="invButtons" onClick={() => inventorySort('number')}>Numéro</button>
+          <button value="number" className="invButtons" onClick={() => inventorySort('idPokedex')}>Numéro</button>
           <button value="rarity" className="invButtons" onClick={() => inventorySort('rarity')}>Rareté</button>
           <button value="name" className="invButtons" onClick={() => inventorySort('name')}>Nom</button>
           <button value="type" className="invButtons" onClick={() => inventorySort('type')}>Type</button>

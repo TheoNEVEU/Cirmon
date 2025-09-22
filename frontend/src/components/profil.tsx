@@ -14,6 +14,15 @@ interface ProfileProps {
   isOwnProfile?: boolean;
 }
 
+interface MicroProfileProps {
+  badgesEquipped: string[];
+  profPicEquipped: string;
+  stats: number[];
+  titleEquipped: string;
+  username: string;
+  _id: string;
+}
+
 export function ProfileDisplay() {
   const { user } = useUser();
   const { baseUrl } = useApiSocket();
@@ -53,7 +62,7 @@ export function Profile({ username, isOwnProfile = false }: ProfileProps) {
   const { user } = useUser();
   const { activePage } = usePage();
   const { status } = useConnection();
-  const { baseUrl, socket } = useApiSocket();
+  const { baseUrl } = useApiSocket();
 
   const [allCards, setAllCards] = useState<Card[]>([])
 
@@ -563,6 +572,97 @@ const selectBadgeForSlot = (badge: Badge) => {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+export function MicroProfile({ userToDisplay }: { userToDisplay: MicroProfileProps }) {
+  const { user } = useUser();
+  const { baseUrl } = useApiSocket();
+
+  const [selectedBadges, setSelectedBadges] = useState<Badge[]>([]);
+  const [selectedTitle, setSelectedTitle] = useState<TitleWithEffect | null>(null);
+  const [selectedProfilePicture, setSelectedProfilePicture] = useState<ProfPicture | null>(null);
+
+  useEffect(() => {
+    const loadProfileUser = async () => {
+      try {
+        // Récupérer le titres équipé
+        if(userToDisplay.titleEquipped == 'default') setSelectedTitle(null);
+        else{
+          let titlesRes = await fetch(`${baseUrl}/collectibles/titles?ids=${userToDisplay.titleEquipped}`);
+          let titlesData = await titlesRes.json();
+          if(titlesData.success) setSelectedTitle(titlesData.titles[0] as TitleWithEffect);
+        }
+        
+        // Récupérer les badges équipés
+        if(userToDisplay.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',') == "") setSelectedBadges([{_id:'default', label:'default', image:'default'},{_id:'default', label:'default', image:'default'}]);
+        else {
+          let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${userToDisplay.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
+          let badgesData = await badgesRes.json();
+          if(badgesData.success) {
+            while(badgesData.badges.length < 2) badgesData.badges.push({_id:'default', label:'default', image:'default'});
+            setSelectedBadges(badgesData.badges as Badge[]);}
+        }
+        
+        // Récupérer la photo de profil équipée
+        if(userToDisplay.profPicEquipped == 'default') setSelectedProfilePicture({_id:'default', label:'default', image:'default'});
+        else {
+          console.log("Fetching prof pic for id:", userToDisplay.profPicEquipped);
+          let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${userToDisplay.profPicEquipped}`);
+          let profPictureData = await profPictureRes.json();
+          if(profPictureData.success) setSelectedProfilePicture(profPictureData.profPics[0] as ProfPicture || null);
+        }
+      } catch (e) {
+        console.error("Erreur chargement profil :", e);
+      }
+    };
+
+      loadProfileUser();
+  }, [user]);
+
+  function getGradientStyle(gradientDirection: string, colors: string[]) {
+    return {
+      backgroundImage: `linear-gradient(${gradientDirection}, ${colors.join(', ')})`,
+    };
+  }
+
+  if (!userToDisplay) {
+    return (
+      <div id="page-container-loading">
+        <img className="loadingImg"  src="img/loading.png" alt="car"/>
+        <h2>Chargement du profil...</h2>
+      </div>
+    );
+  }
+  return (
+    <div className="micro-profile">
+      <div className="pp-container-micro">
+        {(selectedProfilePicture?.image != "default") ? (
+          <img className="pp-micro" src={`${import.meta.env.BASE_URL}img/profiles/${selectedProfilePicture?.image}.png`} alt="Profile" />
+        ) : (
+          <div className="pp-micro-default"></div>
+        )}
+      </div>
+      <div className="username-micro">
+        <h1>{userToDisplay.username}</h1>
+        <h2 style={selectedTitle?.isGradientActive ? getGradientStyle(selectedTitle?.gradientDirection ?? "to right", selectedTitle?.colors ?? ["black"]) : {}}>
+          {selectedTitle?.text || 'default'}
+        </h2>
+      </div>
+      <div className="micro-badges-display">
+        {selectedBadges?.map((badge, i) => (
+          <div key={i+""+badge._id} className="micro-badge">
+            {(badge.image != "default") ? (
+              <SmartImage key={i}
+                src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
+                alt=""
+                fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
+              />
+            ) : ""}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

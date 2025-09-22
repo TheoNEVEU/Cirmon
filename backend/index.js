@@ -84,6 +84,7 @@ app.get('/cards/:id', async (req, res) => {
   }
 });
 
+// Récupérer toutes les cartes
 app.get('/cards', async (req, res) => {
   try {
     const cards = await Card.find();
@@ -93,7 +94,7 @@ app.get('/cards', async (req, res) => {
   }
 });
 
-// Partie inscription
+// Route inscription
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -107,7 +108,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Partie connexion (bcp de chat GPT, pour la partie des tokens)
+// Route connexion
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -124,8 +125,8 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Récupération de toutes les infos du compte
-app.get('/users', async (req, res) => {
+// Récupération de toutes les infos de son compte
+app.get('/users/me', async (req, res) => {
   const authHeader = req.headers['authorization'];
   if (!authHeader) return res.status(401).json({ success: false, message: 'Token manquant' });
   const token = authHeader.split(' ')[1];
@@ -141,6 +142,17 @@ app.get('/users', async (req, res) => {
   } catch (err) {
     console.error('Erreur de token :', err);
     res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Récupération des infos de tous les comptes
+app.get('/users', async (req, res) => {
+  try {
+    const users = await User.find().select('username profPicEquipped titleEquipped badgesEquipped stats');
+    res.json({ success: true, users });
+  } catch (err) {
+    console.error('Erreur de récupération des utilisateurs :', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur lors de la récupération des utilisateurs.' });
   }
 });
 
@@ -318,7 +330,7 @@ app.post('/booster/open', async (req, res) => {
 
   try {
     const boosterCards = [];
-    const isGodPack = Math.random() > 0.999;
+    const isGodPack = Math.random() > 0.5; //0.999;
     for (let i = 0; i < boosterSize; i++) {
       let tries = 0;
       while (tries < 10) {

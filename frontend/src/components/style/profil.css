@@ -72,7 +72,7 @@
   justify-content: center;
 }
 
-#account-grid #username h2, .titre_selection p {
+#account-grid #username h2, .titre_selection p, .username-micro h2 {
   font-weight: bold;
   color: transparent;
   font-size: 100%;
@@ -406,4 +406,88 @@
   padding: 24px;
   text-align: center;
   color: grey;
+}
+
+/* MICRO-PROFILE */
+.micro-profile {
+  display: flex;
+  flex-direction: row;
+
+  gap: 2%;
+  padding: 10px 10px 10px 15px;
+  width: 100%;
+  height: 20vh;
+  max-height: 20vh;
+  overflow: hidden;
+
+  border: 1px solid whitesmoke;
+  border-radius: 12px;
+  background-color: whitesmoke;
+  filter: drop-shadow(0px 0px 4px lightgrey);
+}
+
+.pp-container-micro {
+  grid-area: 1 / 1 / 2 / 2;
+  height: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+  overflow: hidden;
+}
+
+.pp-container-micro img,
+.pp-container-micro .pp-micro-default {
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+  object-fit: cover;
+}
+
+.pp-micro-default {
+  border: 2px dashed lightgray;
+}
+
+.username-micro {
+  grid-area: 1 / 2 / 2 / 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+  aspect-ratio: 3.5;
+  color: rgb(79, 79, 79);
+}
+
+.username-micro h1 {
+  font-size: 130%;
+  margin: 0;
+}
+
+.username-micro h2 {
+  font-size: 80%;
+  margin: 0;
+  padding-left: 0%;
+}
+
+.micro-badges-display { 
+  grid-area: 1 / 3 / 2 / 4;
+  height: 100%;
+  aspect-ratio: 2/1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10%;
+}
+
+.micro-badge { 
+  height: 80%;
+}
+
+.micro-badge img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.div4 { 
+  grid-area: 1 / 4 / 2 / 5;
 }

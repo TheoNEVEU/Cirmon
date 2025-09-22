@@ -54,7 +54,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      fetch(`${baseUrl}/users`, {
+      fetch(`${baseUrl}/users/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
         .then(res => res.json())
