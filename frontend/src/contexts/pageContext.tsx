@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-export type Page = 'home' | 'inventory' | 'friends' | 'shop' | 'account' | 'boosters';
+export type Page = 'home' | 'inventory' | 'friends' | 'shop' | 'account' | 'boosters' | 'admin';
 
 type PageContextType = {
   activePage: Page;

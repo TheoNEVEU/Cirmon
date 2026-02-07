@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import CardDetails, { type Card } from "../components/card";
-import { useUser } from '../contexts/userContext'; // J'imagine que tu as un setUser ici aussi
+import { useUser } from '../contexts/userContext';
 import { usePage } from '../contexts/pageContext';
 import { useApiSocket  } from '../contexts/ApiSocketContext';
 
 import '../style/BoosterOpening.css';
 
 export default function BoosterOpening() {
-  const { user, setUser } = useUser();  // <-- Récupérer setUser aussi
+  const { user, setUser } = useUser();
   const { activePage, setActivePage } = usePage();
   const { baseUrl, socket } = useApiSocket();
   
@@ -109,7 +109,7 @@ export default function BoosterOpening() {
           <button style={{top:"100%"}} className="green-btn" onClick={() => {
             setActivePage('home');
             setCards([]);
-            setAnimation(false)
+            setAnimation(false);
             setSpreadCards(false);
             setFlippedCards([]);
             setFinalizedCards([]);

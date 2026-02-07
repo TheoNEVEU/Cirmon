@@ -9,15 +9,22 @@ const userSchema = new mongoose.Schema({
   // Actuellement équipés
   profPicEquipped: { type: String, default: '68a3c55266fffb8ab45028d3' },
   titleEquipped: { type: String , default: '68a3c4da66fffb8ab45028cf' },
-  badgesEquipped: { type: [String], default: [{_id: 'default'},{_id: 'default'}] 
+  badgesEquipped: {
+    type: [{ id: String, level: Number }],
+    default: [{ id: 'default', level: 0 }, { id: 'default', level: 0 }]
   },
   displayedCards: { type: [String], default: [0, 0, 0, 0] },
 
   // Inventaire
   collectibles: { // Tous les collectibles débloqués
-    profPicIds: { type: [String], default: ['68a3c55266fffb8ab45028d3'] },
-    titleIds: { type: [String], default: ['68a3c4da66fffb8ab45028cf'] },
-    badgeIds: { type: [String], default: ['68a3c51666fffb8ab45028d1'] }
+    profPicIds: { type: [String], default: ['68a3c55266fffb8ab45028d3']},
+    titleIds: { type: [String], default: ['68a3c4da66fffb8ab45028cf']},
+    badges: {
+      type: [{
+        id: { type: String, default: '68a3c51666fffb8ab45028d1'},
+        level: { type: Number, default: 0 }
+      }], 
+      default: [{ id: '68a3c51666fffb8ab45028d1', level: 0 }]}
   },
 
   cards: [{

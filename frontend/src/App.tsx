@@ -8,6 +8,7 @@ import Shop from './pages/Shop';
 import Account from './pages/Account';
 import BoosterOpening from './pages/BoosterOpening';
 import StatusSquare from './components/statusSquare';
+import AdminBadges from './pages/AdminBadges';
 
 import { useUser } from './contexts/userContext';
 import { usePage, type Page } from './contexts/pageContext';
@@ -28,6 +29,7 @@ function App() {
     shop: useRef<HTMLButtonElement | null>(null),
     account: useRef<HTMLButtonElement | null>(null),
     boosters: useRef<null>(null),
+    admin: useRef<HTMLButtonElement | null>(null),
   }; 
 
   const handleClick = (page: Page) => {
@@ -76,21 +78,30 @@ function App() {
       <div id="grid-container-sidebar">
         <div id="sidebar">
           <div id="active-indicator" style={{ top: indicatorTop, left: indicatorLeft }} />
-          <button onClick={() => handleClick('home')} ref={buttonRefs.home}>
-            <img src={`${import.meta.env.BASE_URL}img/icones/home.png`} className="nav-icon" />
-          </button>
-          <button onClick={() => handleClick('inventory')} ref={buttonRefs.inventory} data-locked={user? false : true}>
-            <img src={`${import.meta.env.BASE_URL}img/icones/inventory.png`} className="nav-icon" />
-          </button>
-          <button onClick={() => handleClick('friends')} ref={buttonRefs.friends} data-locked={user? false : true}>
-            <img src={`${import.meta.env.BASE_URL}img/icones/users.png`} className="nav-icon" />
-          </button>
-          <button /*onClick={() => handleClick('shop')}*/ ref={buttonRefs.shop} data-locked={user? /*false*/true : true}>
-            <img src={`${import.meta.env.BASE_URL}img/icones/shop.png`} className="nav-icon" />
-          </button>
+          {!user?.isAdmin ? (
+            <>
+              <button onClick={() => handleClick('home')} ref={buttonRefs.home}>
+                <img src={`${import.meta.env.BASE_URL}img/icones/home.png`} className="nav-icon" />
+              </button>
+              <button onClick={() => handleClick('inventory')} ref={buttonRefs.inventory} data-locked={user? false : true}>
+                <img src={`${import.meta.env.BASE_URL}img/icones/inventory.png`} className="nav-icon" />
+              </button>
+              <button onClick={() => handleClick('friends')} ref={buttonRefs.friends} data-locked={user? false : true}>
+                <img src={`${import.meta.env.BASE_URL}img/icones/users.png`} className="nav-icon" />
+              </button>
+              <button /*onClick={() => handleClick('shop')}*/ ref={buttonRefs.shop} data-locked={user? /*false*/true : true}>
+                <img src={`${import.meta.env.BASE_URL}img/icones/shop.png`} className="nav-icon" />
+              </button>
+            </>
+          ) : null}
           <button onClick={() => handleClick('account')} ref={buttonRefs.account}>
             <img src={`${import.meta.env.BASE_URL}img/icones/account.png`} className="nav-icon" />
           </button>
+          {user?.isAdmin ? (
+            <button onClick={() => handleClick('admin')} ref={buttonRefs.admin} title="Admin">
+              <img src={`${import.meta.env.BASE_URL}img/icones/settings.png`} className="nav-icon" />
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -100,6 +111,7 @@ function App() {
           <div className={`page ${activePage === 'friends' ? 'active' : ''}`}><Friends /></div>
           <div className={`page ${activePage === 'shop' ? 'active' : ''}`}><Shop /></div>
           <div className={`page ${activePage === 'account' ? 'active' : ''}`}><Account /></div>
+            <div className={`page ${activePage === 'admin' ? 'active' : ''}`}><AdminBadges /></div>
       </div>
     </div>
   );

@@ -57,7 +57,7 @@ export default function Home() {
           </div> */}
         </div>
         <div id="booster-cover" className='placeholder'> </div>
-        <button className="green-btn" style={user && user.diamonds >= 200 ? undefined : {filter: "grayscale(1)"}} onClick={() => {user && user.diamonds >= 200 ? setActivePage('boosters') : null}}>Ouvrir 1</button>
+        <button className="green-btn" style={user && user.diamonds >= 200 ? undefined : {filter: "grayscale(1)"}} onClick={() => {user && user.diamonds >= 200 ? setActivePage('boosters') : null}}>Ouvrir 1<br></br>(200<img className="imageInText" src={`${import.meta.env.BASE_URL}img/currency.png`}></img>)</button>
       </div>
     );
   }

@@ -13,7 +13,7 @@ module.exports = async function auth(req, res, next) {
     const user = await User.findById(decoded.userId);
     if (!user) return res.status(401).json({ success: false, message: 'Utilisateur introuvable' });
 
-    req.user = { id: user._id, username: user.username }; // tu peux ajouter d'autres infos si besoin
+    req.user = { id: user._id, username: user.username, isAdmin: user.isAdmin === true }; // include admin flag
     next();
   } catch (err) {
     res.status(401).json({ success: false, message: 'Token invalide' });

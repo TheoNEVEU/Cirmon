@@ -225,9 +225,54 @@ app.get('/collectibles/badges', async (req, res) => {
   res.json({ success: true, badges });
 });
 
+// --- Admin CRUD for badges ---
+function isAdminUser(req) {
+  return req.user && req.user.isAdmin === true;
+}
+
+app.get('/admin/badges', auth, async (req, res) => {
+  if (!isAdminUser(req)) return res.status(403).json({ success: false, message: 'Forbidden' });
+  const badges = await Badge.find().lean();
+  res.json({ success: true, badges });
+});
+
+app.post('/admin/badges', auth, async (req, res) => {
+  if (!isAdminUser(req)) return res.status(403).json({ success: false, message: 'Forbidden' });
+  try {
+    const data = req.body;
+    // require key, label, image
+    if (!data.key || !data.label || !data.image) return res.status(400).json({ success: false, message: 'Missing required fields' });
+    const badge = await Badge.create(data);
+    res.json({ success: true, badge });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.patch('/admin/badges/:id', auth, async (req, res) => {
+  if (!isAdminUser(req)) return res.status(403).json({ success: false, message: 'Forbidden' });
+  try {
+    const badge = await Badge.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
+    res.json({ success: true, badge });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/admin/badges/:id', auth, async (req, res) => {
+  if (!isAdminUser(req)) return res.status(403).json({ success: false, message: 'Forbidden' });
+  try {
+    await Badge.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Mettre à jour les modifications du profil d'un joueur
 app.patch('/users/me/equip', auth, async (req, res) => {
-  const { titleId, badgeIds, profPicId, featuredIds } = req.body;
+  const { titleId, badgesEquipped, badgeIds, profPicId, featuredIds } = req.body;
   const user = await User.findById(req.user.id);
 
   // --- Gestion du titre ---
@@ -238,10 +283,31 @@ app.patch('/users/me/equip', auth, async (req, res) => {
   }
 
   // --- Gestion des badges ---
-  if (badgeIds) {
-    if (!badgeIds.every(id => id === 'default' || user.collectibles.badgeIds.includes(id))) 
-      return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
-    user.badgesEquipped = badgeIds;
+  if (badgesEquipped || badgeIds) {
+    // Accept both new format (badgesEquipped: [{id, level}]) or old format (badgeIds: [id])
+    let toEquip = [];
+    if (badgesEquipped) {
+      // Validate ownership and normalize level from user's collectibles
+      for (const entry of badgesEquipped) {
+        if (entry.id === 'default') {
+          toEquip.push({ id: 'default', level: 0 });
+          continue;
+        }
+        const owned = user.collectibles.badges.find(b => b.id === entry.id);
+        if (!owned) return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
+        toEquip.push({ id: owned.id, level: owned.level ?? 0 });
+      }
+    } else {
+      // old format: badgeIds
+      if (!badgeIds.every(id => id === 'default' || user.collectibles.badges.some(b => b.id === id)))
+        return res.status(400).json({ success: false, message: 'Badge non débloqué.' });
+      toEquip = badgeIds.map(id => {
+        if (id === 'default') return { id: 'default', level: 0 };
+        const owned = user.collectibles.badges.find(b => b.id === id);
+        return { id: owned.id, level: owned.level ?? 0 };
+      });
+    }
+    user.badgesEquipped = toEquip;
   }
 
   // --- Gestion de la photo de pofil ---

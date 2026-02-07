@@ -32,9 +32,6 @@ button[data-locked="true"] {
 /* Style Généraux pour des éléments communs */
 
 .green-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   
   position: absolute;
   bottom: 5%;
@@ -51,4 +48,12 @@ button[data-locked="true"] {
   font-weight: bold;
   color: white;
   filter: drop-shadow(0 0 10px darkgray);
+}
+
+.imageInText {
+  width: 1em;
+  aspect-ratio: 1/1;
+  vertical-align: -0.2em;
+  display: inline-block;
+  position: relative;
 }

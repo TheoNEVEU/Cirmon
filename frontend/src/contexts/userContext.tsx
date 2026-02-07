@@ -17,6 +17,7 @@ export interface Badge {
   _id: string,
   label: string,
   image: string,
+  level: number,
 }
 
 export interface ProfPicture {
@@ -30,18 +31,19 @@ export interface User {
   username: string;
   password: string;
   diamonds: number;
+  isAdmin?: boolean;
   
   // Actuellement équipés
   profPicEquipped: string;
   titleEquipped: string;
-  badgesEquipped: string[];
+  badgesEquipped: { id: string; level: number }[];
   displayedCards: string[];
 
   // Inventaire
   collectibles: { // Tous les collectibles débloqués
     profPicIds: string[];
     titleIds: string[];
-    badgeIds: string[];
+    badges: { id: string; level: number }[];
   };
   cards: PreCard[];
 

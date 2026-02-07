@@ -9,13 +9,22 @@ import { useApiSocket } from '../contexts/ApiSocketContext';
 
 import './style/profil.css';
 
+// Fonction utilitaire pour obtenir le nom de la bordure en fonction du level
+function getBorderImageByLevel(level: number): string | null {
+  if (level === 0) return null; // Pas de badge
+  if (level >= 1 && level <= 3) return `B${level}`; // Bronze
+  if (level >= 4 && level <= 6) return `S${level - 3}`; // Silver (S1, S2, S3)
+  if (level >= 7 && level <= 9) return `G${level - 6}`; // Gold (G1, G2, G3)
+  return null;
+}
+
 interface ProfileProps {
   username: string;
   isOwnProfile?: boolean;
 }
 
 interface MicroProfileProps {
-  badgesEquipped: string[];
+  badgesEquipped: { id: string; level: number }[];
   profPicEquipped: string;
   stats: number[];
   titleEquipped: string;
@@ -88,7 +97,7 @@ export function Profile({ username, isOwnProfile = false }: ProfileProps) {
   
 
 
-  const statlist = ["Nombre de cartes", "Nombre de boosters ouvert", "Nombre de cartes uniques", "4", "Nombre de cartes FA", "6"]
+  const statlist = ["Cartes", "Boosters ouvert", "Cartes uniques", "4", "Cartes Full Art", "6"]
 
   useEffect(() => {
     // Récupérer les cartes possédés
@@ -156,19 +165,31 @@ export function Profile({ username, isOwnProfile = false }: ProfileProps) {
             }
 
             // Récupérer les badges équipés
-            if(user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',') == "") setSelectedBadges([{_id:'default', label:'default', image:'default'},{_id:'default', label:'default', image:'default'}]);
-            else {
-              let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
+            const badgeIdsToFetch = user.badgesEquipped?.map((b:any) => b.id).filter((id:any) => id !== 'default') ?? [];
+            if(!user.badgesEquipped || user.badgesEquipped.length === 0) {
+              setSelectedBadges([{_id:'default', label:'default', image:'default', level: 0},{_id:'default', label:'default', image:'default', level: 0}]);
+            } else if(badgeIdsToFetch.length > 0) {
+              let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${badgeIdsToFetch.join(',')}`);
               let badgesData = await badgesRes.json();
               if(badgesData.success) {
-                while(badgesData.badges.length < 2) badgesData.badges.push({_id:'default', label:'default', image:'default'});
-                setSelectedBadges(badgesData.badges as Badge[]);}
+                const badges = (badgesData.badges as Badge[]) || [];
+                // merge level from user.badgesEquipped
+                const merged = badges.map(b => {
+                  const entry = user.badgesEquipped.find((e:any) => e.id === b._id);
+                  return { ...b, level: entry?.level ?? 0 } as Badge;
+                });
+                while(merged.length < 2) merged.push({_id:'default', label:'default', image:'default', level: 0});
+                setSelectedBadges(merged);
+                console.log("Badges équipés :", merged);
+              }
+            } else {
+              setSelectedBadges([{_id:'default', label:'default', image:'default', level: 0},{_id:'default', label:'default', image:'default', level: 0}]);
             }
 
             // Récupérer les badges possédés
-            if (user.collectibles.badgeIds.length < 1) setOwnedBadges([]);
+            if (user.collectibles.badges.length < 1) setOwnedBadges([]);
             else {
-              let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.collectibles.badgeIds.join(',')}`);
+              let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.collectibles.badges.map(b => b.id).join(',')}`);
               let badgesData = await badgesRes.json();
               if(badgesData.success) setOwnedBadges(badgesData.badges as Badge[] || []);
             }
@@ -284,13 +305,22 @@ export function Profile({ username, isOwnProfile = false }: ProfileProps) {
     }
 
     // Récupérer les badges équipés
-    if(user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',') == "") setSelectedBadges([{_id:'default', label:'default', image:'default'},{_id:'default', label:'default', image:'default'}]);
-    else {
-      let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${user.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
+    const badgeIdsToFetch = user.badgesEquipped?.map((b:any) => b.id).filter((id:any) => id !== 'default') ?? [];
+    if(!user.badgesEquipped || user.badgesEquipped.length === 0) {
+      setSelectedBadges([{_id:'default', label:'default', image:'default', level: 0},{_id:'default', label:'default', image:'default', level: 0}]);
+    } else if(badgeIdsToFetch.length > 0) {
+      let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${badgeIdsToFetch.join(',')}`);
       let badgesData = await badgesRes.json();
       if(badgesData.success) {
-        while(badgesData.badges.length < 2) badgesData.badges.push({_id:'default', label:'default', image:'default'});
-        setSelectedBadges(badgesData.badges as Badge[]);}
+        const badges = (badgesData.badges as Badge[]) || [];
+        const merged = badges.map(b => {
+          const entry = user.badgesEquipped.find((e:any) => e.id === b._id);
+          return { ...b, level: entry?.level ?? 0 } as Badge;
+        });
+        while(merged.length < 2) merged.push({_id:'default', label:'default', image:'default', level: 0});
+        setSelectedBadges(merged);
+      }
+    } else {
     }
 
     // Récupérer la photo de profil équipée
@@ -320,7 +350,7 @@ export function Profile({ username, isOwnProfile = false }: ProfileProps) {
       },
       body: JSON.stringify({
         titleId: selectedTitle?._id,
-        badgeIds: selectedBadges.map(b => b?._id),
+        badgesEquipped: selectedBadges.map(b => ({ id: b?._id, level: b?.level ?? 0 })),
         profPicId: selectedProfilePicture?._id,
         featuredIds: featured.map(c => c?._id)
       })
@@ -423,17 +453,28 @@ const selectBadgeForSlot = (badge: Badge) => {
             </h2>
           </div>
           <div id="badges-display">
-            {selectedBadges?.map((badge, i) => (
-              <div key={i+""+badge._id} className="badge" data-isediting={isEditing ? true : false} onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
-                {(badge.image != "default" || isEditing) ? (
-                  <SmartImage key={i+"2"+badge._id}
-                    src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
-                    alt=""
-                    fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
-                  />
-                ) : <SmartImage key={i+"3"+badge._id} src={`${import.meta.env.BASE_URL}img/void.png`}/>}
-              </div>
-            ))}
+            {selectedBadges?.map((badge, i) => {
+              const borderImage = getBorderImageByLevel(badge.level);
+              return (
+                <div key={i+""+badge._id} className="badge" data-isediting={isEditing ? true : false} onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
+                  {borderImage && (
+                    <SmartImage key={i+"border"+badge._id}
+                      src={`${import.meta.env.BASE_URL}img/badges/bordures/${borderImage}.png`}
+                      alt=""
+                      className="badge-border"
+                    />
+                  )}
+                  {(badge.image != "default" || isEditing) ? (
+                    <SmartImage key={i+"2"+badge._id}
+                      src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
+                      alt=""
+                      fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
+                      className="badge-image"
+                    />
+                  ) : <SmartImage key={i+"3"+badge._id} src={`${import.meta.env.BASE_URL}img/void.png`} className="badge-image"/>}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -537,18 +578,29 @@ const selectBadgeForSlot = (badge: Badge) => {
                 <button key={card._id} onClick={() => selectCardForSlot(card)}>
                   <CardDetails card={card}/>
                 </button>
-              )) : pickerType == "badges" ? ownedBadges?.map((badge, index) => (
+              )) : pickerType == "badges" ? ownedBadges?.map((badge, index) => {
+                const borderImage = getBorderImageByLevel(badge.level);
+                return (
                 <button className="badge_selection" key={index} onClick={() => selectBadgeForSlot(badge)}>
+                  {borderImage && (
+                    <SmartImage 
+                      src={`${import.meta.env.BASE_URL}img/badges/bordures/${borderImage}.png`}
+                      alt=""
+                      className="badge-border-picker"
+                    />
+                  )}
                   {badge.image == 'default' ? (
-                  <SmartImage id="default_badge" src={`${import.meta.env.BASE_URL}img/icones/plus.png`}></SmartImage>
+                  <SmartImage id="default_badge" src={`${import.meta.env.BASE_URL}img/icones/plus.png`} className="badge-image-picker"></SmartImage>
                   ) : (
                   <SmartImage 
                     src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
-                    fallbackSrc={`${import.meta.env.BASE_URL}img/void.png`}>
+                    fallbackSrc={`${import.meta.env.BASE_URL}img/void.png`}
+                    className="badge-image-picker">
                   </SmartImage>)}
                   <p>{badge.label}</p>
                 </button>
-              )) : pickerType == "title" ? ownedTitles?.map((title) => (
+              );
+              }) : pickerType == "title" ? ownedTitles?.map((title) => (
                 <button className="titre_selection" key={title.text} onClick={() => selectTitle(title)}>
                   {title.text == '' ? (
                     <p style={getGradientStyle("to right", ["black"])}>Aucun</p>
@@ -596,19 +648,30 @@ export function MicroProfile({ userToDisplay }: { userToDisplay: MicroProfilePro
         }
         
         // Récupérer les badges équipés
-        if(userToDisplay.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',') == "") setSelectedBadges([{_id:'default', label:'default', image:'default'},{_id:'default', label:'default', image:'default'}]);
-        else {
-          let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${userToDisplay.badgesEquipped.map(b => (b === 'default' ? '' : b)).filter(Boolean).join(',')}`);
-          let badgesData = await badgesRes.json();
-          if(badgesData.success) {
-            while(badgesData.badges.length < 2) badgesData.badges.push({_id:'default', label:'default', image:'default'});
-            setSelectedBadges(badgesData.badges as Badge[]);}
+        if(!userToDisplay.badgesEquipped || userToDisplay.badgesEquipped.length === 0) {
+          setSelectedBadges([{_id:'default', label:'default', image:'default', level: 0},{_id:'default', label:'default', image:'default', level: 0}]);
+        } else {
+          const badgesToFetch = userToDisplay.badgesEquipped.map((b:any) => b.id).filter((id:any) => id !== 'default');
+          if(badgesToFetch.length > 0) {
+            let badgesRes = await fetch( `${baseUrl}/collectibles/badges?ids=${badgesToFetch.join(',')}`);
+            let badgesData = await badgesRes.json();
+            if(badgesData.success) {
+              let badges = (badgesData.badges as Badge[]) || [];
+              const merged = badges.map(b => {
+                const entry = userToDisplay.badgesEquipped.find((e:any) => e.id === b._id);
+                return { ...b, level: entry?.level ?? 0 } as Badge;
+              });
+              while(merged.length < 2) merged.push({_id:'default', label:'default', image:'default', level: 0});
+              setSelectedBadges(merged);
+            }
+          } else {
+            setSelectedBadges([{_id:'default', label:'default', image:'default', level: 0},{_id:'default', label:'default', image:'default', level: 0}]);
+          }
         }
         
         // Récupérer la photo de profil équipée
         if(userToDisplay.profPicEquipped == 'default') setSelectedProfilePicture({_id:'default', label:'default', image:'default'});
         else {
-          console.log("Fetching prof pic for id:", userToDisplay.profPicEquipped);
           let profPictureRes = await fetch( `${baseUrl}/collectibles/profPic?ids=${userToDisplay.profPicEquipped}`);
           let profPictureData = await profPictureRes.json();
           if(profPictureData.success) setSelectedProfilePicture(profPictureData.profPics[0] as ProfPicture || null);
@@ -651,17 +714,28 @@ export function MicroProfile({ userToDisplay }: { userToDisplay: MicroProfilePro
         </h2>
       </div>
       <div className="micro-badges-display">
-        {selectedBadges?.map((badge, i) => (
+        {selectedBadges?.map((badge, i) => {
+          const borderImage = getBorderImageByLevel(badge.level);
+          return (
           <div key={i+""+badge._id} className="micro-badge">
+            {borderImage && (
+              <SmartImage key={i+"border"}
+                src={`${import.meta.env.BASE_URL}img/badges/bordures/${borderImage}.png`}
+                alt=""
+                className="badge-border-micro"
+              />
+            )}
             {(badge.image != "default") ? (
               <SmartImage key={i}
                 src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
                 alt=""
                 fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
+                className="badge-image-micro"
               />
             ) : ""}
           </div>
-        ))}
+        );
+        })}
       </div>
     </div>
   );
