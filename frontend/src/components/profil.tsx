@@ -457,21 +457,18 @@ const selectBadgeForSlot = (badge: Badge) => {
               const borderImage = getBorderImageByLevel(badge.level);
               return (
                 <div key={i+""+badge._id} className="badge" data-isediting={isEditing ? true : false} onClick={() => {if(isEditing) {setPickerType("badges");openPickerForSlot(i)}}}>
-                  {borderImage && (
-                    <SmartImage key={i+"border"+badge._id}
-                      src={`${import.meta.env.BASE_URL}img/badges/bordures/${borderImage}.png`}
-                      alt=""
-                      className="badge-border"
-                    />
-                  )}
+                  <div className="badge-border">
+                    {borderImage!=null && !isEditing && <img key={"badge-border"+badge._id} src={`${import.meta.env.BASE_URL}img/badges/bordures/${borderImage}.png`} alt=""/>}
+                  </div>
+                  <div className="badge-image">
                   {(badge.image != "default" || isEditing) ? (
                     <SmartImage key={i+"2"+badge._id}
                       src={`${import.meta.env.BASE_URL}img/badges/${badge.image}.png`}
                       alt=""
                       fallbackSrc={`${import.meta.env.BASE_URL}img/icones/plus.png`}
-                      className="badge-image"
                     />
-                  ) : <SmartImage key={i+"3"+badge._id} src={`${import.meta.env.BASE_URL}img/void.png`} className="badge-image"/>}
+                  ) : null}
+                  </div>
                 </div>
               );
             })}

@@ -8,7 +8,6 @@ import Shop from './pages/Shop';
 import Account from './pages/Account';
 import BoosterOpening from './pages/BoosterOpening';
 import StatusSquare from './components/statusSquare';
-import AdminBadges from './pages/AdminBadges';
 
 import { useUser } from './contexts/userContext';
 import { usePage, type Page } from './contexts/pageContext';
@@ -111,7 +110,6 @@ function App() {
           <div className={`page ${activePage === 'friends' ? 'active' : ''}`}><Friends /></div>
           <div className={`page ${activePage === 'shop' ? 'active' : ''}`}><Shop /></div>
           <div className={`page ${activePage === 'account' ? 'active' : ''}`}><Account /></div>
-            <div className={`page ${activePage === 'admin' ? 'active' : ''}`}><AdminBadges /></div>
       </div>
     </div>
   );
